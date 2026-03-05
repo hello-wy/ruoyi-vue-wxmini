@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ParentsMapper">
+    
+    <resultMap type="Parents" id="ParentsResult">
+        <result property="id"    column="id"    />
+        <result property="uid"    column="uid"    />
+        <result property="location"    column="location"    />
+        <result property="geo"    column="geo"    />
+        <result property="region"    column="region"    />
+        <result property="name"    column="name"    />
+        <result property="grade"    column="grade"    />
+        <result property="subject"    column="subject"    />
+        <result property="methods"    column="methods"    />
+        <result property="requirements"    column="requirements"    />
+        <result property="brief"    column="brief"    />
+        <result property="createDate"    column="create_date"    />
+        <result property="updateDate"    column="update_date"    />
+        <result property="status"    column="status"    />
+        <result property="dayOfWeek"    column="day_of_week"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+    </resultMap>
+
+    <sql id="selectParentsVo">
+        select id, uid, location, geo, region, name, grade, subject, methods, requirements, brief, create_date, update_date, status, day_of_week, start_time, end_time from parents
+    </sql>
+
+    <select id="selectParentsList" parameterType="Parents" resultMap="ParentsResult">
+        <include refid="selectParentsVo"/>
+        <where>  
+            <if test="uid != null "> and uid = #{uid}</if>
+            <if test="location != null  and location != ''"> and location = #{location}</if>
+            <if test="geo != null  and geo != ''"> and geo = #{geo}</if>
+            <if test="region != null  and region != ''"> and region = #{region}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="grade != null  and grade != ''"> and grade = #{grade}</if>
+            <if test="subject != null  and subject != ''"> and subject = #{subject}</if>
+            <if test="methods != null "> and methods = #{methods}</if>
+            <if test="requirements != null  and requirements != ''"> and requirements = #{requirements}</if>
+            <if test="brief != null  and brief != ''"> and brief = #{brief}</if>
+            <if test="createDate != null "> and create_date = #{createDate}</if>
+            <if test="updateDate != null "> and update_date = #{updateDate}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="dayOfWeek != null  and dayOfWeek != ''"> and day_of_week = #{dayOfWeek}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectParentsById" parameterType="Long" resultMap="ParentsResult">
+        <include refid="selectParentsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertParents" parameterType="Parents">
+        insert into parents
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="uid != null">uid,</if>
+            <if test="location != null">location,</if>
+            <if test="geo != null">geo,</if>
+            <if test="region != null">region,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="grade != null">grade,</if>
+            <if test="subject != null">subject,</if>
+            <if test="methods != null">methods,</if>
+            <if test="requirements != null">requirements,</if>
+            <if test="brief != null">brief,</if>
+            <if test="createDate != null">create_date,</if>
+            <if test="updateDate != null">update_date,</if>
+            <if test="status != null">status,</if>
+            <if test="dayOfWeek != null and dayOfWeek != ''">day_of_week,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="uid != null">#{uid},</if>
+            <if test="location != null">#{location},</if>
+            <if test="geo != null">#{geo},</if>
+            <if test="region != null">#{region},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="grade != null">#{grade},</if>
+            <if test="subject != null">#{subject},</if>
+            <if test="methods != null">#{methods},</if>
+            <if test="requirements != null">#{requirements},</if>
+            <if test="brief != null">#{brief},</if>
+            <if test="createDate != null">#{createDate},</if>
+            <if test="updateDate != null">#{updateDate},</if>
+            <if test="status != null">#{status},</if>
+            <if test="dayOfWeek != null and dayOfWeek != ''">#{dayOfWeek},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateParents" parameterType="Parents">
+        update parents
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="uid != null">uid = #{uid},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="geo != null">geo = #{geo},</if>
+            <if test="region != null">region = #{region},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="grade != null">grade = #{grade},</if>
+            <if test="subject != null">subject = #{subject},</if>
+            <if test="methods != null">methods = #{methods},</if>
+            <if test="requirements != null">requirements = #{requirements},</if>
+            <if test="brief != null">brief = #{brief},</if>
+            <if test="createDate != null">create_date = #{createDate},</if>
+            <if test="updateDate != null">update_date = #{updateDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="dayOfWeek != null and dayOfWeek != ''">day_of_week = #{dayOfWeek},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteParentsById" parameterType="Long">
+        delete from parents where id = #{id}
+    </delete>
+
+    <delete id="deleteParentsByIds" parameterType="String">
+        delete from parents where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

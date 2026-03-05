@@ -7,7 +7,7 @@ ruoyi:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+  profile: /Users/wuyang/Documents/site/ruoyi-vue-wxmini/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -94,8 +94,8 @@ token:
   header: Authorization
   # 令牌密钥
   secret: abcdefghijklmnopqrstuvwxyz
-  # 令牌有效期（默认30分钟）
-  expireTime: 30
+  # 令牌有效期（默认3000分钟）
+  expireTime: 43200
 
 # MyBatis配置
 mybatis:
@@ -131,8 +131,8 @@ xss:
 wx:
   miniapp:
     configs:
-      - appid: test #微信小程序的appid
-        secret: test #微信小程序的Secret
+      - appid: wx4c21998d0c65f24b #微信小程序的appid
+        secret: c490e5d8ac5b584eb962aa0acad10513 #微信小程序的Secret
         token: #微信小程序消息服务器配置的token
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON
@@ -146,3 +146,18 @@ wx:
     certSerialNo: test
     privateKeyPath: classpath:cert/apiclient_key.pem #apiclient_key.pem证书文件的绝对路径或者以classpath:开头的类路径
     privateCertPath: classpath:cert/apiclient_cert.pem #apiclient_cert.pem证书文件的绝对路径或者以classpath:开头的类路径
+
+# 阿里云实人认证配置
+# 文档：https://help.aliyun.com/zh/id-verification/financial-grade-id-verification/server-side-integration-2
+aliyun:
+  face-auth:
+    # 阿里云 RAM 用户 AccessKey ID（建议使用子账号，授权 cloudauth:* 权限）
+    access-key-id: YOUR_ACCESS_KEY_ID
+    # 阿里云 RAM 用户 AccessKey Secret
+    access-key-secret: YOUR_ACCESS_KEY_SECRET
+    # 实人认证场景ID（在阿里云控制台-实人认证-认证场景中创建并获取）
+    scene-id: 1000000001
+    # API接入点，固定值
+    endpoint: cloudauth.aliyuncs.com
+    # H5认证完成后跳转回小程序的地址（小程序scheme链接，或H5回调页URL）
+    return-url: https://your-domain.com/face-auth/callback

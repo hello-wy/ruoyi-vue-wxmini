@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TutorsMapper">
+    
+    <resultMap type="Tutors" id="TutorsResult">
+        <result property="uid"    column="uid"    />
+        <result property="title"    column="title"    />
+        <result property="certificates"    column="certificates"    />
+        <result property="subjects"    column="subjects"    />
+        <result property="areas"    column="areas"    />
+        <result property="methods"    column="methods"    />
+        <result property="isCertified"    column="is_certified"    />
+        <result property="salary"    column="salary"    />
+        <result property="experience"    column="experience"    />
+        <result property="major"    column="major"    />
+        <result property="school"    column="school"    />
+        <result property="degree"    column="degree"    />
+        <result property="createDate"    column="create_date"    />
+        <result property="updateDate"    column="update_date"    />
+    </resultMap>
+
+    <sql id="selectTutorsVo">
+        select uid, title, certificates, subjects, areas, methods, is_certified, salary, experience, major, school, degree, create_date, update_date from tutors
+    </sql>
+
+    <select id="selectTutorsList" parameterType="Tutors" resultMap="TutorsResult">
+        <include refid="selectTutorsVo"/>
+        <where>  
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="certificates != null  and certificates != ''"> and certificates = #{certificates}</if>
+            <if test="subjects != null  and subjects != ''"> and subjects = #{subjects}</if>
+            <if test="areas != null  and areas != ''"> and areas = #{areas}</if>
+            <if test="methods != null  and methods != ''"> and methods = #{methods}</if>
+            <if test="experience != null  and experience != ''"> and experience = #{experience}</if>
+            <if test="major != null  and major != ''"> and major = #{major}</if>
+            <if test="school != null  and school != ''"> and school = #{school}</if>
+            <if test="degree != null "> and degree = #{degree}</if>
+            <if test="createDate != null "> and create_date = #{createDate}</if>
+            <if test="updateDate != null "> and update_date = #{updateDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectTutorsByUid" parameterType="Long" resultMap="TutorsResult">
+        <include refid="selectTutorsVo"/>
+        where uid = #{uid}
+    </select>
+
+    <insert id="insertTutors" parameterType="Tutors">
+        insert into tutors
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uid != null">uid,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="certificates != null and certificates != ''">certificates,</if>
+            <if test="subjects != null and subjects != ''">subjects,</if>
+            <if test="areas != null">areas,</if>
+            <if test="methods != null">methods,</if>
+            <if test="isCertified != null">is_certified,</if>
+            <if test="salary != null">salary,</if>
+            <if test="experience != null">experience,</if>
+            <if test="major != null and major != ''">major,</if>
+            <if test="school != null and school != ''">school,</if>
+            <if test="degree != null">degree,</if>
+            <if test="createDate != null">create_date,</if>
+            <if test="updateDate != null">update_date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uid != null">#{uid},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="certificates != null and certificates != ''">#{certificates},</if>
+            <if test="subjects != null and subjects != ''">#{subjects},</if>
+            <if test="areas != null">#{areas},</if>
+            <if test="methods != null">#{methods},</if>
+            <if test="isCertified != null">#{isCertified},</if>
+            <if test="salary != null">#{salary},</if>
+            <if test="experience != null">#{experience},</if>
+            <if test="major != null and major != ''">#{major},</if>
+            <if test="school != null and school != ''">#{school},</if>
+            <if test="degree != null">#{degree},</if>
+            <if test="createDate != null">#{createDate},</if>
+            <if test="updateDate != null">#{updateDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTutors" parameterType="Tutors">
+        update tutors
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="certificates != null and certificates != ''">certificates = #{certificates},</if>
+            <if test="subjects != null and subjects != ''">subjects = #{subjects},</if>
+            <if test="areas != null">areas = #{areas},</if>
+            <if test="methods != null">methods = #{methods},</if>
+            <if test="isCertified != null">is_certified = #{isCertified},</if>
+            <if test="salary != null">salary = #{salary},</if>
+            <if test="experience != null">experience = #{experience},</if>
+            <if test="major != null and major != ''">major = #{major},</if>
+            <if test="school != null and school != ''">school = #{school},</if>
+            <if test="degree != null">degree = #{degree},</if>
+            <if test="createDate != null">create_date = #{createDate},</if>
+            <if test="updateDate != null">update_date = #{updateDate},</if>
+        </trim>
+        where uid = #{uid}
+    </update>
+
+    <delete id="deleteTutorsByUid" parameterType="Long">
+        delete from tutors where uid = #{uid}
+    </delete>
+
+    <delete id="deleteTutorsByUids" parameterType="String">
+        delete from tutors where uid in 
+        <foreach item="uid" collection="array" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </delete>
+</mapper>
