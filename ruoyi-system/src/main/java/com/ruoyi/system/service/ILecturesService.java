@@ -2,62 +2,43 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.Lectures;
+import com.ruoyi.system.domain.vo.LecturesDetailVo;
+import com.ruoyi.system.domain.vo.LecturesListVo;
 
 /**
  * 课程活动/讲座Service接口
- * 
+ *
  * @author ruoyi
- * @date 2026-03-05
  */
-public interface ILecturesService 
+public interface ILecturesService
 {
-    /**
-     * 查询课程活动/讲座
-     * 
-     * @param id 课程活动/讲座主键
-     * @return 课程活动/讲座
-     */
     public Lectures selectLecturesById(Long id);
 
-    /**
-     * 查询课程活动/讲座列表
-     * 
-     * @param lectures 课程活动/讲座
-     * @return 课程活动/讲座集合
-     */
     public List<Lectures> selectLecturesList(Lectures lectures);
 
-    /**
-     * 新增课程活动/讲座
-     * 
-     * @param lectures 课程活动/讲座
-     * @return 结果
-     */
     public int insertLectures(Lectures lectures);
 
-    /**
-     * 修改课程活动/讲座
-     * 
-     * @param lectures 课程活动/讲座
-     * @return 结果
-     */
     public int updateLectures(Lectures lectures);
 
-    /**
-     * 批量删除课程活动/讲座
-     * 
-     * @param ids 需要删除的课程活动/讲座主键集合
-     * @return 结果
-     */
     public int deleteLecturesByIds(Long[] ids);
 
-    /**
-     * 删除课程活动/讲座信息
-     * 
-     * @param id 课程活动/讲座主键
-     * @return 结果
-     */
     public int deleteLecturesById(Long id);
 
     public List<Lectures> selectRecentLecturesList();
+
+    /**
+     * 查询讲座列表，speaker 字段解析为拼接的讲师姓名字符串
+     *
+     * @param lectures 查询条件
+     * @return 讲座列表 VO（含 speakerNames 字段）
+     */
+    List<LecturesListVo> selectLecturesListVo(Lectures lectures);
+
+    /**
+     * 查询讲座详情，speaker 字段解析为讲师 id/name/avatarUrl 对象列表
+     *
+     * @param id 讲座主键
+     * @return 讲座详情 VO（含 speakers 列表）
+     */
+    LecturesDetailVo selectLecturesDetailById(Long id);
 }

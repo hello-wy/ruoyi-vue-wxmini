@@ -4,6 +4,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.annotation.Anonymous;
+import com.ruoyi.system.domain.vo.LecturesDetailVo;
+import com.ruoyi.system.domain.vo.LecturesListVo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
  * 课程活动/讲座Controller
- * 
+ *
  * @author ruoyi
  * @date 2026-03-05
  */
@@ -37,14 +39,14 @@ public class LecturesController extends BaseController
     private ILecturesService lecturesService;
 
     /**
-     * 查询课程活动/讲座列表
+     * 查询课程活动/讲座列表（含讲师姓名拼接）
      */
     @PreAuthorize("@ss.hasPermi('system:lectures:list')")
     @GetMapping("/list")
     public TableDataInfo list(Lectures lectures)
     {
         startPage();
-        List<Lectures> list = lecturesService.selectLecturesList(lectures);
+        List<LecturesListVo> list = lecturesService.selectLecturesListVo(lectures);
         return getDataTable(list);
     }
 
@@ -74,13 +76,14 @@ public class LecturesController extends BaseController
     }
 
     /**
-     * 获取课程活动/讲座详细信息
+     * 获取课程活动/讲座详细信息（含讲师 id/name/avatarUrl）
      */
     @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
-        return success(lecturesService.selectLecturesById(id));
+        LecturesDetailVo vo = lecturesService.selectLecturesDetailById(id);
+        return success(vo);
     }
 
     /**
@@ -110,7 +113,7 @@ public class LecturesController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:lectures:remove')")
     @Log(title = "课程活动/讲座", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(lecturesService.deleteLecturesByIds(ids));

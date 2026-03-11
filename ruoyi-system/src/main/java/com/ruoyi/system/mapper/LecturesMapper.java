@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.system.domain.Lectures;
+import com.ruoyi.system.domain.vo.LecturesDetailVo;
+import com.ruoyi.system.domain.vo.LecturesListVo;
 
 /**
  * 课程活动/讲座Mapper接口
@@ -60,4 +62,20 @@ public interface LecturesMapper extends BaseMapper<Lectures>
      * @return 结果
      */
     public int deleteLecturesByIds(Long[] ids);
+
+    /**
+     * 查询讲座列表 VO（通过 SQL JOIN 拼接讲师姓名）
+     *
+     * @param lectures 查询条件
+     * @return 讲座列表 VO 集合
+     */
+    public List<LecturesListVo> selectLecturesListVo(Lectures lectures);
+
+    /**
+     * 查询讲座详情 VO（通过 SQL JOIN 关联讲师信息）
+     *
+     * @param id 讲座主键
+     * @return 讲座详情 VO
+     */
+    public LecturesDetailVo selectLecturesDetailVoById(Long id);
 }

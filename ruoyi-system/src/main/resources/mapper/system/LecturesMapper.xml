@@ -96,4 +96,69 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <!-- VO ResultMap：列表（含拼接讲师姓名） -->
+    <resultMap type="com.ruoyi.system.domain.vo.LecturesListVo" id="LecturesListVoResult">
+        <result property="id"           column="id"           />
+        <result property="time"         column="time"         />
+        <result property="endDate"      column="end_date"     />
+        <result property="name"         column="name"         />
+        <result property="speaker"      column="speaker"      />
+        <result property="location"     column="location"     />
+        <result property="geo"          column="geo"          />
+        <result property="cover"        column="cover"        />
+        <result property="detail"       column="detail"       />
+        <result property="createDate"   column="create_date"  />
+        <result property="updateDate"   column="update_date"  />
+        <result property="speakerNames" column="speaker_names"/>
+    </resultMap>
+
+    <!-- VO ResultMap：详情（含讲师列表） -->
+    <resultMap type="com.ruoyi.system.domain.vo.LecturesDetailVo" id="LecturesDetailVoResult">
+        <result property="id"         column="id"         />
+        <result property="time"       column="time"       />
+        <result property="endDate"    column="end_date"   />
+        <result property="name"       column="name"       />
+        <result property="speaker"    column="speaker"    />
+        <result property="location"   column="location"   />
+        <result property="geo"        column="geo"        />
+        <result property="cover"      column="cover"      />
+        <result property="detail"     column="detail"     />
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+        <collection property="speakers" ofType="com.ruoyi.system.domain.vo.SpeakerVo">
+            <result property="id"        column="sp_id"        />
+            <result property="name"      column="sp_name"      />
+            <result property="avatarUrl" column="sp_avatar_url"/>
+        </collection>
+    </resultMap>
+
+    <!-- 查询讲座列表 VO：LEFT JOIN lecturer_profile，用 GROUP_CONCAT 拼接讲师姓名 -->
+    <select id="selectLecturesListVo" parameterType="Lectures" resultMap="LecturesListVoResult">
+        SELECT
+            l.id, l.time, l.end_date, l.name, l.speaker,
+            l.location, l.geo, l.cover, l.detail, l.create_date, l.update_date,
+            GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
+        FROM lectures l
+        LEFT JOIN lecturer_profile p ON FIND_IN_SET(p.id, l.speaker)
+        <where>
+            <if test="time != null "> and l.time = #{time}</if>
+            <if test="name != null and name != ''"> and l.name like concat('%', #{name}, '%')</if>
+            <if test="location != null and location != ''"> and l.location = #{location}</if>
+        </where>
+        GROUP BY l.id
+    </select>
+
+    <!-- 查询讲座详情 VO：LEFT JOIN lecturer_profile 获取每位讲师详细信息 -->
+    <select id="selectLecturesDetailVoById" parameterType="Long" resultMap="LecturesDetailVoResult">
+        SELECT
+            l.id, l.time, l.end_date, l.name, l.speaker,
+            l.location, l.geo, l.cover, l.detail, l.create_date, l.update_date,
+            p.id        AS sp_id,
+            p.name      AS sp_name,
+            p.avatar_url AS sp_avatar_url
+        FROM lectures l
+        LEFT JOIN lecturer_profile p ON FIND_IN_SET(p.id, l.speaker)
+        WHERE l.id = #{id}
+    </select>
 </mapper>

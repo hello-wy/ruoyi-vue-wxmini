@@ -3,8 +3,6 @@ package com.ruoyi.web.controller.bussiness;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ruoyi.common.annotation.Anonymous;
-import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
@@ -106,39 +103,5 @@ public class StudentEnrollmentController extends BaseController
         return toAjax(studentEnrollmentService.deleteStudentEnrollmentByIds(ids));
     }
 
-    /**
-     * 查询用户个人学籍信息
-     */
-    @GetMapping("/myEnrollment")
-    public TableDataInfo myEnrollment() {
-        startPage();
-        Long uid = getUserId();
-        List<EnrollmentWithLectureVo> enrollments = studentEnrollmentService.selectMyEnrollment(uid);
-        return getDataTable(enrollments);
-    }
-
-    /**
-     * 核销：当前用户指定课程剩余次数减num（余额不足时报错并回滚）
-     */
-    @Log(title = "学籍核销", businessType = BusinessType.UPDATE)
-    @PutMapping("/decreaseRemain/{lectureId}")
-    public AjaxResult decreaseRemain(@PathVariable Long lectureId,
-                                     @RequestParam(defaultValue = "1") int num)
-    {
-        studentEnrollmentService.decreaseRemain(getUserId(), lectureId, num);
-        return success();
-    }
-
-    /**
-     * 充值：当前用户指定课程剩余次数加num
-     */
-    @Log(title = "学籍充值", businessType = BusinessType.UPDATE)
-    @PutMapping("/increaseRemain/{lectureId}")
-    public AjaxResult increaseRemain(@PathVariable Long lectureId,
-                                     @RequestParam(defaultValue = "1") int num)
-    {
-        studentEnrollmentService.increaseRemain(getUserId(), lectureId, num);
-        return success();
-    }
 
 }
