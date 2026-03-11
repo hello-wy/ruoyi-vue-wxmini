@@ -97,6 +97,29 @@ public class TutorsController extends BaseController
     }
 
     /**
+     * 审核教员（修改 isCertified：0-待审核 / 1-已通过 / 2-已拒绝）
+     */
+    @PreAuthorize("@ss.hasPermi('system:tutors:edit')")
+    @Log(title = "大学生/教员审核", businessType = BusinessType.UPDATE)
+    @PutMapping("/review")
+    public AjaxResult review(@RequestBody Tutors tutors)
+    {
+        if (tutors == null || tutors.getId() == null || tutors.getIsCertified() == null)
+        {
+            return AjaxResult.error("参数不能为空");
+        }
+        Long isCertified = tutors.getIsCertified();
+        if (!isCertified.equals(0L) && !isCertified.equals(1L) && !isCertified.equals(2L))
+        {
+            return AjaxResult.error("isCertified 参数非法，只允许 0/1/2");
+        }
+        Tutors update = new Tutors();
+        update.setId(tutors.getId());
+        update.setIsCertified(isCertified);
+        return toAjax(tutorsService.updateTutors(update));
+    }
+
+    /**
      * 删除大学生/教员
      */
     @PreAuthorize("@ss.hasPermi('system:tutors:remove')")
