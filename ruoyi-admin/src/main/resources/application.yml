@@ -106,11 +106,14 @@ mybatis:
   # 加载全局的配置文件
   configLocation: classpath:mybatis/mybatis-config.xml
 
-# PageHelper分页插件
+# PageHelper分页插件（仅供若依原生XML分页使用，防止干扰 MyBatis-Plus selectPage 的 COUNT 查询）
 pagehelper:
   helperDialect: mysql
   supportMethodsArguments: true
   params: count=countSql
+  # 关闭自动方言检测，避免与 MyBatis-Plus PaginationInnerInterceptor 冲突导致 total=0
+  autoRuntimeDialect: false
+  closeConn: false
 
 # Swagger配置
 swagger:

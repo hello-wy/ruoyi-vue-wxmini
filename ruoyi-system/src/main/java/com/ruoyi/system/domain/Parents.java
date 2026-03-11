@@ -2,6 +2,9 @@ package com.ruoyi.system.domain;
 
 import java.time.LocalTime;
 import java.util.Date;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -16,12 +19,13 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2026-03-04
  */
-
+@TableName("parents")
 public class Parents extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 教员表主键ID */
+    @TableId(type = IdType.INPUT)
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
@@ -88,7 +92,7 @@ public class Parents extends BaseEntity
     private Date updateDate;
 
     /** 请家教订单状态 */
-    @Excel(name = "请家教订单状态")
+    @Excel(name = "请家教订单状态",readConverterExp = "0 正常 1 取消")
     private Long status;
 
     public void setId(Long id) 

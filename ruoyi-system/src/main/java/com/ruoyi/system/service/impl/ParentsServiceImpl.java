@@ -1,6 +1,8 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.ParentsMapper;
@@ -89,5 +91,36 @@ public class ParentsServiceImpl implements IParentsService
     public int deleteParentsById(Long id)
     {
         return parentsMapper.deleteParentsById(id);
+    }
+
+    @Override
+    public List<Parents> selectActiveParentsList(Parents parents) {
+        LambdaQueryWrapper<Parents> wrapper = new LambdaQueryWrapper<>();
+        // 只查询有效订单（status = 0）
+        wrapper.eq(Parents::getStatus, 0L);
+        // 可选筛选：科目
+        if (StringUtils.isNotBlank(parents.getSubject())) {
+            wrapper.like(Parents::getSubject, parents.getSubject());
+        }
+        // 可选筛选：区域
+        if (StringUtils.isNotBlank(parents.getRegion())) {
+            wrapper.like(Parents::getRegion, parents.getRegion());
+        }
+        // 可选筛选：辅导方式
+        if (parents.getMethods() != null) {
+            wrapper.eq(Parents::getMethods, parents.getMethods());
+        }
+        // 可选筛选：年级
+        if (StringUtils.isNotBlank(parents.getGrade())) {
+            wrapper.like(Parents::getGrade, parents.getGrade());
+        }
+        return parentsMapper.selectList(wrapper);
+    }
+
+    @Override
+    public List<Parents> selectParentsByUid(Long uid) {
+        LambdaQueryWrapper<Parents> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Parents::getUid, uid);
+        return parentsMapper.selectList(wrapper);
     }
 }

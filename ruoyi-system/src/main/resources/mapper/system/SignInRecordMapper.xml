@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SignInRecordMapper">
+
+    <resultMap type="SignInRecord" id="SignInRecordResult">
+        <result property="id"           column="id"            />
+        <result property="uid"          column="uid"           />
+        <result property="recordType"   column="record_type"   />
+        <result property="lectureId"    column="lecture_id"    />
+        <result property="salonId"      column="salon_id"      />
+        <result property="signTime"     column="sign_time"     />
+        <result property="signStatus"   column="sign_status"   />
+        <result property="contactName"  column="contact_name"  />
+        <result property="contactPhone" column="contact_phone" />
+        <result property="remark"       column="remark"        />
+        <result property="deviceInfo"   column="device_info"   />
+    </resultMap>
+
+    <sql id="selectSignInRecordVo">
+        select id, uid, record_type, lecture_id, salon_id,
+               sign_time, sign_status, contact_name, contact_phone,
+               remark, device_info
+        from sign_in_record
+    </sql>
+
+    <!-- 列表查询 -->
+    <select id="selectSignInRecordList" parameterType="SignInRecord" resultMap="SignInRecordResult">
+        <include refid="selectSignInRecordVo"/>
+        <where>
+            <if test="uid != null">                    and uid = #{uid}</if>
+            <if test="recordType != null">             and record_type = #{recordType}</if>
+            <if test="lectureId != null">              and lecture_id = #{lectureId}</if>
+            <if test="salonId != null">                and salon_id = #{salonId}</if>
+            <if test="signStatus != null">             and sign_status = #{signStatus}</if>
+            <if test="deviceInfo != null and deviceInfo != ''"> and device_info = #{deviceInfo}</if>
+        </where>
+        order by sign_time desc
+    </select>
+
+    <!-- 主键查询 -->
+    <select id="selectSignInRecordById" parameterType="Long" resultMap="SignInRecordResult">
+        <include refid="selectSignInRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insertSignInRecord" parameterType="SignInRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into sign_in_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uid != null">uid,</if>
+            <if test="recordType != null">record_type,</if>
+            <if test="lectureId != null">lecture_id,</if>
+            <if test="salonId != null">salon_id,</if>
+            <if test="signTime != null">sign_time,</if>
+            <if test="signStatus != null">sign_status,</if>
+            <if test="contactName != null">contact_name,</if>
+            <if test="contactPhone != null">contact_phone,</if>
+            <if test="remark != null">remark,</if>
+            <if test="deviceInfo != null">device_info,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uid != null">#{uid},</if>
+            <if test="recordType != null">#{recordType},</if>
+            <if test="lectureId != null">#{lectureId},</if>
+            <if test="salonId != null">#{salonId},</if>
+            <if test="signTime != null">#{signTime},</if>
+            <if test="signStatus != null">#{signStatus},</if>
+            <if test="contactName != null">#{contactName},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="deviceInfo != null">#{deviceInfo},</if>
+        </trim>
+    </insert>
+
+    <!-- 修改 -->
+    <update id="updateSignInRecord" parameterType="SignInRecord">
+        update sign_in_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="uid != null">uid = #{uid},</if>
+            <if test="recordType != null">record_type = #{recordType},</if>
+            <if test="lectureId != null">lecture_id = #{lectureId},</if>
+            <if test="salonId != null">salon_id = #{salonId},</if>
+            <if test="signTime != null">sign_time = #{signTime},</if>
+            <if test="signStatus != null">sign_status = #{signStatus},</if>
+            <if test="contactName != null">contact_name = #{contactName},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="deviceInfo != null">device_info = #{deviceInfo},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSignInRecordById" parameterType="Long">
+        delete from sign_in_record where id = #{id}
+    </delete>
+
+    <delete id="deleteSignInRecordByIds" parameterType="String">
+        delete from sign_in_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- ======================================================= -->
+    <!-- 讲座签到联表查询（record_type=1） -->
+    <!-- ======================================================= -->
+    <resultMap type="com.ruoyi.system.domain.vo.SignInRecordWithLectureVo" id="SignInWithLectureResult">
+        <result property="id"              column="id"               />
+        <result property="uid"             column="uid"              />
+        <result property="recordType"      column="record_type"      />
+        <result property="lectureId"       column="lecture_id"       />
+        <result property="signTime"        column="sign_time"        />
+        <result property="signStatus"      column="sign_status"      />
+        <result property="deviceInfo"      column="device_info"      />
+        <result property="lectureName"     column="lecture_name"     />
+        <result property="lectureTime"     column="lecture_time"     />
+        <result property="lectureLocation" column="lecture_location" />
+        <result property="lectureCover"    column="lecture_cover"    />
+    </resultMap>
+
+    <select id="selectSignInRecordWithLectureByUid" parameterType="Long"
+            resultMap="SignInWithLectureResult">
+        SELECT
+            s.id,
+            s.uid,
+            s.record_type,
+            s.lecture_id,
+            s.sign_time,
+            s.sign_status,
+            s.device_info,
+            l.name     AS lecture_name,
+            l.time     AS lecture_time,
+            l.location AS lecture_location,
+            l.cover    AS lecture_cover
+        FROM sign_in_record s
+        LEFT JOIN lectures l ON s.lecture_id = l.id
+        WHERE s.uid = #{uid}
+          AND s.record_type = 1
+        ORDER BY s.sign_time DESC
+    </select>
+
+    <!-- ======================================================= -->
+    <!-- 沙龙报名联表查询（record_type=2） -->
+    <!-- ======================================================= -->
+    <resultMap type="com.ruoyi.system.domain.vo.SignInRecordWithLectureVo" id="SalonRegistrationResult">
+        <result property="id"             column="id"              />
+        <result property="uid"            column="uid"             />
+        <result property="recordType"     column="record_type"     />
+        <result property="salonId"        column="salon_id"        />
+        <result property="signTime"       column="sign_time"       />
+        <result property="signStatus"     column="sign_status"     />
+        <result property="contactName"    column="contact_name"    />
+        <result property="contactPhone"   column="contact_phone"   />
+        <result property="remark"         column="remark"          />
+        <result property="salonTitle"     column="salon_title"     />
+        <result property="salonSubtitle"  column="salon_subtitle"  />
+        <result property="salonStartTime" column="salon_start_time"/>
+        <result property="salonCoverImg"  column="salon_cover_img" />
+    </resultMap>
+
+    <select id="selectSalonRegistrationByUid" parameterType="Long"
+            resultMap="SalonRegistrationResult">
+        SELECT
+            s.id,
+            s.uid,
+            s.record_type,
+            s.salon_id,
+            s.sign_time,
+            s.sign_status,
+            s.contact_name,
+            s.contact_phone,
+            s.remark,
+            si.title      AS salon_title,
+            si.subtitle   AS salon_subtitle,
+            si.start_time AS salon_start_time,
+            si.cover_img  AS salon_cover_img
+        FROM sign_in_record s
+        LEFT JOIN salon_info si ON s.salon_id = si.id
+        WHERE s.uid = #{uid}
+          AND s.record_type = 2
+        ORDER BY s.sign_time DESC
+    </select>
+
+    <!-- 检查用户是否已报名某沙龙 -->
+    <select id="countSalonRegistration" resultType="int">
+        SELECT COUNT(1)
+        FROM sign_in_record
+        WHERE uid = #{uid}
+          AND salon_id = #{salonId}
+          AND record_type = 2
+          AND sign_status != 3
+    </select>
+
+    <!-- 检查用户是否已签到某讲座 -->
+    <select id="countLectureSignIn" resultType="int">
+        SELECT COUNT(1)
+        FROM sign_in_record
+        WHERE uid = #{uid}
+          AND lecture_id = #{lectureId}
+          AND record_type = 1
+    </select>
+
+</mapper>

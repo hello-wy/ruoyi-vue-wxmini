@@ -124,4 +124,13 @@ public interface SysUserMapper
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 对指定用户的 enrollment 字段做增量更新（delta 为正数则增加，负数则减少）
+     *
+     * @param userId 用户ID
+     * @param delta  变化量，+1 或 -1
+     * @return 结果
+     */
+    public int updateUserEnrollmentDelta(@Param("userId") Long userId, @Param("delta") int delta);
 }

@@ -58,4 +58,20 @@ public interface IParentsService
      * @return 结果
      */
     public int deleteParentsById(Long id);
+
+    /**
+     * 查询有效家教单列表（status=0），支持筛选（配合 PageHelper 分页）
+     *
+     * @param parents 筛选条件
+     * @return 家教单列表
+     */
+    List<Parents> selectActiveParentsList(Parents parents);
+
+    /**
+     * 根据uid查询家长家教单列表
+     *
+     * @param uid 关联的用户id
+     * @return 家教单列表
+     */
+    List<Parents> selectParentsByUid(Long uid);
 }

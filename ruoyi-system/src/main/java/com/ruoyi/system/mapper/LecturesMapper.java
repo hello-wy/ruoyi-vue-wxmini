@@ -1,6 +1,8 @@
 package com.ruoyi.system.mapper;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.system.domain.Lectures;
 
 /**
@@ -9,7 +11,7 @@ import com.ruoyi.system.domain.Lectures;
  * @author ruoyi
  * @date 2026-03-05
  */
-public interface LecturesMapper 
+public interface LecturesMapper extends BaseMapper<Lectures>
 {
     /**
      * 查询课程活动/讲座

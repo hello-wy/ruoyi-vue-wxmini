@@ -1,23 +1,25 @@
 package com.ruoyi.system.mapper;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.system.domain.Tutors;
 
 /**
  * 大学生/教员Mapper接口
  * 
  * @author ruoyi
- * @date 2026-03-03
+ * @date 2026-03-05
  */
-public interface TutorsMapper 
+public interface TutorsMapper extends BaseMapper<Tutors>
 {
     /**
      * 查询大学生/教员
      * 
-     * @param uid 大学生/教员主键
+     * @param id 大学生/教员主键
      * @return 大学生/教员
      */
-    public Tutors selectTutorsByUid(Long uid);
+    public Tutors selectTutorsById(Long id);
 
     /**
      * 查询大学生/教员列表
@@ -46,16 +48,16 @@ public interface TutorsMapper
     /**
      * 删除大学生/教员
      * 
-     * @param uid 大学生/教员主键
+     * @param id 大学生/教员主键
      * @return 结果
      */
-    public int deleteTutorsByUid(Long uid);
+    public int deleteTutorsById(Long id);
 
     /**
      * 批量删除大学生/教员
      * 
-     * @param uids 需要删除的数据主键集合
+     * @param ids 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteTutorsByUids(Long[] uids);
+    public int deleteTutorsByIds(Long[] ids);
 }

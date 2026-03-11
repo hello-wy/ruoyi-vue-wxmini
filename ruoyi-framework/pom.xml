@@ -59,6 +59,18 @@
             <artifactId>ruoyi-system</artifactId>
         </dependency>
 
+        <!-- MyBatis-Plus（仅引入核心，不引入自动配置，避免与自定义SqlSessionFactory冲突）-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mybatis.spring.boot</groupId>
+                    <artifactId>mybatis-spring-boot-autoconfigure</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
 
 </project>

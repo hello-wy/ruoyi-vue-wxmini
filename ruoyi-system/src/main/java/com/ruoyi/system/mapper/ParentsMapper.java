@@ -1,6 +1,8 @@
 package com.ruoyi.system.mapper;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.system.domain.Parents;
 
 /**
@@ -9,7 +11,7 @@ import com.ruoyi.system.domain.Parents;
  * @author ruoyi
  * @date 2026-03-04
  */
-public interface ParentsMapper 
+public interface ParentsMapper extends BaseMapper<Parents>
 {
     /**
      * 查询家教订单

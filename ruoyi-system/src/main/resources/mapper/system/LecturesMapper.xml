@@ -7,17 +7,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="Lectures" id="LecturesResult">
         <result property="id"    column="id"    />
         <result property="time"    column="time"    />
+        <result property="endDate"    column="end_date"    />
         <result property="name"    column="name"    />
         <result property="speaker"    column="speaker"    />
         <result property="location"    column="location"    />
         <result property="geo"    column="geo"    />
+        <result property="cover"    column="cover"    />
         <result property="detail"    column="detail"    />
         <result property="createDate"    column="create_date"    />
         <result property="updateDate"    column="update_date"    />
     </resultMap>
 
     <sql id="selectLecturesVo">
-        select id, time, name, speaker, location, geo, detail, create_date, update_date from lectures
+        select id, time, end_date, name, speaker, location, geo, cover, detail, create_date, update_date from lectures
     </sql>
 
     <select id="selectLecturesList" parameterType="Lectures" resultMap="LecturesResult">
@@ -43,20 +45,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into lectures
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="time != null">time,</if>
+            <if test="endDate != null">end_date,</if>
             <if test="name != null and name != ''">name,</if>
             <if test="speaker != null">speaker,</if>
             <if test="location != null">location,</if>
             <if test="geo != null">geo,</if>
+            <if test="cover != null">cover,</if>
             <if test="detail != null">detail,</if>
             <if test="createDate != null">create_date,</if>
             <if test="updateDate != null">update_date,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="time != null">#{time},</if>
+            <if test="endDate != null">#{endDate},</if>
             <if test="name != null and name != ''">#{name},</if>
             <if test="speaker != null">#{speaker},</if>
             <if test="location != null">#{location},</if>
             <if test="geo != null">#{geo},</if>
+            <if test="cover != null">#{cover},</if>
             <if test="detail != null">#{detail},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="updateDate != null">#{updateDate},</if>
@@ -67,10 +73,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update lectures
         <trim prefix="SET" suffixOverrides=",">
             <if test="time != null">time = #{time},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="speaker != null">speaker = #{speaker},</if>
             <if test="location != null">location = #{location},</if>
             <if test="geo != null">geo = #{geo},</if>
+            <if test="cover != null">cover = #{cover},</if>
             <if test="detail != null">detail = #{detail},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="updateDate != null">update_date = #{updateDate},</if>

@@ -75,7 +75,9 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
 
     // 跳过无需鉴权的
     private boolean checkIsExcludeUri(String path) {
-        return path.startsWith("/wxmini/login") || path.startsWith("/wxmini/portal")
-                || path.startsWith("/wxmini/pay/notify");
+        return path.startsWith("/wxmini/login")
+                || path.startsWith("/wxmini/portal")
+                || path.startsWith("/wxmini/pay/notify")
+                || path.startsWith("/wxmini/tutoring");
     }
 }

@@ -1,10 +1,36 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="关联user表的主键ID" prop="uid">
+        <el-input
+          v-model="queryParams.uid"
+          placeholder="请输入关联user表的主键ID"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="职称" prop="title">
         <el-input
           v-model="queryParams.title"
           placeholder="请输入职称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="审核状态" prop="isCertified">
+        <el-select v-model="queryParams.isCertified" placeholder="请选择审核状态" clearable>
+          <el-option
+            v-for="dict in dict.type.sys_tutor_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="薪资要求" prop="salary">
+        <el-input
+          v-model="queryParams.salary"
+          placeholder="请输入薪资要求"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -50,6 +76,38 @@
           value-format="yyyy-MM-dd"
           placeholder="请选择更新时间">
         </el-date-picker>
+      </el-form-item>
+      <el-form-item label="实名认证真实姓名" prop="realName">
+        <el-input
+          v-model="queryParams.realName"
+          placeholder="请输入实名认证真实姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="身份证号码" prop="idCard">
+        <el-input
+          v-model="queryParams.idCard"
+          placeholder="请输入身份证号码"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="生活区域" prop="live">
+        <el-input
+          v-model="queryParams.live"
+          placeholder="请输入生活区域"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="${comment}" prop="work">
+        <el-input
+          v-model="queryParams.work"
+          placeholder="请输入${comment}"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -105,7 +163,8 @@
 
     <el-table v-loading="loading" :data="tutorsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="关联user对应的id" align="center" prop="uid" />
+      <el-table-column label="教员表主键ID" align="center" prop="id" />
+      <el-table-column label="关联user表的主键ID" align="center" prop="uid" />
       <el-table-column label="职称" align="center" prop="title" />
       <el-table-column label="证书图片url" align="center" prop="certificates" width="100">
         <template slot-scope="scope">
@@ -123,6 +182,12 @@
           <dict-tag :options="dict.type.sys_methods" :value="scope.row.methods ? scope.row.methods.split(',') : []"/>
         </template>
       </el-table-column>
+      <el-table-column label="审核状态" align="center" prop="isCertified">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.sys_tutor_status" :value="scope.row.isCertified"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="薪资要求" align="center" prop="salary" />
       <el-table-column label="经历/履历" align="center" prop="experience" />
       <el-table-column label="专业" align="center" prop="major" />
       <el-table-column label="就读/毕业院校" align="center" prop="school" />
@@ -141,6 +206,12 @@
           <span>{{ parseTime(scope.row.updateDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="实名认证真实姓名" align="center" prop="realName" />
+      <el-table-column label="身份证号码" align="center" prop="idCard" />
+      <el-table-column label="个人评价" align="center" prop="selfJudge" />
+      <el-table-column label="证书" align="center" prop="certificate" />
+      <el-table-column label="生活区域" align="center" prop="live" />
+      <el-table-column label="${comment}" align="center" prop="work" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -198,6 +269,18 @@
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
+        <el-form-item label="审核状态" prop="isCertified">
+          <el-radio-group v-model="form.isCertified">
+            <el-radio
+              v-for="dict in dict.type.sys_tutor_status"
+              :key="dict.value"
+              :label="parseInt(dict.value)"
+            >{{dict.label}}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="薪资要求" prop="salary">
+          <el-input v-model="form.salary" placeholder="请输入薪资要求" />
+        </el-form-item>
         <el-form-item label="经历/履历" prop="experience">
           <el-input v-model="form.experience" type="textarea" placeholder="请输入内容" />
         </el-form-item>
@@ -216,6 +299,40 @@
             >{{dict.label}}</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="创建时间" prop="createDate">
+          <el-date-picker clearable
+            v-model="form.createDate"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择创建时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="更新时间" prop="updateDate">
+          <el-date-picker clearable
+            v-model="form.updateDate"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择更新时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="实名认证真实姓名" prop="realName">
+          <el-input v-model="form.realName" placeholder="请输入实名认证真实姓名" />
+        </el-form-item>
+        <el-form-item label="身份证号码" prop="idCard">
+          <el-input v-model="form.idCard" placeholder="请输入身份证号码" />
+        </el-form-item>
+        <el-form-item label="个人评价" prop="selfJudge">
+          <el-input v-model="form.selfJudge" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="证书" prop="certificate">
+          <el-input v-model="form.certificate" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="生活区域" prop="live">
+          <el-input v-model="form.live" placeholder="请输入生活区域" />
+        </el-form-item>
+        <el-form-item label="${comment}" prop="work">
+          <el-input v-model="form.work" placeholder="请输入${comment}" />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -230,7 +347,7 @@ import { listTutors, getTutors, delTutors, addTutors, updateTutors } from "@/api
 
 export default {
   name: "Tutors",
-  dicts: ['sys_subject', 'sys_degree', 'sys_methods'],
+  dicts: ['sys_tutor_status', 'sys_subject', 'sys_degree', 'sys_methods'],
   data() {
     return {
       // 遮罩层
@@ -255,24 +372,33 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        uid: null,
         title: null,
         certificates: null,
         subjects: null,
         areas: null,
         methods: null,
+        isCertified: null,
+        salary: null,
         experience: null,
         major: null,
         school: null,
         degree: null,
         createDate: null,
-        updateDate: null
+        updateDate: null,
+        realName: null,
+        idCard: null,
+        selfJudge: null,
+        certificate: null,
+        live: null,
+        work: null
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
         uid: [
-          { required: true, message: "关联user对应的id不能为空", trigger: "blur" }
+          { required: true, message: "关联user表的主键ID不能为空", trigger: "blur" }
         ],
         title: [
           { required: true, message: "职称不能为空", trigger: "blur" }
@@ -313,6 +439,7 @@ export default {
     // 表单重置
     reset() {
       this.form = {
+        id: null,
         uid: null,
         title: null,
         certificates: null,
@@ -326,7 +453,13 @@ export default {
         school: null,
         degree: null,
         createDate: null,
-        updateDate: null
+        updateDate: null,
+        realName: null,
+        idCard: null,
+        selfJudge: null,
+        certificate: null,
+        live: null,
+        work: null
       }
       this.resetForm("form")
     },
@@ -342,7 +475,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.uid)
+      this.ids = selection.map(item => item.id)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -355,8 +488,8 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
-      const uid = row.uid || this.ids
-      getTutors(uid).then(response => {
+      const id = row.id || this.ids
+      getTutors(id).then(response => {
         this.form = response.data
         this.form.subjects = this.form.subjects.split(",")
         this.form.methods = this.form.methods.split(",")
@@ -370,7 +503,7 @@ export default {
         if (valid) {
           this.form.subjects = this.form.subjects.join(",")
           this.form.methods = this.form.methods.join(",")
-          if (this.form.uid != null) {
+          if (this.form.id != null) {
             updateTutors(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
               this.open = false
@@ -388,9 +521,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const uids = row.uid || this.ids
-      this.$modal.confirm('是否确认删除大学生/教员编号为"' + uids + '"的数据项？').then(function() {
-        return delTutors(uids)
+      const ids = row.id || this.ids
+      this.$modal.confirm('是否确认删除大学生/教员编号为"' + ids + '"的数据项？').then(function() {
+        return delTutors(ids)
       }).then(() => {
         this.getList()
         this.$modal.msgSuccess("删除成功")

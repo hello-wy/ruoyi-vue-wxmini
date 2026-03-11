@@ -10,9 +10,9 @@ export function listTutors(query) {
 }
 
 // 查询大学生/教员详细
-export function getTutors(uid) {
+export function getTutors(id) {
   return request({
-    url: '/system/tutors/' + uid,
+    url: '/system/tutors/' + id,
     method: 'get'
   })
 }
@@ -36,9 +36,9 @@ export function updateTutors(data) {
 }
 
 // 删除大学生/教员
-export function delTutors(uid) {
+export function delTutors(id) {
   return request({
-    url: '/system/tutors/' + uid,
+    url: '/system/tutors/' + id,
     method: 'delete'
   })
 }

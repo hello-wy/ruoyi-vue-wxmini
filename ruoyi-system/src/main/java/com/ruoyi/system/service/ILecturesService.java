@@ -58,4 +58,6 @@ public interface ILecturesService
      * @return 结果
      */
     public int deleteLecturesById(Long id);
+
+    public List<Lectures> selectRecentLecturesList();
 }

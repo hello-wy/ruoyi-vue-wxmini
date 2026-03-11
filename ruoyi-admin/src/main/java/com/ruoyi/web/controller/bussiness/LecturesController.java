@@ -2,6 +2,8 @@ package com.ruoyi.web.controller.bussiness;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.annotation.Anonymous;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +49,18 @@ public class LecturesController extends BaseController
     }
 
     /**
+     * 查询最近一个月课程活动/讲座列表（前端接口）
+     */
+    @Anonymous
+    @GetMapping("/recent")
+    public TableDataInfo recentList()
+    {
+        startPage();
+        List<Lectures> list = lecturesService.selectRecentLecturesList();
+        return getDataTable(list);
+    }
+
+    /**
      * 导出课程活动/讲座列表
      */
     @PreAuthorize("@ss.hasPermi('system:lectures:export')")
@@ -62,7 +76,7 @@ public class LecturesController extends BaseController
     /**
      * 获取课程活动/讲座详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:lectures:query')")
+    @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {

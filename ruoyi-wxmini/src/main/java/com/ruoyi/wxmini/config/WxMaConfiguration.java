@@ -26,18 +26,18 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(com.yigeng.wxmini.config.WxMaProperties.class)
+@EnableConfigurationProperties(WxMaProperties.class)
 public class WxMaConfiguration {
-    private final com.yigeng.wxmini.config.WxMaProperties properties;
+    private final WxMaProperties properties;
 
     @Autowired
-    public WxMaConfiguration(com.yigeng.wxmini.config.WxMaProperties properties) {
+    public WxMaConfiguration(WxMaProperties properties) {
         this.properties = properties;
     }
 
     @Bean
     public WxMaService wxMaService() {
-        List<com.yigeng.wxmini.config.WxMaProperties.Config> configs = this.properties.getConfigs();
+        List<WxMaProperties.Config> configs = this.properties.getConfigs();
         if (configs == null) {
             throw new WxRuntimeException("大哥，拜托先看下项目首页的说明（readme文件），添加下相关配置，注意别配错了！");
         }

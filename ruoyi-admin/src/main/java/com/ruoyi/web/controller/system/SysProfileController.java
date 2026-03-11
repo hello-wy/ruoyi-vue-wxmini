@@ -115,6 +115,21 @@ public class SysProfileController extends BaseController
     }
 
     /**
+     * 获取当前用户学籍总数
+     */
+    @GetMapping("/enrollment")
+    public AjaxResult getEnrollment()
+    {
+        LoginUser loginUser = getLoginUser();
+        // 实时查询数据库，避免读取缓存中的旧值
+        SysUser user = userService.selectUserById(loginUser.getUser().getUserId());
+        Integer enrollment = user != null ? user.getEnrollment() : null;
+        AjaxResult ajax = AjaxResult.success();
+        ajax.put("enrollment", enrollment != null ? enrollment : 0);
+        return ajax;
+    }
+
+    /**
      * 头像上传
      */
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)

@@ -1,0 +1,107 @@
+package com.ruoyi.system.domain;
+
+import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import com.ruoyi.common.annotation.Excel;
+import com.ruoyi.common.core.domain.BaseEntity;
+
+/**
+ * 签到与报名记录对象 sign_in_record
+ * <p>
+ * record_type=1: 讲座签到，lecture_id 有值<br>
+ * record_type=2: 沙龙报名，salon_id 有值，contact_name/contact_phone 有值
+ * </p>
+ *
+ * @author ruoyi
+ * @date 2026-03-06
+ */
+public class SignInRecord extends BaseEntity
+{
+    private static final long serialVersionUID = 1L;
+
+    /** 主键ID */
+    private Long id;
+
+    /** 用户ID，关联sys_user表的user_id */
+    @Excel(name = "用户ID")
+    private Long uid;
+
+    /** 记录类型: 1-讲座签到, 2-沙龙报名 */
+    @Excel(name = "记录类型", readConverterExp = "1=讲座签到,2=沙龙报名")
+    private Integer recordType;
+
+    /** 讲座ID，关联lectures表（record_type=1时有值） */
+    @Excel(name = "讲座ID")
+    private Long lectureId;
+
+    /** 沙龙ID，关联salon_info表（record_type=2时有值） */
+    @Excel(name = "沙龙ID")
+    private Long salonId;
+
+    /** 签到/报名时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "签到/报名时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date signTime;
+
+    /** 状态: 0-已报名/待签到, 1-已签到/正常, 2-迟到, 3-已取消 */
+    @Excel(name = "状态", readConverterExp = "0=已报名/待签到,1=已签到/正常,2=迟到,3=已取消")
+    private Integer signStatus;
+
+    /** 联系人姓名（沙龙报名时填写） */
+    @Excel(name = "联系人姓名")
+    private String contactName;
+
+    /** 联系电话（沙龙报名时填写） */
+    @Excel(name = "联系电话")
+    private String contactPhone;
+
+    /** 备注信息 */
+    @Excel(name = "备注")
+    private String remark;
+
+    /** 签到设备或IP（可选，用于防作弊） */
+    @Excel(name = "设备信息")
+    private String deviceInfo;
+
+    public void setId(Long id)                  { this.id = id; }
+    public Long getId()                         { return id; }
+    public void setUid(Long uid)                { this.uid = uid; }
+    public Long getUid()                        { return uid; }
+    public void setRecordType(Integer recordType) { this.recordType = recordType; }
+    public Integer getRecordType()              { return recordType; }
+    public void setLectureId(Long lectureId)    { this.lectureId = lectureId; }
+    public Long getLectureId()                  { return lectureId; }
+    public void setSalonId(Long salonId)        { this.salonId = salonId; }
+    public Long getSalonId()                    { return salonId; }
+    public void setSignTime(Date signTime)      { this.signTime = signTime; }
+    public Date getSignTime()                   { return signTime; }
+    public void setSignStatus(Integer signStatus) { this.signStatus = signStatus; }
+    public Integer getSignStatus()              { return signStatus; }
+    public void setContactName(String contactName) { this.contactName = contactName; }
+    public String getContactName()              { return contactName; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
+    public String getContactPhone()             { return contactPhone; }
+    public void setRemark(String remark)        { this.remark = remark; }
+    public String getRemark()                   { return remark; }
+    public void setDeviceInfo(String deviceInfo) { this.deviceInfo = deviceInfo; }
+    public String getDeviceInfo()               { return deviceInfo; }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("id", getId())
+                .append("uid", getUid())
+                .append("recordType", getRecordType())
+                .append("lectureId", getLectureId())
+                .append("salonId", getSalonId())
+                .append("signTime", getSignTime())
+                .append("signStatus", getSignStatus())
+                .append("contactName", getContactName())
+                .append("contactPhone", getContactPhone())
+                .append("remark", getRemark())
+                .append("deviceInfo", getDeviceInfo())
+                .toString();
+    }
+}

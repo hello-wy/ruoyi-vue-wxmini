@@ -89,6 +89,10 @@ public class SysUser extends BaseEntity
     /** 角色ID */
     private Long roleId;
 
+    /** 学籍总数 */
+    @Excel(name = "学籍总数", cellType = ColumnType.NUMERIC)
+    private Integer enrollment;
+
     public SysUser()
     {
 
@@ -297,6 +301,16 @@ public class SysUser extends BaseEntity
         this.roleId = roleId;
     }
 
+    public Integer getEnrollment()
+    {
+        return enrollment;
+    }
+
+    public void setEnrollment(Integer enrollment)
+    {
+        this.enrollment = enrollment;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -319,6 +333,7 @@ public class SysUser extends BaseEntity
             .append("updateTime", getUpdateTime())
             .append("remark", getRemark())
             .append("dept", getDept())
+            .append("enrollment", getEnrollment())
             .toString();
     }
 }

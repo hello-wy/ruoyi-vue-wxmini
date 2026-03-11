@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TradeOrderMapper">
+
+    <resultMap type="com.ruoyi.system.domain.TradeOrder" id="TradeOrderResult">
+        <result property="id"          column="id"          />
+        <result property="orderNo"     column="order_no"    />
+        <result property="userId"      column="user_id"     />
+        <result property="orderType"   column="order_type"  />
+        <result property="salonId"     column="salon_id"    />
+        <result property="lectureId"   column="lecture_id"  />
+        <result property="payAmount"   column="pay_amount"  />
+        <result property="payMethod"   column="pay_method"  />
+        <result property="purpose"     column="purpose"     />
+        <result property="payStatus"   column="pay_status"  />
+        <result property="payTime"     column="pay_time"    />
+        <result property="createTime"  column="create_time" />
+        <result property="updateTime"  column="update_time" />
+    </resultMap>
+
+    <sql id="selectTradeOrderVo">
+        select id, order_no, user_id, order_type, salon_id, lecture_id,
+               pay_amount, pay_method, purpose, pay_status, pay_time,
+               create_time, update_time
+        from trade_order
+    </sql>
+
+    <select id="selectTradeOrderList" parameterType="com.ruoyi.system.domain.TradeOrder" resultMap="TradeOrderResult">
+        <include refid="selectTradeOrderVo"/>
+        <where>
+            <if test="orderNo != null and orderNo != ''"> and order_no = #{orderNo}</if>
+            <if test="userId != null">                   and user_id = #{userId}</if>
+            <if test="orderType != null">                and order_type = #{orderType}</if>
+            <if test="salonId != null">                  and salon_id = #{salonId}</if>
+            <if test="lectureId != null">                and lecture_id = #{lectureId}</if>
+            <if test="payStatus != null">                and pay_status = #{payStatus}</if>
+            <if test="payMethod != null and payMethod != ''"> and pay_method = #{payMethod}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTradeOrderById" parameterType="Long" resultMap="TradeOrderResult">
+        <include refid="selectTradeOrderVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTradeOrder" parameterType="com.ruoyi.system.domain.TradeOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into trade_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="salonId != null">salon_id,</if>
+            <if test="lectureId != null">lecture_id,</if>
+            <if test="payAmount != null">pay_amount,</if>
+            <if test="payMethod != null">pay_method,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="payStatus != null">pay_status,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="orderType != null">#{orderType},</if>
+            <if test="salonId != null">#{salonId},</if>
+            <if test="lectureId != null">#{lectureId},</if>
+            <if test="payAmount != null">#{payAmount},</if>
+            <if test="payMethod != null">#{payMethod},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="payStatus != null">#{payStatus},</if>
+            <if test="payTime != null">#{payTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTradeOrder" parameterType="com.ruoyi.system.domain.TradeOrder">
+        update trade_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="orderType != null">order_type = #{orderType},</if>
+            <if test="salonId != null">salon_id = #{salonId},</if>
+            <if test="lectureId != null">lecture_id = #{lectureId},</if>
+            <if test="payAmount != null">pay_amount = #{payAmount},</if>
+            <if test="payMethod != null">pay_method = #{payMethod},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTradeOrderById" parameterType="Long">
+        delete from trade_order where id = #{id}
+    </delete>
+
+    <delete id="deleteTradeOrderByIds" parameterType="String">
+        delete from trade_order where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

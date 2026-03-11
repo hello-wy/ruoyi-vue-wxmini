@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserRealnameAuthMapper">
+    
+    <resultMap type="UserRealnameAuth" id="UserRealnameAuthResult">
+        <result property="id"    column="id"    />
+        <result property="uid"    column="uid"    />
+        <result property="realName"    column="real_name"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="authStatus"    column="auth_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectUserRealnameAuthVo">
+        select id, uid, real_name, id_card, auth_status, create_time, update_time from user_realname_auth
+    </sql>
+
+    <select id="selectUserRealnameAuthList" parameterType="UserRealnameAuth" resultMap="UserRealnameAuthResult">
+        <include refid="selectUserRealnameAuthVo"/>
+        <where>  
+            <if test="uid != null "> and uid = #{uid}</if>
+            <if test="realName != null  and realName != ''"> and real_name like concat('%', #{realName}, '%')</if>
+            <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
+            <if test="authStatus != null "> and auth_status = #{authStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectUserRealnameAuthById" parameterType="Long" resultMap="UserRealnameAuthResult">
+        <include refid="selectUserRealnameAuthVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertUserRealnameAuth" parameterType="UserRealnameAuth" useGeneratedKeys="true" keyProperty="id">
+        insert into user_realname_auth
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="uid != null">uid,</if>
+            <if test="realName != null and realName != ''">real_name,</if>
+            <if test="idCard != null and idCard != ''">id_card,</if>
+            <if test="authStatus != null">auth_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="uid != null">#{uid},</if>
+            <if test="realName != null and realName != ''">#{realName},</if>
+            <if test="idCard != null and idCard != ''">#{idCard},</if>
+            <if test="authStatus != null">#{authStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateUserRealnameAuth" parameterType="UserRealnameAuth">
+        update user_realname_auth
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="uid != null">uid = #{uid},</if>
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="authStatus != null">auth_status = #{authStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteUserRealnameAuthById" parameterType="Long">
+        delete from user_realname_auth where id = #{id}
+    </delete>
+
+    <delete id="deleteUserRealnameAuthByIds" parameterType="String">
+        delete from user_realname_auth where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

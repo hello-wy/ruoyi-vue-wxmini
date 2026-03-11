@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DailyJobsMapper">
+    
+    <resultMap type="DailyJobs" id="DailyJobsResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="category"    column="category"    />
+        <result property="salaryDay"    column="salary_day"    />
+        <result property="workDate"    column="work_date"    />
+        <result property="workTime"    column="work_time"    />
+        <result property="location"    column="location"    />
+        <result property="districtId"    column="district_id"    />
+        <result property="contacts"    column="contacts"    />
+        <result property="phone"    column="phone"    />
+        <result property="description"    column="description"    />
+        <result property="status"    column="status"    />
+        <result property="createDate"    column="create_date"    />
+        <result property="updateDate"    column="update_date"    />
+    </resultMap>
+
+    <sql id="selectDailyJobsVo">
+        select id, title, category, salary_day, work_date, work_time, location, district_id, contacts, phone, description, status, create_date, update_date from daily_jobs
+    </sql>
+
+    <select id="selectDailyJobsList" parameterType="DailyJobs" resultMap="DailyJobsResult">
+        <include refid="selectDailyJobsVo"/>
+        <where>  
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="category != null "> and category = #{category}</if>
+            <if test="salaryDay != null "> and salary_day = #{salaryDay}</if>
+            <if test="workDate != null "> and work_date = #{workDate}</if>
+            <if test="workTime != null  and workTime != ''"> and work_time = #{workTime}</if>
+            <if test="location != null  and location != ''"> and location = #{location}</if>
+            <if test="districtId != null  and districtId != ''"> and district_id = #{districtId}</if>
+            <if test="contacts != null  and contacts != ''"> and contacts = #{contacts}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="createDate != null "> and create_date = #{createDate}</if>
+            <if test="updateDate != null "> and update_date = #{updateDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectDailyJobsById" parameterType="Long" resultMap="DailyJobsResult">
+        <include refid="selectDailyJobsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDailyJobs" parameterType="DailyJobs" useGeneratedKeys="true" keyProperty="id">
+        insert into daily_jobs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">title,</if>
+            <if test="category != null">category,</if>
+            <if test="salaryDay != null">salary_day,</if>
+            <if test="workDate != null">work_date,</if>
+            <if test="workTime != null">work_time,</if>
+            <if test="location != null and location != ''">location,</if>
+            <if test="districtId != null">district_id,</if>
+            <if test="contacts != null">contacts,</if>
+            <if test="phone != null">phone,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="createDate != null">create_date,</if>
+            <if test="updateDate != null">update_date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="category != null">#{category},</if>
+            <if test="salaryDay != null">#{salaryDay},</if>
+            <if test="workDate != null">#{workDate},</if>
+            <if test="workTime != null">#{workTime},</if>
+            <if test="location != null and location != ''">#{location},</if>
+            <if test="districtId != null">#{districtId},</if>
+            <if test="contacts != null">#{contacts},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createDate != null">#{createDate},</if>
+            <if test="updateDate != null">#{updateDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDailyJobs" parameterType="DailyJobs">
+        update daily_jobs
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="salaryDay != null">salary_day = #{salaryDay},</if>
+            <if test="workDate != null">work_date = #{workDate},</if>
+            <if test="workTime != null">work_time = #{workTime},</if>
+            <if test="location != null and location != ''">location = #{location},</if>
+            <if test="districtId != null">district_id = #{districtId},</if>
+            <if test="contacts != null">contacts = #{contacts},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createDate != null">create_date = #{createDate},</if>
+            <if test="updateDate != null">update_date = #{updateDate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDailyJobsById" parameterType="Long">
+        delete from daily_jobs where id = #{id}
+    </delete>
+
+    <delete id="deleteDailyJobsByIds" parameterType="String">
+        delete from daily_jobs where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

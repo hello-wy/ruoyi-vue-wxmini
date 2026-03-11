@@ -2,6 +2,8 @@ package com.ruoyi.web.controller.bussiness;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 大学生/教员Controller
  * 
  * @author ruoyi
- * @date 2026-03-03
+ * @date 2026-03-05
  */
 @RestController
 @RequestMapping("/system/tutors")
@@ -63,10 +65,10 @@ public class TutorsController extends BaseController
      * 获取大学生/教员详细信息
      */
     @PreAuthorize("@ss.hasPermi('system:tutors:query')")
-    @GetMapping(value = "/{uid}")
-    public AjaxResult getInfo(@PathVariable("uid") Long uid)
+    @GetMapping(value = "/{id}")
+    public AjaxResult getInfo(@PathVariable("id") Long id)
     {
-        return success(tutorsService.selectTutorsByUid(uid));
+        return success(tutorsService.selectTutorsById(id));
     }
 
     /**
@@ -77,7 +79,10 @@ public class TutorsController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody Tutors tutors)
     {
-        return toAjax(tutorsService.insertTutors(tutors));
+        long snowflakeId = SnowflakeIdWorker.nextIdDefault();
+        tutors.setId(snowflakeId);
+        toAjax(tutorsService.insertTutors(tutors));
+        return AjaxResult.success("操作成功", snowflakeId);
     }
 
     /**
@@ -96,9 +101,9 @@ public class TutorsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:tutors:remove')")
     @Log(title = "大学生/教员", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{uids}")
-    public AjaxResult remove(@PathVariable Long[] uids)
+	@DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids)
     {
-        return toAjax(tutorsService.deleteTutorsByUids(uids));
+        return toAjax(tutorsService.deleteTutorsByIds(ids));
     }
 }

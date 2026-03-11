@@ -3,6 +3,7 @@ package com.ruoyi.wxmini.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.uuid.UUID;
 import com.ruoyi.wxmini.bo.WxUserInfo;
@@ -41,6 +42,7 @@ public class WxLoginController {
     /**
      * 登陆接口
      */
+    @Anonymous
     @GetMapping("/login")
     public AjaxResult login(String appid, String code) {
         if (StringUtils.isEmpty(code)) {

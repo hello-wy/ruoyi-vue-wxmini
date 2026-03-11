@@ -1,6 +1,9 @@
 package com.ruoyi.system.domain;
 
 import java.util.Date;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -13,17 +16,24 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2026-03-05
  */
+@TableName("lectures")
 public class Lectures extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 唯一编码 */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /** 开讲时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "开讲时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Excel(name = "开讲时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm")
     private Date time;
+
+    /** 会议结束日期 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @Excel(name = "会议结束日期", width = 30, dateFormat = "yyyy-MM-dd HH:mm")
+    private Date endDate;
 
     /** 课程名称 */
     @Excel(name = "课程名称")
@@ -40,6 +50,10 @@ public class Lectures extends BaseEntity
     /** 经纬度信息 (如: 118.80,32.05) */
     @Excel(name = "经纬度信息 (如: 118.80,32.05)")
     private String geo;
+
+    /** 活动封面图 */
+    @Excel(name = "活动封面图")
+    private String cover;
 
     /** 活动详情 */
     @Excel(name = "活动详情")
@@ -75,7 +89,17 @@ public class Lectures extends BaseEntity
         return time;
     }
 
-    public void setName(String name) 
+    public void setEndDate(Date endDate)
+    {
+        this.endDate = endDate;
+    }
+
+    public Date getEndDate()
+    {
+        return endDate;
+    }
+
+    public void setName(String name)
     {
         this.name = name;
     }
@@ -125,7 +149,17 @@ public class Lectures extends BaseEntity
         return detail;
     }
 
-    public void setCreateDate(Date createDate) 
+    public void setCover(String cover)
+    {
+        this.cover = cover;
+    }
+
+    public String getCover()
+    {
+        return cover;
+    }
+
+    public void setCreateDate(Date createDate)
     {
         this.createDate = createDate;
     }
@@ -150,6 +184,7 @@ public class Lectures extends BaseEntity
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("time", getTime())
+            .append("endDate", getEndDate())
             .append("name", getName())
             .append("speaker", getSpeaker())
             .append("location", getLocation())

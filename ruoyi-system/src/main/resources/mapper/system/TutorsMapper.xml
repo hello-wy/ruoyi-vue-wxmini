@@ -5,6 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.system.mapper.TutorsMapper">
     
     <resultMap type="Tutors" id="TutorsResult">
+        <result property="id"    column="id"    />
         <result property="uid"    column="uid"    />
         <result property="title"    column="title"    />
         <result property="certificates"    column="certificates"    />
@@ -19,37 +20,53 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="degree"    column="degree"    />
         <result property="createDate"    column="create_date"    />
         <result property="updateDate"    column="update_date"    />
+        <result property="realName"    column="real_name"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="selfJudge"    column="self_judge"    />
+        <result property="certificate"    column="certificate"    />
+        <result property="live"    column="live"    />
+        <result property="work"    column="work"    />
     </resultMap>
 
     <sql id="selectTutorsVo">
-        select uid, title, certificates, subjects, areas, methods, is_certified, salary, experience, major, school, degree, create_date, update_date from tutors
+        select id, uid, title, certificates, subjects, areas, methods, is_certified, salary, experience, major, school, degree, create_date, update_date, real_name, id_card, self_judge, certificate, live, work from tutors
     </sql>
 
     <select id="selectTutorsList" parameterType="Tutors" resultMap="TutorsResult">
         <include refid="selectTutorsVo"/>
         <where>  
+            <if test="uid != null "> and uid = #{uid}</if>
             <if test="title != null  and title != ''"> and title = #{title}</if>
             <if test="certificates != null  and certificates != ''"> and certificates = #{certificates}</if>
             <if test="subjects != null  and subjects != ''"> and subjects = #{subjects}</if>
             <if test="areas != null  and areas != ''"> and areas = #{areas}</if>
-            <if test="methods != null  and methods != ''"> and methods = #{methods}</if>
+            <if test="methods != null "> and methods = #{methods}</if>
+            <if test="isCertified != null "> and is_certified = #{isCertified}</if>
+            <if test="salary != null  and salary != ''"> and salary = #{salary}</if>
             <if test="experience != null  and experience != ''"> and experience = #{experience}</if>
             <if test="major != null  and major != ''"> and major = #{major}</if>
             <if test="school != null  and school != ''"> and school = #{school}</if>
             <if test="degree != null "> and degree = #{degree}</if>
             <if test="createDate != null "> and create_date = #{createDate}</if>
             <if test="updateDate != null "> and update_date = #{updateDate}</if>
+            <if test="realName != null  and realName != ''"> and real_name like concat('%', #{realName}, '%')</if>
+            <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
+            <if test="selfJudge != null  and selfJudge != ''"> and self_judge = #{selfJudge}</if>
+            <if test="certificate != null  and certificate != ''"> and certificate = #{certificate}</if>
+            <if test="live != null  and live != ''"> and live = #{live}</if>
+            <if test="work != null  and work != ''"> and work = #{work}</if>
         </where>
     </select>
     
-    <select id="selectTutorsByUid" parameterType="Long" resultMap="TutorsResult">
+    <select id="selectTutorsById" parameterType="Long" resultMap="TutorsResult">
         <include refid="selectTutorsVo"/>
-        where uid = #{uid}
+        where id = #{id}
     </select>
 
     <insert id="insertTutors" parameterType="Tutors">
         insert into tutors
         <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
             <if test="uid != null">uid,</if>
             <if test="title != null and title != ''">title,</if>
             <if test="certificates != null and certificates != ''">certificates,</if>
@@ -64,8 +81,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="degree != null">degree,</if>
             <if test="createDate != null">create_date,</if>
             <if test="updateDate != null">update_date,</if>
+            <if test="realName != null">real_name,</if>
+            <if test="idCard != null">id_card,</if>
+            <if test="selfJudge != null">self_judge,</if>
+            <if test="certificate != null">certificate,</if>
+            <if test="live != null">live,</if>
+            <if test="work != null">work,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
             <if test="uid != null">#{uid},</if>
             <if test="title != null and title != ''">#{title},</if>
             <if test="certificates != null and certificates != ''">#{certificates},</if>
@@ -80,12 +104,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="degree != null">#{degree},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="updateDate != null">#{updateDate},</if>
+            <if test="realName != null">#{realName},</if>
+            <if test="idCard != null">#{idCard},</if>
+            <if test="selfJudge != null">#{selfJudge},</if>
+            <if test="certificate != null">#{certificate},</if>
+            <if test="live != null">#{live},</if>
+            <if test="work != null">#{work},</if>
          </trim>
     </insert>
 
     <update id="updateTutors" parameterType="Tutors">
         update tutors
         <trim prefix="SET" suffixOverrides=",">
+            <if test="uid != null">uid = #{uid},</if>
             <if test="title != null and title != ''">title = #{title},</if>
             <if test="certificates != null and certificates != ''">certificates = #{certificates},</if>
             <if test="subjects != null and subjects != ''">subjects = #{subjects},</if>
@@ -99,18 +130,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="degree != null">degree = #{degree},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="updateDate != null">update_date = #{updateDate},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="selfJudge != null">self_judge = #{selfJudge},</if>
+            <if test="certificate != null">certificate = #{certificate},</if>
+            <if test="live != null">live = #{live},</if>
+            <if test="work != null">work = #{work},</if>
         </trim>
-        where uid = #{uid}
+        where id = #{id}
     </update>
 
-    <delete id="deleteTutorsByUid" parameterType="Long">
-        delete from tutors where uid = #{uid}
+    <delete id="deleteTutorsById" parameterType="Long">
+        delete from tutors where id = #{id}
     </delete>
 
-    <delete id="deleteTutorsByUids" parameterType="String">
-        delete from tutors where uid in 
-        <foreach item="uid" collection="array" open="(" separator="," close=")">
-            #{uid}
+    <delete id="deleteTutorsByIds" parameterType="String">
+        delete from tutors where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
         </foreach>
     </delete>
 </mapper>

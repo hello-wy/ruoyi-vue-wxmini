@@ -1,4 +1,4 @@
-package com.yigeng.wxmini.config;
+package com.ruoyi.wxmini.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

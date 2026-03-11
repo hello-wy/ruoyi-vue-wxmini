@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.LecturerProfileMapper">
+    
+    <resultMap type="LecturerProfile" id="LecturerProfileResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="intro"    column="intro"    />
+        <result property="avatarUrl"    column="avatar_url"    />
+        <result property="posterUrl"    column="poster_url"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+    </resultMap>
+
+    <sql id="selectLecturerProfileVo">
+        select id, name, intro, avatar_url, poster_url, create_time, update_time, is_deleted from lecturer_profile
+    </sql>
+
+    <select id="selectLecturerProfileList" parameterType="LecturerProfile" resultMap="LecturerProfileResult">
+        <include refid="selectLecturerProfileVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="intro != null  and intro != ''"> and intro = #{intro}</if>
+            <if test="avatarUrl != null  and avatarUrl != ''"> and avatar_url = #{avatarUrl}</if>
+            <if test="posterUrl != null  and posterUrl != ''"> and poster_url = #{posterUrl}</if>
+            <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
+        </where>
+    </select>
+    
+    <select id="selectLecturerProfileById" parameterType="Long" resultMap="LecturerProfileResult">
+        <include refid="selectLecturerProfileVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertLecturerProfile" parameterType="LecturerProfile">
+        insert into lecturer_profile
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="intro != null">intro,</if>
+            <if test="avatarUrl != null">avatar_url,</if>
+            <if test="posterUrl != null">poster_url,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="intro != null">#{intro},</if>
+            <if test="avatarUrl != null">#{avatarUrl},</if>
+            <if test="posterUrl != null">#{posterUrl},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+         </trim>
+    </insert>
+
+    <update id="updateLecturerProfile" parameterType="LecturerProfile">
+        update lecturer_profile
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            <if test="posterUrl != null">poster_url = #{posterUrl},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteLecturerProfileById" parameterType="Long">
+        delete from lecturer_profile where id = #{id}
+    </delete>
+
+    <delete id="deleteLecturerProfileByIds" parameterType="String">
+        delete from lecturer_profile where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

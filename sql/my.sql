@@ -116,34 +116,78 @@ INSERT INTO `sys_user` (
 (2010, NULL, 'parent2010', '郑先生', '00', 'parent2010@example.com', '13900002010', '0', '', 'e10adc3949ba59abbe56e057f20f883e', '0', '0', '127.0.0.1', NOW(), 'admin', NOW(), '找初二物理家教');
 
 DROP TABLE IF EXISTS `tutors`;
-CREATE TABLE `tutors` (   `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '教员表主键ID',
-                          `uid` INT NOT NULL UNIQUE COMMENT '关联user表的主键ID',
-                          `title` VARCHAR(50) DEFAULT NULL COMMENT '职称（如：教师、老师、大学生教员）',
-                          `certificates` VARCHAR(255) DEFAULT NULL COMMENT '证书图片url',
-                          `subjects` JSON DEFAULT NULL COMMENT '可授科目数组（使用索引0，1，2)',
-                          `areas` JSON DEFAULT NULL COMMENT '可授区域数组（地区索引id）',
-                          `methods` VARCHAR(50) DEFAULT NULL COMMENT '授课方式（网络辅导、线下）',
-                          `is_certified` VARCHAR(20) DEFAULT '待审核' COMMENT '审核状态（待审核、已通过、已拒绝）',
-                          `salary` VARCHAR(50) DEFAULT NULL COMMENT '薪资要求（如：100元/小时）',
-                          `experience` TEXT COMMENT '经历/履历',
-                          `major` VARCHAR(100) DEFAULT NULL COMMENT '专业',
-                          `school` VARCHAR(100) DEFAULT NULL COMMENT '就读/毕业院校',
-                          `degree` TINYINT DEFAULT 0 COMMENT '学历枚举：0-本科, 1-硕士, 2-博士',
-                          `create_date` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                          `update_date` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='大学生表/教员表';
+create table tutors
+(
+    id           bigint auto_increment comment '教员表主键ID'
+        primary key,
+    uid          int                                not null comment '关联user表的主键ID',
+    title        varchar(20)                        null comment '职称（如：教师、老师、大学生教员）',
+    certificates varchar(255)                       null comment '证书图片url',
+    subjects     varchar(40)                        null comment '可授科目数组（使用索引0，1，2)',
+    areas        varchar(100)                       null comment '可授区域数组（地区索引id）',
+    methods      int                                null comment '授课方式（网络辅导、线下）',
+    is_certified int      default 0                 null comment '审核状态（待审核、已通过、已拒绝）',
+    salary       varchar(50)                        null comment '薪资要求（如：100元/小时）',
+    experience   text                               null comment '经历/履历',
+    major        varchar(15)                        null comment '专业',
+    school       varchar(15)                        null comment '就读/毕业院校',
+    degree       tinyint  default 0                 null comment '学历枚举：0-本科, 1-硕士, 2-博士',
+    create_date  datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    update_date  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    real_name    varchar(10)                        null comment '实名认证真实姓名',
+    id_card      varchar(20)                        null comment '身份证号码',
+    self_judge   text                               null comment '个人评价',
+    certificate  text                               null comment '证书',
+    live         varchar(10)                        null comment '生活区域',
+    work         varchar(10)                        null,
+    constraint uid
+        unique (uid)
+)
+    comment '大学生表/教员表';
 
-INSERT INTO `tutors` (`id`,`uid`, `title`, `certificates`, `subjects`, `areas`, `methods`, `is_certified`, `salary`, `experience`, `major`, `school`, `degree`) VALUES
-       (01,1001, '大学生教员', 'https://img.example.com/cert1.jpg', '[0, 1]', '[320102, 320104]', '线下', '已通过', '100元/小时', '带过两届初三数学，提分显著', '数学与应用数学', '南京大学', 0),
-       (02,1002, '专职教师', 'https://img.example.com/cert2.jpg', '[2]', '[320106]', '网络辅导', '已通过', '200元/小时', '五年高中物理重点班教学经验', '物理学', '东南大学', 1),
-       (03,1003, '大学生教员', 'https://img.example.com/cert3.jpg', '[1, 3]', '[320105]', '线下', '待审核', '80元/小时', '英语专八，擅长口语及雅思教学', '英语', '南京师范大学', 0),
-       (04,1004, '大学生教员', 'https://img.example.com/cert4.jpg', '[0]', '[320102, 320105]', '线下', '已通过', '120元/小时', '大学期间连续三年获得一等奖学金', '计算机科学', '南京航空航天大学', 0),
-       (05,1005, '专职教师', 'https://img.example.com/cert5.jpg', '[4, 5]', '[320104]', '线下', '已拒绝', '150元/小时', '擅长小学全科辅导，有心理咨询师证', '小学教育', '晓庄学院', 0),
-       (06,1006, '大学生教员', 'https://img.example.com/cert6.jpg', '[2, 6]', '[320111]', '网络辅导', '已通过', '90元/小时', '高中化学生物竞赛省一等奖', '生物工程', '南京农业大学', 1),
-       (07,1007, '兼职老师', 'https://img.example.com/cert7.jpg', '[0, 2]', '[320115]', '线下', '待审核', '110元/小时', '有耐心，善于与青少年沟通', '自动化', '南京理工大学', 1),
-       (08,1008, '大学生教员', 'https://img.example.com/cert8.jpg', '[1]', '[320102]', '网络辅导', '已通过', '85元/小时', '高中英语课代表，擅长语法梳理', '翻译', '南京大学', 0),
-       (09,1009, '在职教师', 'https://img.example.com/cert9.jpg', '[7]', '[320106]', '线下', '已通过', '300元/小时', '十年高三历史把关经验', '历史学', '南京师范大学', 2),
-       (10,1010, '大学生教员', 'https://img.example.com/cert10.jpg', '[0, 8]', '[320104, 320111]', '线下', '已通过', '100元/小时', '中考市排名前500，理科基础扎实', '电子信息', '东南大学', 0);
+
+INSERT INTO tutors (uid, title, certificates, subjects, areas, methods, is_certified, salary, experience, major, school, degree, real_name, id_card, self_judge, certificate, live, work)
+VALUES
+    (1001, '大学生教员', 'https://img.com/c1.jpg', '0,1,2', '320115,320114', 1, 1, '100-150元/小时',
+     '2023.09至今在高三进行数学提分辅导，学生成绩从85提升至112分；2022年曾带初中奥数班。',
+     '数学与应用数学', '南京大学', 0, '张三', '320101199901011234', '认真负责，擅长逻辑引导', '英语六级', '江宁区', '雨花台区'),
+
+    (1002, '专业教师', 'https://img.com/c2.jpg', '3,5', '320102,320104', 0, 1, '200元/小时',
+     '10年高中物理教学经验，曾任职于南京某重点中学，带过三届高三毕业班，熟悉高考考点。',
+     '物理学', '南京师范大学', 1, '李四', '320101199505052345', '教学幽默，深受学生喜爱', '高级教师资格证', '玄武区', '秦淮区'),
+
+    (1003, '大学生教员', NULL, '1,4', '320113', 1, 0, '80-120元/小时',
+     '大二开始从事家教，辅导过3名小学生的语数英全科作业，有良好的沟通能力。',
+     '英语', '南京航空航天大学', 0, '王五', '320101200208083456', '发音标准，亲和力强', '专八证书', '栖霞区', '栖霞区'),
+
+    (1004, '金牌教员', 'https://img.com/c4.jpg', '0,8', '320106,320105', 1, 1, '300元/小时',
+     '长期担任奥数竞赛教练，多名学员获得省级一等奖；精通高中数学难题拆解。',
+     '计算机科学', '东南大学', 2, '赵六', '320101199012124567', '逻辑极强，擅长难题拆解', '博士学位证', '鼓楼区', '建邺区'),
+
+    (1005, '大学生教员', NULL, '10,11', '320104', 0, 2, '100元/小时',
+     '钢琴十级，在南京艺术学院就读期间长期兼职钢琴陪练，负责纠正指法。',
+     '音乐表演', '南京艺术学院', 0, '孙七', '320101200103035678', '极具耐心，艺术气息浓厚', '钢琴十级证书', '秦淮区', '秦淮区'),
+
+    (1006, '专业教员', 'https://img.com/c6.jpg', '2,6', '320111', 1, 1, '150元/小时',
+     '南京本地化学老师，擅长初三化学考前冲刺，能快速帮助学生建立知识体系。',
+     '应用化学', '南京理工大学', 1, '周八', '320101199604046789', '重点难点把握精准', '教师资格证', '浦口区', '浦口区'),
+
+    (1007, '大学生教员', NULL, '15', '320115', 0, 0, '120元/小时',
+     '研二学生，考研政治88分，熟悉考研政治大纲，有一套独特的背诵方法。',
+     '马克思主义理论', '河海大学', 1, '吴九', '320101199811117890', '政治理论扎实，经验丰富', '优秀毕业生', '江宁区', '江宁区'),
+
+    (1008, '专业教师', 'https://img.com/c8.jpg', '7,9', '320116', 1, 1, '250元/小时',
+     '资深生物老师，整理有全套初中生物知识归纳笔记，尤其擅长实验题讲解。',
+     '生物科学', '中国药科大学', 1, '郑十', '320101199402028901', '严谨负责，注重知识联想', '高级职称证', '六合区', '江宁区'),
+
+    (1009, '大学生教员', NULL, '20', '320115', 0, 1, '90元/小时',
+     '擅长少儿编程机器人辅导，曾带队参加省青少年科技创新大赛。',
+     '软件工程', '南京邮电大学', 0, '钱十一', '320101200306069012', '思维活跃，互动性强', '省赛一等奖', '栖霞区', '江宁区'),
+
+    (1010, '大学生教员', 'https://img.com/c10.jpg', '4,1', '320114', 1, 1, '180元/小时',
+     '英语专业八级，雅思8.0，曾在南京某知名培训机构兼职托福口语老师。',
+     '英语教育', '南京师范大学', 1, 'Mike', '320101199709091111', '发音纯正，口语地道', 'TESOL证书', '雨花台区', '雨花台区');
+
 
 
 DROP TABLE IF EXISTS `parents`;
@@ -174,11 +218,12 @@ INSERT INTO `parents` (`id`,`uid`, `location`, `geo`, `region`, `name`, `grade`,
                                                                                                                                (09,2009, '南京市浦口区珠江镇XX小区', '118.630,32.060', '浦口区', '一年级拼音认字辅导', '1', '6', '0', '幼师或者小学教育专业优先，亲和力强', '刚上小学，跟不上进度，拼音总是搞混'),
                                                                                                                                (10,2010, '南京市六合区雄州街道XX苑', '118.840,32.340', '六合区', '初二物理入门辅导', '8', '10', '0', '需要老师自带一些小实验道具，激发兴趣', '刚接触物理，觉得比较抽象，需要培养物理思维');
 
-
+drop table if exists lectures;
 -- 课程表
 CREATE TABLE `lectures` (
-                            `id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '唯一编码',
+                            `id` bigint(20) AUTO_INCREMENT PRIMARY KEY COMMENT '唯一编码',
                             `time` DATETIME NOT NULL COMMENT '开讲时间',
+                            `end_date` DATETIME DEFAULT NULL COMMENT '会议结束日期',
                             `name` VARCHAR(255) NOT NULL COMMENT '课程名称',
                             `speaker` VARCHAR(100) DEFAULT NULL COMMENT '讲师名称',
                             `location` VARCHAR(255) DEFAULT NULL COMMENT '详细地址',
@@ -204,5 +249,280 @@ INSERT INTO `lectures` (`time`, `name`, `speaker`, `location`, `geo`, `detail`) 
 
 
 
+CREATE TABLE daily_jobs (
+                            id           BIGINT AUTO_INCREMENT COMMENT '日结工作主键ID' PRIMARY KEY,
+                            title        VARCHAR(50) NOT NULL COMMENT '工作标题（如：初中数学日结兼职）',
+                            category     TINYINT DEFAULT 0 COMMENT '分类：0-家教, 1-助教, 2-派发, 3-其他',
+                            salary_day   DECIMAL(10, 2) NOT NULL COMMENT '日结薪水（元/日）',
+                            work_date    DATE NOT NULL COMMENT '工作具体日期',
+                            work_time    VARCHAR(50) COMMENT '具体时间段（如：14:00-16:00）',
+                            location     VARCHAR(100) NOT NULL COMMENT '工作详细地址',
+                            district_id  VARCHAR(10) COMMENT '区域区号（如：320115）',
+                            contacts     VARCHAR(20) COMMENT '联系人姓名',
+                            phone        VARCHAR(20) COMMENT '联系电话',
+                            description  TEXT COMMENT '工作具体要求内容',
+                            status       TINYINT DEFAULT 0 COMMENT '状态：0-招募中, 1-已满员, 2-已结束',
+                            create_time  DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            update_time  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) COMMENT '兼职日结工作表';
+
+INSERT INTO daily_jobs (title, category, salary_day, work_date, work_time, location, district_id, contacts, phone, description, status)
+VALUES
+    ('高三数学考前突击', 0, 300.00, '2026-03-10', '18:00-20:00', '江宁区大学城某小区', '320115', '张家长', '13800001111', '急需一名数学优秀的教员，针对导数大题进行讲解。', 0),
+    ('少儿编程体验课助教', 1, 150.00, '2026-03-11', '09:00-12:00', '秦淮区新街口某机构', '320104', '李老师', '13800002222', '协助主讲老师维护课堂秩序，分发器材。', 0),
+    ('初中物理实验演示', 0, 200.00, '2026-03-10', '14:00-16:00', '鼓楼区北京西路', '320106', '王女士', '13800003333', '演示初二物理电路实验，要求操作规范。', 0),
+    ('教育展会宣传员', 2, 120.00, '2026-03-12', '08:30-17:30', '建邺区国际博览中心', '320105', '赵经理', '13800004444', '负责展台宣传单页派发，形象气质佳优先。', 1),
+    ('钢琴陪练（日结）', 0, 180.00, '2026-03-10', '19:00-20:00', '雨花台区软件大道', '320114', '孙先生', '13800005555', '陪同7岁孩子练习钢琴，纠正手型。', 0),
+    ('英语口语陪练', 0, 260.00, '2026-03-13', '15:00-17:00', '栖霞区仙林大学城', '320113', '刘同学', '13800006666', '纯英文对话，练习雅思口语部分。', 0),
+    ('书法班代课老师', 1, 220.00, '2026-03-14', '10:00-12:00', '玄武区珠江路', '320102', '周校长', '13800007777', '要求有硬笔书法基础，代课一小节。', 0),
+    ('考研专业课答疑', 0, 400.00, '2026-03-10', '20:00-22:00', '线上辅导（南京本地优先）', '320100', '钱同学', '13800008888', '解答南大专业课真题，要求研究生在读。', 0),
+    ('周末户外写生助教', 1, 160.00, '2026-03-15', '09:00-16:00', '南京玄武湖公园', '320102', '吴老师', '13800009999', '协助照顾外出写生的小朋友，注意安全。', 0),
+    ('小学奥数临时辅导', 0, 200.00, '2026-03-11', '16:30-18:30', '六合区龙津路', '320116', '郑家长', '13800000000', '针对晚托班学生进行奥数难题点拨。', 0);
 
 
+CREATE TABLE `user_realname_auth` (
+                                      `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                      `uid` bigint(20) NOT NULL COMMENT '用户ID，关联sys_user表',
+                                      `real_name` varchar(50) NOT NULL COMMENT '真实姓名',
+                                      `id_card` varchar(18) NOT NULL COMMENT '身份证号码',
+                                      `auth_status` tinyint(4) DEFAULT '0' COMMENT '认证状态：0-待审核，1-已通过，2-已驳回',
+                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                      `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                      PRIMARY KEY (`id`),
+                                      UNIQUE KEY `uk_uid` (`uid`) COMMENT '保证一个用户只能有一条认证记录',
+                                      UNIQUE KEY `uk_id_card` (`id_card`) COMMENT '保证一个身份证号只能认证一次',
+                                      CONSTRAINT `fk_auth_sys_user` FOREIGN KEY (`uid`) REFERENCES `sys_user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户实名认证表';
+
+INSERT INTO `user_realname_auth` (`uid`, `real_name`, `id_card`, `auth_status`) VALUES
+-- 10xx 序列 (导师/学生)
+(1001, '张同学', '110105200501010011', 1),
+(1002, '李老师', '110105199001020022', 1),
+(1003, '王同学', '110105200501030033', 1),
+(1004, '赵同学', '110105200501040044', 1),
+(1005, '陈老师', '110105199001050055', 1),
+(1006, '刘同学', '110105200501060066', 1),
+(1007, '孙老师', '110105199001070077', 1),
+(1008, '周同学', '110105200501080088', 1),
+(1009, '吴老师', '110105199001090099', 1),
+(1010, '郑同学', '11010520050110010X', 1),
+
+-- 20xx 序列 (家长)
+(2001, '张先生', '110105198001010011', 1),
+(2002, '李女士', '110105198001020022', 1),
+(2003, '王女士', '110105198001030033', 1),
+(2004, '赵先生', '110105198001040044', 1),
+(2005, '陈先生', '110105198001050055', 1),
+(2006, '刘女士', '110105198001060066', 1),
+(2007, '孙先生', '110105198001070077', 1),
+(2008, '周女士', '110105198001080088', 1),
+(2009, '吴女士', '110105198001090099', 1),
+(2010, '郑先生', '11010519800110010X', 1);
+
+
+-- ==================================================
+-- 签到与报名记录表（兼容讲座签到 + 沙龙报名两种场景）
+-- record_type=1: 讲座签到，lecture_id 有值
+-- record_type=2: 沙龙报名，salon_id 有值，contact_name/phone 有值
+-- ==================================================
+drop table if exists `sign_in_record`;
+CREATE TABLE `sign_in_record` (
+    `id`            BIGINT(20)   NOT NULL AUTO_INCREMENT                COMMENT '主键ID',
+    `uid`           BIGINT(20)   NOT NULL                               COMMENT '用户ID，关联sys_user表的user_id',
+    `record_type`   TINYINT(4)   NOT NULL DEFAULT 1                    COMMENT '记录类型: 1-讲座签到, 2-沙龙报名',
+    `lecture_id`    BIGINT(20)   DEFAULT NULL                           COMMENT '讲座ID，关联lectures表（record_type=1时有值）',
+    `salon_id`      BIGINT(20)   DEFAULT NULL                           COMMENT '沙龙ID，关联salon_info表（record_type=2时有值）',
+    `sign_time`     DATETIME     DEFAULT CURRENT_TIMESTAMP              COMMENT '签到/报名时间',
+    `sign_status`   TINYINT(4)   DEFAULT 0                             COMMENT '状态: 0-已报名/待签到, 1-已签到/正常, 2-迟到, 3-已取消',
+    `contact_name`  VARCHAR(50)  DEFAULT NULL                           COMMENT '联系人姓名（沙龙报名时填写）',
+    `contact_phone` VARCHAR(20)  DEFAULT NULL                           COMMENT '联系电话（沙龙报名时填写）',
+    `remark`        VARCHAR(255) DEFAULT NULL                           COMMENT '备注信息',
+    `device_info`   VARCHAR(255) DEFAULT NULL                           COMMENT '签到设备或IP（可选，用于防作弊）',
+    PRIMARY KEY (`id`),
+    INDEX `idx_uid_type`   (`uid`, `record_type`) COMMENT '按用户和类型查询',
+    INDEX `idx_lecture_id` (`lecture_id`)          COMMENT '按讲座查询签到',
+    INDEX `idx_salon_id`   (`salon_id`)            COMMENT '按沙龙查询报名'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='签到与报名记录表（讲座签到/沙龙报名）';
+
+
+
+
+-- activity_salon 表已废弃，统一使用 salon_info 表管理沙龙活动数据（含价格、封面、报名等）
+
+
+
+-- ----------------------------
+-- 1. 问卷调查表 (questionnaire)
+-- ----------------------------
+CREATE TABLE `questionnaire` (
+                                 `id` BIGINT NOT NULL COMMENT '主键ID (雪花算法)',
+                                 `lecture_id` BIGINT NOT NULL COMMENT '关联课程ID',
+                                 `url` VARCHAR(512) NOT NULL COMMENT '问卷星链接URL',
+                                 `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-失效, 1-有效 (配合Java定时任务控制开课7天内有效)',
+                                 `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                 `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                 `is_deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识: 0-未删除, 1-已删除',
+                                 PRIMARY KEY (`id`),
+                                 INDEX `idx_lecture_status` (`lecture_id`, `status`) COMMENT '联合索引加速根据课程查询有效问卷'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='问卷调查配置表';
+
+-- ----------------------------
+-- 2. 资料中心数据表 (lecture_material)
+-- ----------------------------
+CREATE TABLE `lecture_material` (
+                                    `id` BIGINT NOT NULL COMMENT '主键ID',
+                                    `lecture_id` BIGINT NOT NULL COMMENT '关联课程ID',
+                                    `url` VARCHAR(512) NOT NULL COMMENT '资料/PDF文件OSS链接',
+                                    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-隐藏, 1-展示 (由后端接口业务调整)',
+                                    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                    `is_deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识',
+                                    PRIMARY KEY (`id`),
+                                    INDEX `idx_lecture_id` (`lecture_id`) COMMENT '加速课程资料拉取'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='资料中心数据表';
+
+-- ----------------------------
+-- 3. 讲师风采表 (lecturer_profile)
+-- ----------------------------
+CREATE TABLE `lecturer_profile` (
+                                    `id` BIGINT NOT NULL COMMENT '主键ID',
+                                    `name` VARCHAR(64) NOT NULL COMMENT '讲师姓名',
+                                    `intro` TEXT COMMENT '讲师简介/职位介绍',
+                                    `avatar_url` VARCHAR(512) COMMENT '头像URL',
+                                    `poster_url` VARCHAR(512) COMMENT '宣传海报URL',
+                                    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                    `is_deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识',
+                                    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='讲师风采表';
+
+-- ----------------------------
+-- 4. 学籍信息表 (student_enrollment)
+-- ----------------------------
+CREATE TABLE `student_enrollment` (
+                                      `id` BIGINT NOT NULL COMMENT '主键ID',
+                                      `uid` BIGINT NOT NULL COMMENT '用户ID (关联小程序学员)',
+                                      `lecture_id` BIGINT NOT NULL COMMENT '关联课程ID',
+                                      `total` INT NOT NULL DEFAULT 0 COMMENT '总学籍数/报名数',
+                                      `remain` INT NOT NULL DEFAULT 0 COMMENT '剩余可用学籍数 (支持线下核销或赠送扣减)',
+                                      `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                      `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                      `is_deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识',
+                                      PRIMARY KEY (`id`),
+                                      UNIQUE KEY `uk_uid_lecture` (`uid`, `lecture_id`) COMMENT '联合唯一约束：同一学员同一课程只保留一条汇总记录',
+                                      INDEX `idx_uid` (`uid`) COMMENT '加速查询"我的学籍"'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学籍信息表';
+
+
+-- 插入讲师风采数据 (假设课程由该讲师讲授)
+INSERT INTO `lecturer_profile` (`id`, `name`, `intro`, `avatar_url`, `poster_url`) VALUES
+                                                                                       (1898700000000001, '李老师', '资深心理学导师，拥有10年家庭关系咨询经验。', 'https://cdn.example.com/avatar/li.png', 'https://cdn.example.com/poster/li_poster.jpg'),
+                                                                                       (1898700000000002, '王教授', '亲子教育专家，主讲青少年潜能开发沙龙。', 'https://cdn.example.com/avatar/wang.png', 'https://cdn.example.com/poster/wang_poster.jpg');
+
+-- 插入问卷调查数据 (关联虚拟课程ID: 9901 代表幸福解码)
+-- 设定为状态 1 (有效)，代表开课 7 天内的评估问卷 [cite: 1]
+INSERT INTO `questionnaire` (`id`, `lecture_id`, `url`, `status`) VALUES
+                                                                      (1898700000000010, 9901, 'https://www.wjx.cn/vm/exAmple1.aspx', 1),
+                                                                      (1898700000000011, 9902, 'https://www.wjx.cn/vm/exAmple2.aspx', 0); -- 0表示已失效（超过7天）
+
+-- 插入资料中心数据 (关联同样的课程ID)
+INSERT INTO `lecture_material` (`id`, `lecture_id`, `url`, `status`) VALUES
+                                                                         (1898700000000020, 9901, 'https://cdn.example.com/pdf/幸福解码思维导图.pdf', 1),
+                                                                         (1898700000000021, 9901, 'https://cdn.example.com/pdf/家庭关系核心讲义.pdf', 1),
+                                                                         (1898700000000022, 9902, 'https://cdn.example.com/pdf/往期沙龙回顾.pdf', 0); -- 0表示接口隐藏
+
+-- 插入学籍信息数据
+-- 模拟学员A (uid: 8801) 购买了合伙人套餐，拥有5个《幸福解码》名额，目前消耗了1个，剩余4个
+INSERT INTO `student_enrollment` (`id`, `uid`, `lecture_id`, `total`, `remain`) VALUES
+                                                                                    (1898700000000030, 8801, 9901, 5, 4),
+                                                                                    (1898700000000031, 8802, 9901, 1, 1),
+                                                                                    (1898700000000032, 8801, 9902, 2, 0); -- 剩余0表示已全部分享或核销完
+
+
+CREATE TABLE `salon_info` (
+                              `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '沙龙ID，主键',
+                              `title` VARCHAR(128) NOT NULL COMMENT '沙龙主标题，如：组局思维',
+                              `subtitle` VARCHAR(128) DEFAULT NULL COMMENT '副标题或标签，如：沙龙/社群/KOL',
+                              `cover_img` VARCHAR(512) DEFAULT NULL COMMENT '封面图的URL',
+                              `description` TEXT COMMENT '详情页内容（富文本HTML或JSON）',
+                              `original_price` DECIMAL(10,2) DEFAULT '0.00' COMMENT '原价/划线价，如：768.00',
+                              `current_price` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT '实际售卖价，如：128.00',
+                              `start_time` DATETIME DEFAULT NULL COMMENT '沙龙举办/开始时间',
+                              `sales_volume` INT NOT NULL DEFAULT '0' COMMENT '已售数量（用于页面展示）',
+                              `status` TINYINT NOT NULL DEFAULT '1' COMMENT '状态：0-下架草稿，1-上架售卖中',
+                              `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                              `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='沙龙活动信息主表';
+
+
+-- ==================================================
+-- 用户钱包表（余额 / 冻结 / 累计）
+-- ==================================================
+DROP TABLE IF EXISTS `user_wallet`;
+CREATE TABLE `user_wallet` (
+    `id`              BIGINT       NOT NULL AUTO_INCREMENT               COMMENT '主键ID',
+    `uid`             BIGINT       NOT NULL                              COMMENT '用户ID，关联sys_user表',
+    `balance`         DECIMAL(10,2) NOT NULL DEFAULT 0.00               COMMENT '可用余额（元）',
+    `frozen`          DECIMAL(10,2) NOT NULL DEFAULT 0.00               COMMENT '冻结金额（元，提现审核中）',
+    `total_earned`    DECIMAL(10,2) NOT NULL DEFAULT 0.00               COMMENT '累计收入（元）',
+    `total_withdrawn` DECIMAL(10,2) NOT NULL DEFAULT 0.00               COMMENT '累计提现（元）',
+    `create_time`     DATETIME     DEFAULT CURRENT_TIMESTAMP             COMMENT '创建时间',
+    `update_time`     DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_uid` (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户钱包表';
+
+-- ==================================================
+-- 钱包提现申请记录表
+-- ==================================================
+DROP TABLE IF EXISTS `wallet_withdraw`;
+CREATE TABLE `wallet_withdraw` (
+    `id`             BIGINT       NOT NULL AUTO_INCREMENT                COMMENT '主键ID',
+    `uid`            BIGINT       NOT NULL                               COMMENT '用户ID',
+    `amount`         DECIMAL(10,2) NOT NULL                             COMMENT '申请提现金额（元）',
+    `status`         TINYINT      NOT NULL DEFAULT 0                    COMMENT '状态: 0-审核中, 1-已打款, 2-已拒绝',
+    `remark`         VARCHAR(255) DEFAULT NULL                           COMMENT '备注（拒绝原因等）',
+    `wx_transfer_no` VARCHAR(64)  DEFAULT NULL                           COMMENT '微信企业付款转账单号',
+    `create_time`    DATETIME     DEFAULT CURRENT_TIMESTAMP              COMMENT '申请时间',
+    `update_time`    DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    INDEX `idx_uid`    (`uid`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='钱包提现申请记录表';
+
+
+drop table if exists `order`;
+CREATE TABLE `trade_order` (
+                                  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '内部订单ID，主键',
+                                  `order_no` VARCHAR(64) NOT NULL COMMENT '外部展示及支付网关使用的订单号（需唯一）',
+                                  `user_id` BIGINT NOT NULL COMMENT '购买用户的唯一标识',
+
+    -- 新增的核心区分字段
+                                  `order_type` TINYINT NOT NULL COMMENT '业务类型：1-沙龙(salon订单)，2-讲座(lecture订单)',
+
+    -- 业务关联ID（注意：这里改成了允许为空，因为一笔订单通常只有一个ID有值）
+                                  `salon_id` BIGINT DEFAULT NULL COMMENT '关联的沙龙ID（当order_type=1时有值）',
+                                  `lecture_id` BIGINT DEFAULT NULL COMMENT '关联的讲座ID（当order_type=2时有值）',
+
+                                  `pay_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT '实际支付金额',
+                                  `pay_method` VARCHAR(32) DEFAULT NULL COMMENT '支付方式，如：wechat_pay, alipay, offline',
+                                  `purpose` VARCHAR(128) DEFAULT NULL COMMENT '主要的用途/备注，如：报名听课、赞助商',
+                                  `pay_status` TINYINT NOT NULL DEFAULT '0' COMMENT '支付状态：0-待支付，1-已支付，2-已退款，3-已取消',
+                                  `pay_time` DATETIME DEFAULT NULL COMMENT '实际完成支付的时间',
+                                  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '订单创建时间',
+                                  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '订单更新时间',
+                                  PRIMARY KEY (`id`),
+                                  UNIQUE KEY `uk_order_no` (`order_no`),
+                                  KEY `idx_user_id` (`user_id`),
+                                  KEY `idx_salon_id` (`salon_id`),
+                                  KEY `idx_lecture_id` (`lecture_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通用交易订单表（包含沙龙和讲座）';
+
+INSERT INTO `salon_info` (`id`, `title`, `subtitle`, `cover_img`, `original_price`, `current_price`, `start_time`, `sales_volume`, `status`)
+VALUES
+    (1, '组局思维', '沙龙/社群/KOL', 'https://demo.com/img1.jpg', 768.00, 128.00, '2026-03-06 14:00:00', 9, 1),
+    (2, '岛上圆桌派·第33期', '深度链接/头脑风暴', 'https://demo.com/img2.jpg', 588.00, 58.00, '2026-03-10 19:30:00', 42, 1),
+    (3, '春节不打烊：10天让你朋友圈会说话', '个人品牌建设', 'https://demo.com/img3.jpg', 599.00, 198.00, '2026-02-10 10:00:00', 105, 3), -- 状态3模拟已结束
+    (4, '手碟音乐工作坊', '你的第一支音乐MV', 'https://demo.com/img4.jpg', 698.00, 128.00, '2026-03-15 14:00:00', 15, 1),
+    (5, 'AIGC赋能职场效率沙龙', '效率工具实战', 'https://demo.com/img5.jpg', 299.00, 99.00, '2026-03-20 14:00:00', 0, 0); -- 状态0模拟草稿未上架

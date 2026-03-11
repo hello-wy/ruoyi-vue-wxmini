@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SalonInfoMapper">
+    
+    <resultMap type="SalonInfo" id="SalonInfoResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="subtitle"    column="subtitle"    />
+        <result property="coverImg"    column="cover_img"    />
+        <result property="description"    column="description"    />
+        <result property="originalPrice"    column="original_price"    />
+        <result property="currentPrice"    column="current_price"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="salesVolume"    column="sales_volume"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSalonInfoVo">
+        select id, title, subtitle, cover_img, description, original_price, current_price, start_time, sales_volume, status, create_time, update_time from salon_info
+    </sql>
+
+    <select id="selectSalonInfoList" parameterType="SalonInfo" resultMap="SalonInfoResult">
+        <include refid="selectSalonInfoVo"/>
+        <where>  
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="subtitle != null  and subtitle != ''"> and subtitle = #{subtitle}</if>
+            <if test="coverImg != null  and coverImg != ''"> and cover_img = #{coverImg}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="originalPrice != null "> and original_price = #{originalPrice}</if>
+            <if test="currentPrice != null "> and current_price = #{currentPrice}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="salesVolume != null "> and sales_volume = #{salesVolume}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectSalonInfoById" parameterType="Long" resultMap="SalonInfoResult">
+        <include refid="selectSalonInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSalonInfo" parameterType="SalonInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into salon_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">title,</if>
+            <if test="subtitle != null">subtitle,</if>
+            <if test="coverImg != null">cover_img,</if>
+            <if test="description != null">description,</if>
+            <if test="originalPrice != null">original_price,</if>
+            <if test="currentPrice != null">current_price,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="salesVolume != null">sales_volume,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="subtitle != null">#{subtitle},</if>
+            <if test="coverImg != null">#{coverImg},</if>
+            <if test="description != null">#{description},</if>
+            <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="currentPrice != null">#{currentPrice},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="salesVolume != null">#{salesVolume},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSalonInfo" parameterType="SalonInfo">
+        update salon_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="subtitle != null">subtitle = #{subtitle},</if>
+            <if test="coverImg != null">cover_img = #{coverImg},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="currentPrice != null">current_price = #{currentPrice},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="salesVolume != null">sales_volume = #{salesVolume},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSalonInfoById" parameterType="Long">
+        delete from salon_info where id = #{id}
+    </delete>
+
+    <delete id="deleteSalonInfoByIds" parameterType="String">
+        delete from salon_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

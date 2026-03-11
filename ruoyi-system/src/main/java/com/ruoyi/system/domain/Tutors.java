@@ -1,6 +1,9 @@
 package com.ruoyi.system.domain;
 
 import java.util.Date;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -11,13 +14,19 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 大学生/教员对象 tutors
  * 
  * @author ruoyi
- * @date 2026-03-03
+ * @date 2026-03-05
  */
+@TableName("tutors")
 public class Tutors extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** 关联user对应的id */
+    /** 教员表主键ID */
+    @TableId(type = IdType.INPUT)
+    private Long id;
+
+    /** 关联user表的主键ID */
+    @Excel(name = "关联user表的主键ID")
     private Long uid;
 
     /** 职称（如：教师、老师、大学生教员） */
@@ -38,12 +47,14 @@ public class Tutors extends BaseEntity
 
     /** 授课方式（网络辅导、线下） */
     @Excel(name = "授课方式", readConverterExp = "网=络辅导、线下")
-    private String methods;
+    private Long methods;
 
     /** 审核状态（待审核、已通过、已拒绝） */
-    private String isCertified;
+    @Excel(name = "审核状态", readConverterExp = "0 待=审核、1 已通过、2 已拒绝")
+    private Long isCertified;
 
     /** 薪资要求（如：100元/小时） */
+    @Excel(name = "薪资要求", readConverterExp = "如=：100元/小时")
     private String salary;
 
     /** 经历/履历 */
@@ -71,6 +82,40 @@ public class Tutors extends BaseEntity
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date updateDate;
+
+    /** 实名认证真实姓名 */
+    @Excel(name = "实名认证真实姓名")
+    private String realName;
+
+    /** 身份证号码 */
+    @Excel(name = "身份证号码")
+    private String idCard;
+
+    /** 个人评价 */
+    @Excel(name = "个人评价")
+    private String selfJudge;
+
+    /** 证书 */
+    @Excel(name = "证书")
+    private String certificate;
+
+    /** 生活区域 */
+    @Excel(name = "生活区域")
+    private String live;
+
+    /** $column.columnComment */
+    @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+    private String work;
+
+    public void setId(Long id) 
+    {
+        this.id = id;
+    }
+
+    public Long getId() 
+    {
+        return id;
+    }
 
     public void setUid(Long uid) 
     {
@@ -122,22 +167,22 @@ public class Tutors extends BaseEntity
         return areas;
     }
 
-    public void setMethods(String methods) 
+    public void setMethods(Long methods) 
     {
         this.methods = methods;
     }
 
-    public String getMethods() 
+    public Long getMethods() 
     {
         return methods;
     }
 
-    public void setIsCertified(String isCertified) 
+    public void setIsCertified(Long isCertified) 
     {
         this.isCertified = isCertified;
     }
 
-    public String getIsCertified() 
+    public Long getIsCertified() 
     {
         return isCertified;
     }
@@ -212,9 +257,70 @@ public class Tutors extends BaseEntity
         return updateDate;
     }
 
+    public void setRealName(String realName) 
+    {
+        this.realName = realName;
+    }
+
+    public String getRealName() 
+    {
+        return realName;
+    }
+
+    public void setIdCard(String idCard) 
+    {
+        this.idCard = idCard;
+    }
+
+    public String getIdCard() 
+    {
+        return idCard;
+    }
+
+    public void setSelfJudge(String selfJudge) 
+    {
+        this.selfJudge = selfJudge;
+    }
+
+    public String getSelfJudge() 
+    {
+        return selfJudge;
+    }
+
+    public void setCertificate(String certificate) 
+    {
+        this.certificate = certificate;
+    }
+
+    public String getCertificate() 
+    {
+        return certificate;
+    }
+
+    public void setLive(String live) 
+    {
+        this.live = live;
+    }
+
+    public String getLive() 
+    {
+        return live;
+    }
+
+    public void setWork(String work) 
+    {
+        this.work = work;
+    }
+
+    public String getWork() 
+    {
+        return work;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
+            .append("id", getId())
             .append("uid", getUid())
             .append("title", getTitle())
             .append("certificates", getCertificates())
@@ -229,6 +335,12 @@ public class Tutors extends BaseEntity
             .append("degree", getDegree())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
+            .append("realName", getRealName())
+            .append("idCard", getIdCard())
+            .append("selfJudge", getSelfJudge())
+            .append("certificate", getCertificate())
+            .append("live", getLive())
+            .append("work", getWork())
             .toString();
     }
 }

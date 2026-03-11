@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  此文件已废弃，请使用 TradeOrderMapper.xml 替代。
+  对应 Java 接口已更新为 TradeOrderMapper。
+-->
+<mapper namespace="com.ruoyi.system.mapper.OrderMapper">
+</mapper>
