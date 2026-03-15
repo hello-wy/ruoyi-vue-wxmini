@@ -51,7 +51,7 @@ public class WxPayController {
             v3Request.setAppid(wxPayService.getConfig().getAppId());
             v3Request.setMchid(wxPayService.getConfig().getMchId());
             v3Request.setDescription("order desc"); // 订单描述，在微信账单展示
-            v3Request.setOutTradeNo("orderNo" + new Date().getTime()); // 订单编号，保证唯一
+            v3Request.setOutTradeNo("orderNo" + System.currentTimeMillis()); // 订单编号，保证唯一
             int timeExpireMin = 5; // 支付超时时间，超时微信侧自动关闭失效
             v3Request.setTimeExpire(DateUtil.format(DateUtil.offsetMinute(new Date(), timeExpireMin),
                     DatePattern.UTC_WITH_XXX_OFFSET_PATTERN));
