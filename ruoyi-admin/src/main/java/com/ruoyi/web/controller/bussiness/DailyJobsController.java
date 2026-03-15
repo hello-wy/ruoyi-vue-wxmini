@@ -4,6 +4,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.annotation.Anonymous;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.DailyJobs;
 import com.ruoyi.system.service.IDailyJobsService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 兼职日结工作Controller
@@ -29,6 +32,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-05
  */
+@Api(tags = "兼职日结工作管理")
 @RestController
 @RequestMapping("/system/jobs")
 public class DailyJobsController extends BaseController
@@ -39,9 +43,10 @@ public class DailyJobsController extends BaseController
     /**
      * 查询兼职日结工作列表
      */
+    @ApiOperation("查询兼职日结工作列表")
     @Anonymous
     @GetMapping("/list")
-    public TableDataInfo list(DailyJobs dailyJobs)
+    public TableDataInfoVo<DailyJobs> list(DailyJobs dailyJobs)
     {
         startPage();
         List<DailyJobs> list = dailyJobsService.selectDailyJobsList(dailyJobs);
@@ -51,6 +56,7 @@ public class DailyJobsController extends BaseController
     /**
      * 导出兼职日结工作列表
      */
+    @ApiOperation("导出兼职日结工作列表")
     @PreAuthorize("@ss.hasPermi('system:jobs:export')")
     @Log(title = "兼职日结工作", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -64,6 +70,8 @@ public class DailyJobsController extends BaseController
     /**
      * 获取兼职日结工作详细信息
      */
+    @ApiOperation("获取兼职日结工作详细信息")
+    @ApiImplicitParam(name = "id", value = "兼职工作ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:jobs:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -74,6 +82,7 @@ public class DailyJobsController extends BaseController
     /**
      * 新增兼职日结工作
      */
+    @ApiOperation("新增兼职日结工作")
     @PreAuthorize("@ss.hasPermi('system:jobs:add')")
     @Log(title = "兼职日结工作", businessType = BusinessType.INSERT)
     @PostMapping
@@ -85,6 +94,7 @@ public class DailyJobsController extends BaseController
     /**
      * 修改兼职日结工作
      */
+    @ApiOperation("修改兼职日结工作")
     @PreAuthorize("@ss.hasPermi('system:jobs:edit')")
     @Log(title = "兼职日结工作", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +106,8 @@ public class DailyJobsController extends BaseController
     /**
      * 删除兼职日结工作
      */
+    @ApiOperation("删除兼职日结工作")
+    @ApiImplicitParam(name = "ids", value = "兼职工作ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:jobs:remove')")
     @Log(title = "兼职日结工作", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

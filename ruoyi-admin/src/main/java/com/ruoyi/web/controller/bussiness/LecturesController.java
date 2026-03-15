@@ -6,6 +6,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.system.domain.vo.LecturesDetailVo;
 import com.ruoyi.system.domain.vo.LecturesListVo;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +26,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 课程活动/讲座Controller
@@ -31,6 +34,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-05
  */
+@Api(tags = "课程活动/讲座管理")
 @RestController
 @RequestMapping("/system/lectures")
 public class LecturesController extends BaseController
@@ -41,9 +45,10 @@ public class LecturesController extends BaseController
     /**
      * 查询课程活动/讲座列表（含讲师姓名拼接）
      */
+    @ApiOperation("查询课程活动/讲座列表（含讲师姓名）")
     @PreAuthorize("@ss.hasPermi('system:lectures:list')")
     @GetMapping("/list")
-    public TableDataInfo list(Lectures lectures)
+    public TableDataInfoVo<LecturesListVo> list(Lectures lectures)
     {
         startPage();
         List<LecturesListVo> list = lecturesService.selectLecturesListVo(lectures);
@@ -53,9 +58,10 @@ public class LecturesController extends BaseController
     /**
      * 查询最近一个月课程活动/讲座列表（前端接口）
      */
+    @ApiOperation("查询最近一个月课程活动/讲座列表（公开）")
     @Anonymous
     @GetMapping("/recent")
-    public TableDataInfo recentList()
+    public TableDataInfoVo<Lectures> recentList()
     {
         startPage();
         List<Lectures> list = lecturesService.selectRecentLecturesList();
@@ -65,6 +71,7 @@ public class LecturesController extends BaseController
     /**
      * 导出课程活动/讲座列表
      */
+    @ApiOperation("导出课程活动/讲座列表")
     @PreAuthorize("@ss.hasPermi('system:lectures:export')")
     @Log(title = "课程活动/讲座", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -78,6 +85,8 @@ public class LecturesController extends BaseController
     /**
      * 获取课程活动/讲座详细信息（含讲师 id/name/avatarUrl）
      */
+    @ApiOperation("获取课程活动/讲座详细信息（含讲师信息，公开）")
+    @ApiImplicitParam(name = "id", value = "课程/讲座ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -89,6 +98,7 @@ public class LecturesController extends BaseController
     /**
      * 新增课程活动/讲座
      */
+    @ApiOperation("新增课程活动/讲座")
     @PreAuthorize("@ss.hasPermi('system:lectures:add')")
     @Log(title = "课程活动/讲座", businessType = BusinessType.INSERT)
     @PostMapping
@@ -100,6 +110,7 @@ public class LecturesController extends BaseController
     /**
      * 修改课程活动/讲座
      */
+    @ApiOperation("修改课程活动/讲座")
     @PreAuthorize("@ss.hasPermi('system:lectures:edit')")
     @Log(title = "课程活动/讲座", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -111,6 +122,8 @@ public class LecturesController extends BaseController
     /**
      * 删除课程活动/讲座
      */
+    @ApiOperation("删除课程活动/讲座")
+    @ApiImplicitParam(name = "ids", value = "课程/讲座ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:lectures:remove')")
     @Log(title = "课程活动/讲座", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")

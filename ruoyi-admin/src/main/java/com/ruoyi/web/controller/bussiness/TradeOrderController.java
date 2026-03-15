@@ -2,6 +2,9 @@ package com.ruoyi.web.controller.bussiness;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +22,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.TradeOrder;
 import com.ruoyi.system.service.ITradeOrderService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 通用交易订单 Controller
@@ -27,6 +30,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-07
  */
+@Api(tags = "通用交易订单管理")
 @RestController
 @RequestMapping("/system/tradeOrder")
 public class TradeOrderController extends BaseController
@@ -37,9 +41,10 @@ public class TradeOrderController extends BaseController
     /**
      * 查询交易订单列表
      */
+    @ApiOperation("查询交易订单列表")
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:list')")
     @GetMapping("/list")
-    public TableDataInfo list(TradeOrder tradeOrder)
+    public TableDataInfoVo<TradeOrder> list(TradeOrder tradeOrder)
     {
         startPage();
         List<TradeOrder> list = tradeOrderService.selectTradeOrderList(tradeOrder);
@@ -49,6 +54,7 @@ public class TradeOrderController extends BaseController
     /**
      * 导出交易订单列表
      */
+    @ApiOperation("导出交易订单列表")
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:export')")
     @Log(title = "交易订单", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -62,6 +68,8 @@ public class TradeOrderController extends BaseController
     /**
      * 获取交易订单详细信息
      */
+    @ApiOperation("获取交易订单详细信息")
+    @ApiImplicitParam(name = "id", value = "订单ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -72,6 +80,7 @@ public class TradeOrderController extends BaseController
     /**
      * 新增交易订单
      */
+    @ApiOperation("新增交易订单")
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:add')")
     @Log(title = "交易订单", businessType = BusinessType.INSERT)
     @PostMapping
@@ -83,6 +92,7 @@ public class TradeOrderController extends BaseController
     /**
      * 修改交易订单
      */
+    @ApiOperation("修改交易订单")
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:edit')")
     @Log(title = "交易订单", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -94,6 +104,8 @@ public class TradeOrderController extends BaseController
     /**
      * 删除交易订单
      */
+    @ApiOperation("删除交易订单")
+    @ApiImplicitParam(name = "ids", value = "订单ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:tradeOrder:remove')")
     @Log(title = "交易订单", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")

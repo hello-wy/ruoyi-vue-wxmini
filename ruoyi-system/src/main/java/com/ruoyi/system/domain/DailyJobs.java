@@ -3,6 +3,8 @@ package com.ruoyi.system.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -14,63 +16,78 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2026-03-05
  */
+@ApiModel(value = "DailyJobs", description = "兼职日结工作")
 public class DailyJobs extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
     /** 日结工作主键ID */
+    @ApiModelProperty(value = "日结工作主键ID", example = "1")
     private Long id;
 
     /** 工作标题（如：初中数学日结兼职） */
+    @ApiModelProperty(value = "工作标题，如：初中数学日结兼职", example = "初中数学日结兼职")
     @Excel(name = "工作标题", readConverterExp = "如=：初中数学日结兼职")
     private String title;
 
     /** 分类：0-家教, 1-助教, 2-派发, 3-其他 */
+    @ApiModelProperty(value = "分类：0-家教, 1-助教, 2-派发, 3-其他", example = "0")
     @Excel(name = "分类：0-家教, 1-助教, 2-派发, 3-其他")
     private Long category;
 
     /** 日结薪水（元/日） */
+    @ApiModelProperty(value = "日结薪水（元/日）", example = "200.00")
     @Excel(name = "日结薪水", readConverterExp = "元=/日")
     private BigDecimal salaryDay;
 
     /** 工作具体日期 */
+    @ApiModelProperty(value = "工作具体日期", example = "2026-03-10")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "工作具体日期", width = 30, dateFormat = "yyyy-MM-dd")
     private Date workDate;
 
     /** 具体时间段（如：14:00-16:00） */
+    @ApiModelProperty(value = "具体时间段，如：14:00-16:00", example = "14:00-16:00")
     @Excel(name = "具体时间段", readConverterExp = "如=：14:00-16:00")
     private String workTime;
 
     /** 工作详细地址 */
+    @ApiModelProperty(value = "工作详细地址", example = "南京市江宁区XX街道XX号")
     @Excel(name = "工作详细地址")
     private String location;
 
     /** 区域区号（如：320115） */
+    @ApiModelProperty(value = "区域区号，如：320115", example = "320115")
     @Excel(name = "区域区号", readConverterExp = "如=：320115")
     private String districtId;
 
     /** 联系人姓名 */
+    @ApiModelProperty(value = "联系人姓名", example = "张老师")
     @Excel(name = "联系人姓名")
     private String contacts;
 
     /** 联系电话 */
+    @ApiModelProperty(value = "联系电话", example = "13800138000")
     @Excel(name = "联系电话")
     private String phone;
 
     /** 工作具体要求内容 */
+    @ApiModelProperty(value = "工作具体要求内容", example = "需要有教学经验，耐心细心")
     @Excel(name = "工作具体要求内容")
     private String description;
 
     /** 状态：0-招募中, 1-已满员, 2-已结束 */
+    @ApiModelProperty(value = "状态：0-招募中, 1-已满员, 2-已结束", example = "0")
     @Excel(name = "状态：0-招募中, 1-已满员, 2-已结束")
     private Long status;
 
-    /** $column.columnComment */
+    /** 创建时间 */
+    @ApiModelProperty(value = "创建时间", example = "2026-03-05 10:00:00")
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Date createDate;
 
-    /** $column.columnComment */
+    /** 更新时间 */
+    @ApiModelProperty(value = "更新时间", example = "2026-03-05 10:00:00")
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Date updateDate;
 

@@ -3,6 +3,8 @@ package com.ruoyi.wxmini.controller;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.core.controller.BaseController;
@@ -17,6 +19,7 @@ import com.ruoyi.system.service.IWalletService;
  *
  * @author ruoyi
  */
+@Api(tags = "【小程序】用户钱包")
 @RestController
 @RequestMapping("/system/wallet")
 public class WxWalletController extends BaseController
@@ -28,6 +31,7 @@ public class WxWalletController extends BaseController
      * 获取当前用户钱包信息
      * GET /system/wallet/info
      */
+    @ApiOperation("获取当前登录用户钱包余额信息（需登录）")
     @GetMapping("/info")
     public AjaxResult info()
     {
@@ -41,6 +45,7 @@ public class WxWalletController extends BaseController
      * POST /system/wallet/withdraw
      * body: { "amount": "50.00" }
      */
+    @ApiOperation("申请提现到微信钱包（需登录，body 传 amount 字段）")
     @PostMapping("/withdraw")
     public AjaxResult withdraw(@RequestBody Map<String, Object> body)
     {
@@ -72,6 +77,7 @@ public class WxWalletController extends BaseController
      * 获取提现记录列表
      * GET /system/wallet/withdrawRecords
      */
+    @ApiOperation("获取当前登录用户的提现记录列表（需登录）")
     @GetMapping("/withdrawRecords")
     public AjaxResult withdrawRecords()
     {

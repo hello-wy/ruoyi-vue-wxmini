@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysConfig;
@@ -39,7 +39,7 @@ public class SysConfigController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:config:list')")
     @GetMapping("/list")
-    public TableDataInfo list(SysConfig config)
+    public TableDataInfoVo<SysConfig> list(SysConfig config)
     {
         startPage();
         List<SysConfig> list = configService.selectConfigList(config);

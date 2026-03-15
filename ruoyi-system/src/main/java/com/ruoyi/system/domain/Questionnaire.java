@@ -26,6 +26,8 @@ public class Questionnaire extends BaseEntity
     @Excel(name = "问卷星链接URL")
     private String url;
 
+    private String topic;
+
     /** 状态: 0-失效, 1-有效 (配合Java定时任务控制开课7天内有效) */
     @Excel(name = "状态: 0-失效, 1-有效 (配合Java定时任务控制开课7天内有效)")
     private Long status;
@@ -54,7 +56,15 @@ public class Questionnaire extends BaseEntity
         return lectureId;
     }
 
-    public void setUrl(String url) 
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public void setUrl(String url)
     {
         this.url = url;
     }
@@ -90,6 +100,7 @@ public class Questionnaire extends BaseEntity
             .append("id", getId())
             .append("lectureId", getLectureId())
             .append("url", getUrl())
+                .append("topic", getTopic())
             .append("status", getStatus())
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())

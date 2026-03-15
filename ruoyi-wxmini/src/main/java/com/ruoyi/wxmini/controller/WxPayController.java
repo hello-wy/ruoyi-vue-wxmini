@@ -12,6 +12,9 @@ import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,7 @@ import java.util.Date;
  * @author weijiayu
  * @date 2025/5/18 23:27
  */
+@Api(tags = "【小程序】微信支付")
 @Slf4j
 @RestController
 @RequestMapping("/wxmini/pay")
@@ -35,6 +39,10 @@ public class WxPayController {
     @Resource
     private WxPayService wxPayService;
 
+    /**
+     * 创建微信支付订单（JSAPI），返回小程序唤起支付所需参数
+     */
+    @ApiOperation("创建微信支付订单，返回 JSAPI 支付参数（需登录）")
     @PostMapping("/order/create")
     public AjaxResult createOrder() {
         try {
@@ -73,7 +81,11 @@ public class WxPayController {
         }
     }
 
-    // 主动查询支付结果。建议配合若依的定时任务使用，结合支付时设置的超时时间，查询超时仍在支付中的订单，更新支付结果
+    /**
+     * 主动查询支付结果。建议配合若依的定时任务使用，结合支付时设置的超时时间，查询超时仍在支付中的��单，更新支付结果
+     */
+    @ApiOperation("主动查询微信支付订单结果（需登录）")
+    @ApiImplicitParam(name = "outTradeNo", value = "商户系统内部订单号", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
     @GetMapping("/order/query")
     public AjaxResult queryOrder(@RequestParam("outTradeNo") String outTradeNo) {
         try {
@@ -86,7 +98,10 @@ public class WxPayController {
         }
     }
 
-    // 支付结果回调
+    /**
+     * 微信支付结果异步回调（由微信服务器调用，无需鉴权）
+     */
+    @ApiOperation("微信支付结果异步回调通知（由微信服务器调用）")
     @PostMapping("/notify")
     public String payNotify(HttpServletRequest request, HttpServletResponse response) {
         try {

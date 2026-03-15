@@ -4,6 +4,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.annotation.Anonymous;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.LecturerProfile;
 import com.ruoyi.system.service.ILecturerProfileService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 讲师风采Controller
@@ -29,6 +32,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-07
  */
+@Api(tags = "讲师风采管理")
 @RestController
 @RequestMapping("/system/profile")
 public class LecturerProfileController extends BaseController
@@ -39,9 +43,10 @@ public class LecturerProfileController extends BaseController
     /**
      * 查询讲师风采列表
      */
+    @ApiOperation("查询讲师风采列表")
     @Anonymous
     @GetMapping("/list")
-    public TableDataInfo list(LecturerProfile lecturerProfile)
+    public TableDataInfoVo<LecturerProfile> list(LecturerProfile lecturerProfile)
     {
         startPage();
         List<LecturerProfile> list = lecturerProfileService.selectLecturerProfileList(lecturerProfile);
@@ -51,6 +56,7 @@ public class LecturerProfileController extends BaseController
     /**
      * 导出讲师风采列表
      */
+    @ApiOperation("导出讲师风采列表")
     @PreAuthorize("@ss.hasPermi('system:profile:export')")
     @Log(title = "讲师风采", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -64,6 +70,8 @@ public class LecturerProfileController extends BaseController
     /**
      * 获取讲师风采详细信息
      */
+    @ApiOperation("获取讲师风采详细信息")
+    @ApiImplicitParam(name = "id", value = "讲师ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -74,6 +82,7 @@ public class LecturerProfileController extends BaseController
     /**
      * 新增讲师风采
      */
+    @ApiOperation("新增讲师风采")
     @PreAuthorize("@ss.hasPermi('system:profile:add')")
     @Log(title = "讲师风采", businessType = BusinessType.INSERT)
     @PostMapping
@@ -85,6 +94,7 @@ public class LecturerProfileController extends BaseController
     /**
      * 修改讲师风采
      */
+    @ApiOperation("修改讲师风采")
     @PreAuthorize("@ss.hasPermi('system:profile:edit')")
     @Log(title = "讲师风采", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +106,8 @@ public class LecturerProfileController extends BaseController
     /**
      * 删除讲师风采
      */
+    @ApiOperation("删除讲师风采")
+    @ApiImplicitParam(name = "ids", value = "讲师ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:profile:remove')")
     @Log(title = "讲师风采", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

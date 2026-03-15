@@ -2,6 +2,9 @@ package com.ruoyi.web.controller.bussiness;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +22,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.LectureMaterial;
 import com.ruoyi.system.service.ILectureMaterialService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 资料中心数据Controller
@@ -27,6 +30,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-07
  */
+@Api(tags = "资料中心管理")
 @RestController
 @RequestMapping("/system/material")
 public class LectureMaterialController extends BaseController
@@ -37,9 +41,10 @@ public class LectureMaterialController extends BaseController
     /**
      * 查询资料中心数据列表
      */
+    @ApiOperation("查询资料中心数据列表")
     @PreAuthorize("@ss.hasPermi('system:material:list')")
     @GetMapping("/list")
-    public TableDataInfo list(LectureMaterial lectureMaterial)
+    public TableDataInfoVo<LectureMaterial> list(LectureMaterial lectureMaterial)
     {
         startPage();
         List<LectureMaterial> list = lectureMaterialService.selectLectureMaterialList(lectureMaterial);
@@ -49,6 +54,7 @@ public class LectureMaterialController extends BaseController
     /**
      * 导出资料中心数据列表
      */
+    @ApiOperation("导出资料中心数据列表")
     @PreAuthorize("@ss.hasPermi('system:material:export')")
     @Log(title = "资料中心数据", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -62,6 +68,8 @@ public class LectureMaterialController extends BaseController
     /**
      * 获取资料中心数据详细信息
      */
+    @ApiOperation("获取资料中心数据详细信息")
+    @ApiImplicitParam(name = "id", value = "资料ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:material:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -72,6 +80,7 @@ public class LectureMaterialController extends BaseController
     /**
      * 新增资料中心数据
      */
+    @ApiOperation("新增资料中心数据")
     @PreAuthorize("@ss.hasPermi('system:material:add')")
     @Log(title = "资料中心数据", businessType = BusinessType.INSERT)
     @PostMapping
@@ -83,6 +92,7 @@ public class LectureMaterialController extends BaseController
     /**
      * 修改资料中心数据
      */
+    @ApiOperation("修改资料中心数据")
     @PreAuthorize("@ss.hasPermi('system:material:edit')")
     @Log(title = "资料中心数据", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -94,6 +104,8 @@ public class LectureMaterialController extends BaseController
     /**
      * 删除资料中心数据
      */
+    @ApiOperation("删除资料中心数据")
+    @ApiImplicitParam(name = "ids", value = "资料ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:material:remove')")
     @Log(title = "资料中心数据", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

@@ -70,18 +70,32 @@ public class PageDomain
 
     public void setIsAsc(String isAsc)
     {
-        if (StringUtils.isNotEmpty(isAsc))
+        if (StringUtils.isEmpty(isAsc))
         {
-            // 兼容前端排序类型
-            if ("ascending".equals(isAsc))
-            {
-                isAsc = "asc";
-            }
-            else if ("descending".equals(isAsc))
-            {
-                isAsc = "desc";
-            }
-            this.isAsc = isAsc;
+            return;
+        }
+
+        String normalized = StringUtils.trim(isAsc).toLowerCase();
+        int commaIndex = normalized.indexOf(',');
+        if (commaIndex > -1)
+        {
+            // 避免传入 asc,desc 这类多值导致 order by 语法异常
+            normalized = normalized.substring(0, commaIndex).trim();
+        }
+
+        // 兼容前端排序类型
+        if ("ascending".equals(normalized) || "ascend".equals(normalized))
+        {
+            normalized = "asc";
+        }
+        else if ("descending".equals(normalized) || "descend".equals(normalized))
+        {
+            normalized = "desc";
+        }
+
+        if ("asc".equals(normalized) || "desc".equals(normalized))
+        {
+            this.isAsc = normalized;
         }
     }
 

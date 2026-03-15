@@ -14,6 +14,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.PageUtils;
@@ -77,16 +78,16 @@ public class BaseController
     }
 
     /**
-     * 响应请求分页数据
+     * 响应请求分页数据（泛型版，Swagger 可正确渲染 rows 中的对象属性）
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected TableDataInfo getDataTable(List<?> list)
+    @SuppressWarnings("unchecked")
+    protected <T> TableDataInfoVo<T> getDataTable(List<T> list)
     {
-        TableDataInfo rspData = new TableDataInfo();
+        TableDataInfoVo<T> rspData = new TableDataInfoVo<>();
         rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
         rspData.setRows(list);
-        rspData.setTotal(new PageInfo(list).getTotal());
+        rspData.setTotal(new PageInfo<>(list).getTotal());
         return rspData;
     }
 

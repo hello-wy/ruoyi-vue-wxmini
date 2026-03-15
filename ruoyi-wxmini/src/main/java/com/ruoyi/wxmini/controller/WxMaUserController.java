@@ -8,6 +8,10 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +25,7 @@ import javax.annotation.Resource;
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Api(tags = "【小程序】微信用户信息")
 @RestController
 @AllArgsConstructor
 @Slf4j
@@ -32,10 +37,17 @@ public class WxMaUserController {
     private IUserInfoService userInfoService;
 
     /**
-     * <pre>
      * 获取用户信息接口
-     * </pre>
      */
+    @ApiOperation("获取并同步微信用户信息（昵称/头像，需登录）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "appid", value = "小程序 AppID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "sessionKey", value = "会话密钥", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "signature", value = "用户信息签名", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "rawData", value = "原始数据字符串", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "encryptedData", value = "加密数据", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "iv", value = "加密算法初始向量", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
+    })
     @GetMapping("/info")
     public AjaxResult info(String appid, String sessionKey,
                            String signature, String rawData, String encryptedData, String iv) {
@@ -67,10 +79,15 @@ public class WxMaUserController {
     }
 
     /**
-     * <pre>
      * 获取用户绑定手机号信息
-     * </pre>
      */
+    @ApiOperation("获取并同步用户绑定手机号（需登录）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "appid", value = "小程序 AppID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "sessionKey", value = "会话密钥", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "encryptedData", value = "加密数据", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "iv", value = "加密算法初始向量", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
+    })
     @GetMapping("/phone")
     public AjaxResult phone(String appid, String sessionKey, String signature,
                             String rawData, String encryptedData, String iv) {

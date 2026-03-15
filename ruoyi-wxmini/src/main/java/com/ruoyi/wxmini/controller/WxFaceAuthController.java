@@ -4,6 +4,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.wxmini.bo.FaceAuthInitBO;
 import com.ruoyi.wxmini.service.IFaceAuthService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +26,7 @@ import javax.annotation.Resource;
  *
  * @author ruoyi
  */
+@Api(tags = "【小程序】实人认证（人脸识别）")
 @Slf4j
 @RestController
 @RequestMapping("/wxmini/faceAuth")
@@ -42,6 +46,7 @@ public class WxFaceAuthController {
      *
      * @param bo 认证初始化请求（姓名、身份证号、metaInfo）
      */
+    @ApiOperation("初始化实人认证，返回 certifyId 和 certifyUrl（需登录）")
     @PostMapping("/init")
     public AjaxResult initFaceAuth(@RequestBody FaceAuthInitBO bo) {
         String userId = WxMiniUserContext.getCurrentUserId();
@@ -70,6 +75,8 @@ public class WxFaceAuthController {
      *
      * @param certifyId 认证流程唯一ID（由 /init 接口返回）
      */
+    @ApiOperation("查询实人认证结果（需登录，携带 certifyId 参数）")
+    @ApiImplicitParam(name = "certifyId", value = "认证流程唯一ID（由 /init 接口返回）", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
     @GetMapping("/query")
     public AjaxResult queryFaceAuthResult(@RequestParam String certifyId) {
         String userId = WxMiniUserContext.getCurrentUserId();

@@ -136,9 +136,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 查询讲座列表 VO：LEFT JOIN lecturer_profile，用 GROUP_CONCAT 拼接讲师姓名 -->
     <select id="selectLecturesListVo" parameterType="Lectures" resultMap="LecturesListVoResult">
         SELECT
-            l.id, l.time, l.end_date, l.name, l.speaker,
-            l.location, l.geo, l.cover, l.detail, l.create_date, l.update_date,
-            GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
+        l.id, l.time, l.end_date, l.name, l.speaker,
+        l.location, l.geo, l.cover, l.detail, l.create_date, l.update_date,
+        GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
         FROM lectures l
         LEFT JOIN lecturer_profile p ON FIND_IN_SET(p.id, l.speaker)
         <where>

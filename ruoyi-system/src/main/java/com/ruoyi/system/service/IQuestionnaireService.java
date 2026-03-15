@@ -60,5 +60,11 @@ public interface IQuestionnaireService
     public int deleteQuestionnaireById(Long id);
 
 
+    /**
+     * 根据课程ID查询有效问卷列表（status=1）
+     *
+     * @param lectureId 课程ID
+     * @return 匹配的有效问卷集合
+     */
     public List<Questionnaire> selectRecentQuestionnaireList(Long lectureId);
 }

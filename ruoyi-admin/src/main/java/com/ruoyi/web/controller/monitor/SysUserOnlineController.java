@@ -16,7 +16,7 @@ import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
@@ -40,7 +40,7 @@ public class SysUserOnlineController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('monitor:online:list')")
     @GetMapping("/list")
-    public TableDataInfo list(String ipaddr, String userName)
+    public TableDataInfoVo<SysUserOnline> list(String ipaddr, String userName)
     {
         Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
         List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();

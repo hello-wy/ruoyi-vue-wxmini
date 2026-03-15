@@ -20,7 +20,7 @@ import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -57,7 +57,7 @@ public class SysRoleController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
-    public TableDataInfo list(SysRole role)
+    public TableDataInfoVo<SysRole> list(SysRole role)
     {
         startPage();
         List<SysRole> list = roleService.selectRoleList(role);
@@ -194,7 +194,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/allocatedList")
-    public TableDataInfo allocatedList(SysUser user)
+    public TableDataInfoVo<SysUser> allocatedList(SysUser user)
     {
         startPage();
         List<SysUser> list = userService.selectAllocatedList(user);
@@ -206,7 +206,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/unallocatedList")
-    public TableDataInfo unallocatedList(SysUser user)
+    public TableDataInfoVo<SysUser> unallocatedList(SysUser user)
     {
         startPage();
         List<SysUser> list = userService.selectUnallocatedList(user);

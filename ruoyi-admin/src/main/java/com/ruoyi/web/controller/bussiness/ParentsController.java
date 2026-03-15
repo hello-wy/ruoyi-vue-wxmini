@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.bussiness;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 家教订单Controller
@@ -41,7 +42,7 @@ public class ParentsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:parents:list')")
     @GetMapping("/list")
-    public TableDataInfo list(Parents parents)
+    public TableDataInfoVo<Parents> list(Parents parents)
     {
         startPage();
         List<Parents> list = parentsService.selectParentsList(parents);
@@ -64,7 +65,7 @@ public class ParentsController extends BaseController
     /**
      * 获取家教订单详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:parents:query')")
+    @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {

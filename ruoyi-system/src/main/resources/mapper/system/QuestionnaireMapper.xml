@@ -8,6 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="id"    column="id"    />
         <result property="lectureId"    column="lecture_id"    />
         <result property="url"    column="url"    />
+        <result property="topic"    column="topic"    />
         <result property="status"    column="status"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
@@ -15,7 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectQuestionnaireVo">
-        select id, lecture_id, url, status, create_time, update_time, is_deleted from questionnaire
+        select id, lecture_id, url, topic, status, create_time, update_time, is_deleted from questionnaire
     </sql>
 
     <select id="selectQuestionnaireList" parameterType="Questionnaire" resultMap="QuestionnaireResult">
@@ -23,6 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>  
             <if test="lectureId != null "> and lecture_id = #{lectureId}</if>
             <if test="url != null  and url != ''"> and url = #{url}</if>
+             <if test="topic != null  and topic != ''"> and topic like concat('%', #{topic}, '%')</if>
             <if test="status != null "> and status = #{status}</if>
             <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
         </where>
@@ -39,6 +41,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="id != null">id,</if>
             <if test="lectureId != null">lecture_id,</if>
             <if test="url != null and url != ''">url,</if>
+                <if test="topic != null and topic != ''">topic,</if>
             <if test="status != null">status,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
@@ -48,6 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="id != null">#{id},</if>
             <if test="lectureId != null">#{lectureId},</if>
             <if test="url != null and url != ''">#{url},</if>
+                <if test="topic != null and topic != ''">#{topic},</if>
             <if test="status != null">#{status},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -60,6 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
             <if test="lectureId != null">lecture_id = #{lectureId},</if>
             <if test="url != null and url != ''">url = #{url},</if>
+                <if test="topic != null and topic != ''">topic = #{topic},</if>
             <if test="status != null">status = #{status},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>

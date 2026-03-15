@@ -6,6 +6,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.system.mapper.QuestionnaireMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.LecturesMapper;
@@ -24,6 +25,9 @@ public class LecturesServiceImpl implements ILecturesService
 {
     @Autowired
     private LecturesMapper lecturesMapper;
+
+    @Autowired
+    private QuestionnaireMapper questionnaireMapper;
 
     @Override
     public Lectures selectLecturesById(Long id)

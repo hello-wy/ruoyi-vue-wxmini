@@ -95,6 +95,14 @@ public class Constants
      */
     public static final Integer CAPTCHA_EXPIRATION = 2;
 
+
+    /**
+     * lecture data cache expiration time (minutes) 1天
+     */
+    public static final Integer LECTURE_EXPIRATION = 1440;
+
+    public static final String LECTURE_KEY_PREFIX = "WXMINI:LECTURE_KEY";
+
     /**
      * 令牌
      */

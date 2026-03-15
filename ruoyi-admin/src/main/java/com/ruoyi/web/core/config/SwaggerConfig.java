@@ -2,6 +2,11 @@ package com.ruoyi.web.core.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.classmate.TypeResolver;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
+import com.ruoyi.web.core.config.swagger.AjaxResultVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +17,7 @@ import io.swagger.models.auth.In;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.AlternateTypeRules;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
@@ -42,6 +48,9 @@ public class SwaggerConfig
     @Value("${swagger.pathMapping}")
     private String pathMapping;
 
+    @Autowired
+    private TypeResolver typeResolver;
+
     /**
      * 创建API
      */
@@ -53,6 +62,15 @@ public class SwaggerConfig
                 .enable(enabled)
                 // 用来创建该API的基本信息，展示在文档的页面中（自定义展示的信息）
                 .apiInfo(apiInfo())
+                // 将 AjaxResult（继承 HashMap）替换为有明确字段的 AjaxResultVo，修复 Swagger 示例值显示
+                // 将 TableDataInfo（rows 为 List<?>）替换为泛型 TableDataInfoVo，修复分页 rows 字段显示
+                .alternateTypeRules(
+                        AlternateTypeRules.newRule(
+                                typeResolver.resolve(AjaxResult.class),
+                                typeResolver.resolve(AjaxResultVo.class)),
+                        AlternateTypeRules.newRule(
+                                typeResolver.resolve(TableDataInfo.class),
+                                typeResolver.resolve(TableDataInfoVo.class, Object.class)))
                 // 设置哪些接口暴露给Swagger展示
                 .select()
                 // 扫描所有有注解的api，用这种方式更灵活

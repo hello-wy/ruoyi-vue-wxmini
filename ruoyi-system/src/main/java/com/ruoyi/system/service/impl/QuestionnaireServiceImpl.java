@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.system.domain.Lectures;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.QuestionnaireMapper;
@@ -97,11 +96,11 @@ public class QuestionnaireServiceImpl implements IQuestionnaireService
         return questionnaireMapper.deleteQuestionnaireById(id);
     }
 
+    @Override
     public List<Questionnaire> selectRecentQuestionnaireList(Long lectureId) {
-//        TODO: 判断用户是否购买这个产品
         LambdaQueryWrapper<Questionnaire> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Questionnaire::getStatus, 0)
-                .eq(Questionnaire::getLectureId, lectureId);
+        wrapper.eq(Questionnaire::getLectureId, lectureId)
+                .eq(Questionnaire::getStatus, 1);
 
         return questionnaireMapper.selectList(wrapper);
     }

@@ -3,7 +3,7 @@ package com.ruoyi.wxmini.controller;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
@@ -11,6 +11,10 @@ import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +36,7 @@ import java.util.List;
  *
  * @author ruoyi
  */
+@Api(tags = "【小程序】教员与家教单")
 @Slf4j
 @RestController
 @RequestMapping("/wxmini/tutoring")
@@ -51,16 +56,18 @@ public class WxTutoringController extends BaseController {
     /**
      * 分页查询已认证教员列表（isCertified = 1），支持多条件筛选
      * 无需登录（公开接口）
-     *
-     * @param pageNum  页码，默认 1
-     * @param pageSize 每页数量，默认 10
-     * @param subject 科目筛选（模糊）
-     * @param region    区域筛选（模糊）
-     * @param methods  授课方式筛选（精确）
-     * @param grade   学历筛选（精确）
      */
+    @ApiOperation("分页查询已认证教员列表（公开，支持科目/区域/授课方式/学历筛选）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "pageSize", value = "每页数量，默认5", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "methods", value = "授课方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "grade", value = "学历筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class)
+    })
     @GetMapping("/tutors/list")
-    public TableDataInfo listTutors(
+    public TableDataInfoVo<Tutors> listTutors(
             @RequestParam(defaultValue = "1") long pageNum,
             @RequestParam(defaultValue = "5") long pageSize,
             @RequestParam(required = false) String subject,
@@ -80,6 +87,7 @@ public class WxTutoringController extends BaseController {
      * 当前登录用户申请成为教员（新增 tutors，isCertified 默认为 0 待审核）
      * 需要 Wx-Authorization 登录
      */
+    @ApiOperation("申请成为教员（isCertified 默认 0 待审核，需登录）")
     @PostMapping("/apply")
     public AjaxResult applyTutor(@RequestBody Tutors tutors) {
         String userId = WxMiniUserContext.getCurrentUserId();
@@ -104,6 +112,11 @@ public class WxTutoringController extends BaseController {
      * @param id          tutors 主键
      * @param isCertified 审核结果：0-待审核 1-已通过 2-已拒绝
      */
+    @ApiOperation("审核教员认证状态（需管理员权限，0-待审核 1-已通过 2-已拒绝）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "isCertified", value = "审核结果：0-待审核 1-已通过 2-已拒绝", required = true, dataType = "Long", paramType = "query", dataTypeClass = Long.class)
+    })
     @PutMapping("/review")
     public AjaxResult reviewTutor(
             @RequestParam Long id,
@@ -132,6 +145,7 @@ public class WxTutoringController extends BaseController {
      * 多地区所有的是一个list
      * 需要 Wx-Authorization 登录
      */
+    @ApiOperation("查看当前登录用户的教员信息（需登录）")
     @GetMapping("/mine")
     public AjaxResult myTutor() {
         String userId = WxMiniUserContext.getCurrentUserId();
@@ -147,16 +161,18 @@ public class WxTutoringController extends BaseController {
     /**
      * 分页查询有效家教单列表（status = 0），支持多条件筛选
      * 无需登录（公开接口）
-     *
-     * @param pageNum  页码，默认 1
-     * @param pageSize 每页数量，默认 10
-     * @param subject  科目筛选（模糊）
-     * @param region   区域筛选（模糊）
-     * @param methods  辅导方式筛选（精确）
-     * @param grade    年级筛选（模糊）
      */
+    @ApiOperation("分页查询有效家教单列表（公开，支持科目/区域/辅导方式/年级筛选）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "pageSize", value = "每页数量，默认10", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "methods", value = "辅导方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
+        @ApiImplicitParam(name = "grade", value = "年级筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class)
+    })
     @GetMapping("/parents/list")
-    public TableDataInfo listParents(
+    public TableDataInfoVo<Parents> listParents(
             @RequestParam(defaultValue = "1") long pageNum,
             @RequestParam(defaultValue = "10") long pageSize,
             @RequestParam(required = false) String subject,
@@ -177,6 +193,7 @@ public class WxTutoringController extends BaseController {
      * 当前登录用户查看自己发布的家教单（uid = 当前用户）
      * 需要 Wx-Authorization 登录
      */
+    @ApiOperation("查看当前登录用户发布的家教单（需登录）")
     @GetMapping("/parents/mine")
     public AjaxResult myParents() {
         String userId = WxMiniUserContext.getCurrentUserId();

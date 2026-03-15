@@ -4,6 +4,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.annotation.Anonymous;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +24,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.SalonInfo;
 import com.ruoyi.system.service.ISalonInfoService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 沙龙活动信息主Controller
@@ -29,6 +32,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-07
  */
+@Api(tags = "沙龙活动管理")
 @RestController
 @RequestMapping("/system/info")
 public class SalonInfoController extends BaseController
@@ -39,9 +43,10 @@ public class SalonInfoController extends BaseController
     /**
      * 查询沙龙活动信息主列表
      */
+    @ApiOperation("查询沙龙活动列表（公开）")
     @Anonymous
     @GetMapping("/list")
-    public TableDataInfo list(SalonInfo salonInfo)
+    public TableDataInfoVo<SalonInfo> list(SalonInfo salonInfo)
     {
         startPage();
         List<SalonInfo> list = salonInfoService.selectSalonInfoList(salonInfo);
@@ -51,6 +56,7 @@ public class SalonInfoController extends BaseController
     /**
      * 导出沙龙活动信息主列表
      */
+    @ApiOperation("导出沙龙活动列表")
     @PreAuthorize("@ss.hasPermi('system:info:export')")
     @Log(title = "沙龙活动信息主", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -64,6 +70,8 @@ public class SalonInfoController extends BaseController
     /**
      * 获取沙龙活动信息主详细信息
      */
+    @ApiOperation("获取沙龙活动详细信息（公开）")
+    @ApiImplicitParam(name = "id", value = "沙龙活动ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -74,6 +82,7 @@ public class SalonInfoController extends BaseController
     /**
      * 新增沙龙活动信息主
      */
+    @ApiOperation("新增沙龙活动")
     @PreAuthorize("@ss.hasPermi('system:info:add')")
     @Log(title = "沙龙活动信息主", businessType = BusinessType.INSERT)
     @PostMapping
@@ -85,6 +94,7 @@ public class SalonInfoController extends BaseController
     /**
      * 修改沙龙活动信息主
      */
+    @ApiOperation("修改沙龙活动")
     @PreAuthorize("@ss.hasPermi('system:info:edit')")
     @Log(title = "沙龙活动信息主", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +106,8 @@ public class SalonInfoController extends BaseController
     /**
      * 删除沙龙活动信息主
      */
+    @ApiOperation("删除沙龙活动")
+    @ApiImplicitParam(name = "ids", value = "沙龙活动ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:info:remove')")
     @Log(title = "沙龙活动信息主", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

@@ -25,7 +25,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStateme
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -56,7 +56,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:list')")
     @GetMapping("/list")
-    public TableDataInfo genList(GenTable genTable)
+    public TableDataInfoVo<GenTable> genList(GenTable genTable)
     {
         startPage();
         List<GenTable> list = genTableService.selectGenTableList(genTable);
@@ -85,7 +85,7 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:list')")
     @GetMapping("/db/list")
-    public TableDataInfo dataList(GenTable genTable)
+    public TableDataInfoVo<GenTable> dataList(GenTable genTable)
     {
         startPage();
         List<GenTable> list = genTableService.selectDbTableList(genTable);
@@ -97,13 +97,10 @@ public class GenController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:list')")
     @GetMapping(value = "/column/{tableId}")
-    public TableDataInfo columnList(Long tableId)
+    public TableDataInfoVo<GenTableColumn> columnList(Long tableId)
     {
-        TableDataInfo dataInfo = new TableDataInfo();
         List<GenTableColumn> list = genTableColumnService.selectGenTableColumnListByTableId(tableId);
-        dataInfo.setRows(list);
-        dataInfo.setTotal(list.size());
-        return dataInfo;
+        return getDataTable(list);
     }
 
     /**
@@ -261,3 +258,5 @@ public class GenController extends BaseController
         IOUtils.write(data, response.getOutputStream());
     }
 }
+
+

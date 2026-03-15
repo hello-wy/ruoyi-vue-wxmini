@@ -3,7 +3,12 @@ package com.ruoyi.web.controller.bussiness;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +26,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 大学生/教员Controller
@@ -29,6 +34,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-05
  */
+@Api(tags = "大学生/教员管理")
 @RestController
 @RequestMapping("/system/tutors")
 public class TutorsController extends BaseController
@@ -39,9 +45,10 @@ public class TutorsController extends BaseController
     /**
      * 查询大学生/教员列表
      */
+    @ApiOperation("查询大学生/教员列表")
     @PreAuthorize("@ss.hasPermi('system:tutors:list')")
     @GetMapping("/list")
-    public TableDataInfo list(Tutors tutors)
+    public TableDataInfoVo<Tutors> list(Tutors tutors)
     {
         startPage();
         List<Tutors> list = tutorsService.selectTutorsList(tutors);
@@ -51,6 +58,7 @@ public class TutorsController extends BaseController
     /**
      * 导出大学生/教员列表
      */
+    @ApiOperation("导出大学生/教员列表")
     @PreAuthorize("@ss.hasPermi('system:tutors:export')")
     @Log(title = "大学生/教员", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -64,7 +72,9 @@ public class TutorsController extends BaseController
     /**
      * 获取大学生/教员详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:tutors:query')")
+    @ApiOperation("获取大学生/教员详细信息")
+    @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -74,6 +84,7 @@ public class TutorsController extends BaseController
     /**
      * 新增大学生/教员
      */
+    @ApiOperation("新增大学生/教员（自动生成雪花ID）")
     @PreAuthorize("@ss.hasPermi('system:tutors:add')")
     @Log(title = "大学生/教员", businessType = BusinessType.INSERT)
     @PostMapping
@@ -88,6 +99,7 @@ public class TutorsController extends BaseController
     /**
      * 修改大学生/教员
      */
+    @ApiOperation("修改大学生/教员信息")
     @PreAuthorize("@ss.hasPermi('system:tutors:edit')")
     @Log(title = "大学生/教员", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -99,6 +111,7 @@ public class TutorsController extends BaseController
     /**
      * 审核教员（修改 isCertified：0-待审核 / 1-已通过 / 2-已拒绝）
      */
+    @ApiOperation("审核教员认证状态（0-待审核 1-已通过 2-已拒绝）")
     @PreAuthorize("@ss.hasPermi('system:tutors:edit')")
     @Log(title = "大学生/教员审核", businessType = BusinessType.UPDATE)
     @PutMapping("/review")
@@ -122,6 +135,8 @@ public class TutorsController extends BaseController
     /**
      * 删除大学生/教员
      */
+    @ApiOperation("删除大学生/教员")
+    @ApiImplicitParam(name = "ids", value = "教员ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:tutors:remove')")
     @Log(title = "大学生/教员", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

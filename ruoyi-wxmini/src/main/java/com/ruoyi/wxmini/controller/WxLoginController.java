@@ -10,6 +10,10 @@ import com.ruoyi.wxmini.bo.WxUserInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IWxMiniJwtService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -26,6 +30,7 @@ import javax.annotation.Resource;
  * @author weijiayu
  * @date 2025/4/25 22:15
  */
+@Api(tags = "【小程序】微信登录")
 @RestController
 @AllArgsConstructor
 @Slf4j
@@ -42,6 +47,11 @@ public class WxLoginController {
     /**
      * 登陆接口
      */
+    @ApiOperation("微信小程序登录（通过 code 换取 token，自动注册用户）")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "appid", value = "小程序 AppID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "code", value = "微信登录临时凭证 code", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
+    })
     @Anonymous
     @GetMapping("/login")
     public AjaxResult login(String appid, String code) {

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.quartz.domain.SysJobLog;
@@ -36,7 +36,7 @@ public class SysJobLogController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:list')")
     @GetMapping("/list")
-    public TableDataInfo list(SysJobLog sysJobLog)
+    public TableDataInfoVo<SysJobLog> list(SysJobLog sysJobLog)
     {
         startPage();
         List<SysJobLog> list = jobLogService.selectJobLogList(sysJobLog);

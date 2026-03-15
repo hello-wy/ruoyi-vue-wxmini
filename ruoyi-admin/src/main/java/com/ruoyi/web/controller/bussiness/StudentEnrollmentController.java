@@ -3,6 +3,9 @@ package com.ruoyi.web.controller.bussiness;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +23,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.StudentEnrollment;
 import com.ruoyi.system.service.IStudentEnrollmentService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 
 /**
  * 学籍信息Controller
@@ -28,6 +31,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @author ruoyi
  * @date 2026-03-07
  */
+@Api(tags = "学籍信息管理")
 @RestController
 @RequestMapping("/system/enrollment")
 public class StudentEnrollmentController extends BaseController
@@ -38,9 +42,10 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 查询学籍信息列表
      */
+    @ApiOperation("查询学籍信息列表")
     @PreAuthorize("@ss.hasPermi('system:enrollment:list')")
     @GetMapping("/list")
-    public TableDataInfo list(StudentEnrollment studentEnrollment)
+    public TableDataInfoVo<StudentEnrollment> list(StudentEnrollment studentEnrollment)
     {
         startPage();
         List<StudentEnrollment> list = studentEnrollmentService.selectStudentEnrollmentList(studentEnrollment);
@@ -50,6 +55,7 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 导出学籍信息列表
      */
+    @ApiOperation("导出学籍信息列表")
     @PreAuthorize("@ss.hasPermi('system:enrollment:export')")
     @Log(title = "学籍信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -63,6 +69,8 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 获取学籍信息详细信息
      */
+    @ApiOperation("获取学籍信息详细信息")
+    @ApiImplicitParam(name = "id", value = "学籍记录ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:enrollment:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
@@ -73,6 +81,7 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 新增学籍信息
      */
+    @ApiOperation("新增学籍信息")
     @PreAuthorize("@ss.hasPermi('system:enrollment:add')")
     @Log(title = "学籍信息", businessType = BusinessType.INSERT)
     @PostMapping
@@ -84,6 +93,7 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 修改学籍信息
      */
+    @ApiOperation("修改学籍信息")
     @PreAuthorize("@ss.hasPermi('system:enrollment:edit')")
     @Log(title = "学籍信息", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -95,6 +105,8 @@ public class StudentEnrollmentController extends BaseController
     /**
      * 删除学籍信息
      */
+    @ApiOperation("删除学籍信息")
+    @ApiImplicitParam(name = "ids", value = "学籍记录ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:enrollment:remove')")
     @Log(title = "学籍信息", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
@@ -102,6 +114,4 @@ public class StudentEnrollmentController extends BaseController
     {
         return toAjax(studentEnrollmentService.deleteStudentEnrollmentByIds(ids));
     }
-
-
 }
