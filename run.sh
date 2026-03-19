@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
-sudo -i
 
 REDIS_PASSWORD=''
 REDIS_CONF="/etc/redis/redis.conf"
+JAVA_BIN="/www/server/java/jdk1.8.0_371/bin/java"
 
 echo "===> 检查 Redis 是否已存在"
 
@@ -46,4 +46,4 @@ fi
 
 echo
 echo "===> 启动 Spring Boot 服务"
-java -jar ruoyi-admin/target/ruoyi-admin.jar --spring.profiles.active=prod
+nohup "$JAVA_BIN" -jar ruoyi-admin/target/ruoyi-admin.jar --spring.profiles.active=prod
