@@ -77,15 +77,16 @@
                 <executions>
                     <execution>
                         <id>copy-run-sh</id>
-                        <phase>process-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}</outputDirectory>
+                            <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}</directory>
+                                    <directory>${project.basedir}/..</directory>
                                     <includes>
                                         <include>run.sh</include>
                                     </includes>
