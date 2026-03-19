@@ -72,7 +72,7 @@ public class DailyJobsController extends BaseController
      */
     @ApiOperation("获取兼职日结工作详细信息")
     @ApiImplicitParam(name = "id", value = "兼职工作ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
-    @PreAuthorize("@ss.hasPermi('system:jobs:query')")
+    @Anonymous
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
