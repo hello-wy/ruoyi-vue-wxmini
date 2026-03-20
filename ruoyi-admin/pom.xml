@@ -1,4 +1,3 @@
-                                    <directory>${project.parent.basedir}</directory>
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -77,16 +76,15 @@
                 <version>3.3.1</version>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
+                        <id>copy-run-sh</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <overwrite>true</overwrite>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
-                                    <directory>${project.basedir}/..</directory>
+                                <resource>
                                     <directory>${project.parent.basedir}</directory>
                                     <includes>
                                         <include>run.sh</include>
