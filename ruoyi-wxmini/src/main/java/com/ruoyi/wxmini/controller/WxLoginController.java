@@ -58,34 +58,50 @@ public class WxLoginController {
         if (StringUtils.isEmpty(code)) {
             return AjaxResult.error("empty jscode");
         }
-
         if (!wxMaService.switchover(appid)) {
             return AjaxResult.error(String.format("can not find appid=[%s] config", appid));
         }
 
-        WxUserInfo wxUserInfo = new WxUserInfo();
         try {
             WxMaJscode2SessionResult session = wxMaService.getUserService().getSessionInfo(code);
-            // 同步微信侧用户信息：如果已注册，返回用户信息；如果未注册，自动注册并保存用户信息
-            String openId = session.getOpenid();
-            UserInfo userInfo = userInfoService.selectUserInfoByOpenId(openId);
-            if (userInfo == null) {
-                userInfo = new UserInfo();
-                userInfo.setUserId(UUID.randomUUID().toString());
-                userInfo.setOpenId(openId);
-                userInfo.setUnionId(session.getUnionid());
-                userInfoService.insertUserInfo(userInfo);
-            }
-            // 只返回必要信息给前端
-            wxUserInfo.wapper(session, userInfo);
-            // 生成令牌，用于自定义业务接口鉴权
-            wxUserInfo.setApiToken(jwtService.createToken(userInfo.getUserId()));
-            return AjaxResult.success(wxUserInfo);
+            UserInfo userInfo = initOrLoadUser(session);
+            return AjaxResult.success(buildLoginResult(session, userInfo));
         } catch (WxErrorException e) {
             log.error(e.getMessage(), e);
             return AjaxResult.error();
         } finally {
             WxMaConfigHolder.remove();
         }
+    }
+
+    private UserInfo initOrLoadUser(WxMaJscode2SessionResult session) {
+        String openId = session.getOpenid();
+        UserInfo userInfo = userInfoService.selectUserInfoByOpenId(openId);
+        if (userInfo != null) {
+            updateUnionIdIfNeeded(userInfo, session.getUnionid());
+            return userInfo;
+        }
+
+        UserInfo createdUser = new UserInfo();
+        createdUser.setUserId(UUID.randomUUID().toString());
+        createdUser.setOpenId(openId);
+        createdUser.setUnionId(session.getUnionid());
+        userInfoService.insertUserInfo(createdUser);
+        return createdUser;
+    }
+
+    private void updateUnionIdIfNeeded(UserInfo userInfo, String unionId) {
+        if (StringUtils.isEmpty(unionId) || StringUtils.equals(unionId, userInfo.getUnionId())) {
+            return;
+        }
+        userInfo.setUnionId(unionId);
+        userInfoService.updateUserInfo(userInfo);
+    }
+
+    private WxUserInfo buildLoginResult(WxMaJscode2SessionResult session, UserInfo userInfo) {
+        WxUserInfo wxUserInfo = new WxUserInfo();
+        wxUserInfo.wapper(session, userInfo);
+        wxUserInfo.setApiToken(jwtService.createToken(userInfo.getUserId()));
+        return wxUserInfo;
     }
 }
