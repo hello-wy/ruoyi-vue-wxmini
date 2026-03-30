@@ -47,6 +47,7 @@ nbdist/
 !*/build/*.xml
 
 .DS_Store
+.worktrees/
 uploadPath
 logs
 doc
