@@ -138,7 +138,7 @@ wx:
   miniapp:
     configs:
       - appid: wx0ac1366c34e4ce68 #微信小程序的appid
-        secret: c490e5d8ac5b584eb962aa0acad10513 #微信小程序的Secret
+        secret: f100dbce84ed2a54d13450a2d1e3c2c9 #微信小程序的Secret
         token: #微信小程序消息服务器配置的token
         aesKey: #微信小程序消息服务器配置的EncodingAESKey
         msgDataFormat: JSON
