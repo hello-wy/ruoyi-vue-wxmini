@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wxmini.mapper.WxUserProfileMapper">
+
+    <resultMap id="WxUserProfileVoResult" type="com.ruoyi.wxmini.domain.vo.WxUserProfileVo">
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="displayName" column="display_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="phone" column="phone"/>
+        <result property="realName" column="real_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="gender" column="gender"/>
+        <result property="companyName" column="company_name"/>
+        <result property="companyAddress" column="company_address"/>
+        <result property="companyPosition" column="company_position"/>
+        <result property="industry" column="industry"/>
+        <result property="workYears" column="work_years"/>
+        <result property="personalIntro" column="personal_intro"/>
+        <result property="verified" column="verified"/>
+    </resultMap>
+
+    <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
+        select ui.id as user_info_id,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as display_name,
+               ui.user_name,
+               ui.phone,
+               up.real_name,
+               up.nick_name,
+               up.gender,
+               up.company_name,
+               up.company_address,
+               up.company_position,
+               up.industry,
+               up.work_years,
+               up.personal_intro,
+               case
+                   when up.real_name is not null and up.real_name != '' then 1
+                   else 0
+               end as verified
+        from user_info ui
+                 left join wx_user_profile up on up.user_info_id = ui.id
+        where ui.user_id = #{userId}
+        limit 1
+    </select>
+</mapper>

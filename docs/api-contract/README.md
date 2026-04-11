@@ -49,4 +49,6 @@
 - `system/wallet/info.md`
 - `system/wallet/withdraw.md`
 - `system/wallet/withdrawRecords.md`
+- `system/tutors/list.md`
+- `system/tutors/review.md`
 - `_root/list.md`

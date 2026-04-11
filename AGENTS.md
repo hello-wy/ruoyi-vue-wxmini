@@ -80,9 +80,10 @@
 
 ## 6. 鉴权与响应
 
-- `/wxmini/**` 默认走 `Wx-Authorization: Bearer <token>`。
+- `Wx-Authorization: Bearer <token>` 仅用于 `ruoyi-wxmini` 下的小程序前台普通用户接口。
+- 管理后台、系统管理类接口默认走若依标准 `Authorization`。
+- `/wxmini/**` 不是管理员接口的默认归属，管理员相关接口不要设计成依赖 `Wx-Authorization`。
 - 当前公开白名单以 `ruoyi-wxmini` 中实际过滤器实现为准。
-- 后台接口默认走若依标准 `Authorization`。
 - 对象结果优先保持 `{ code, msg, data }`。
 - 分页结果优先保持 `{ code, msg, total, rows }`。
 - 若存在历史非标准结构，必须在文档中显式写明。
