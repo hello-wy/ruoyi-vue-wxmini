@@ -49,6 +49,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         LambdaQueryWrapper<WxUserProfile> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(WxUserProfile::getUserInfoId, userInfo.getId());
         WxUserProfile profile = wxUserProfileMapper.selectOne(wrapper);
+        boolean isNew = profile == null;
         if (profile == null) {
             profile = new WxUserProfile();
             profile.setUserInfoId(userInfo.getId());
@@ -66,7 +67,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         profile.setPersonalIntro(bo.getPersonalIntro());
         profile.setUpdateTime(DateUtils.getNowDate());
 
-        if (profile.getId() == null) {
+        if (isNew) {
             return wxUserProfileMapper.insert(profile);
         }
         return wxUserProfileMapper.updateById(profile);

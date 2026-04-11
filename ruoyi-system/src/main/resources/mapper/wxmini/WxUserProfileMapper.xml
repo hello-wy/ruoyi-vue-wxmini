@@ -5,7 +5,7 @@
 <mapper namespace="com.ruoyi.wxmini.mapper.WxUserProfileMapper">
 
     <resultMap id="WxUserProfileVoResult" type="com.ruoyi.wxmini.domain.vo.WxUserProfileVo">
-        <result property="userInfoId" column="user_info_id"/>
+        <result property="userInfoId" column="uid"/>
         <result property="displayName" column="display_name"/>
         <result property="userName" column="user_name"/>
         <result property="phone" column="phone"/>
@@ -22,7 +22,7 @@
     </resultMap>
 
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
-        select ui.id as user_info_id,
+        select ui.id as uid,
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name

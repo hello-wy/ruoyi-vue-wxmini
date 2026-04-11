@@ -7,6 +7,7 @@ spring:
       # 主库数据源
       master:
         # 内网访问
+#        url: jdbc:mysql://rm-bp109hg00in464nagno.mysql.rds.aliyuncs.com:3306/zhiyujia?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         url: jdbc:mysql://rm-bp109hg00in464nag.mysql.rds.aliyuncs.com:3306/zhiyujia?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         username: java
         password: z_pR#s_39b-8k_E
