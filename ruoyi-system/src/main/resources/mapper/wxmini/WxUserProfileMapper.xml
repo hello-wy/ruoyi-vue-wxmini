@@ -44,7 +44,7 @@
                    else 0
                end as verified
         from user_info ui
-                 left join wx_user_profile up on up.user_info_id = ui.id
+                 left join wx_user_profile up on up.uid = ui.id
         where ui.user_id = #{userId}
         limit 1
     </select>
