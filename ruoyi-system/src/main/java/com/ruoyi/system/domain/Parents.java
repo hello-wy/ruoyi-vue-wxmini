@@ -29,9 +29,13 @@ public class Parents extends BaseEntity
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
-    /** 关联user表的主键ID */
-    @Excel(name = "关联user表的主键ID")
-    private Long uid;
+    /** 微信用户ID */
+    @Excel(name = "微信用户ID")
+    private Long wechatUid;
+
+    /** 平台用户ID */
+    @Excel(name = "平台用户ID")
+    private Long systemUid;
 
     /** 地理位置文本（如：XX小区） */
     @Excel(name = "地理位置文本", readConverterExp = "如=：XX小区")
@@ -105,14 +109,24 @@ public class Parents extends BaseEntity
         return id;
     }
 
-    public void setUid(Long uid) 
+    public void setWechatUid(Long wechatUid)
     {
-        this.uid = uid;
+        this.wechatUid = wechatUid;
     }
 
-    public Long getUid() 
+    public Long getWechatUid()
     {
-        return uid;
+        return wechatUid;
+    }
+
+    public void setSystemUid(Long systemUid)
+    {
+        this.systemUid = systemUid;
+    }
+
+    public Long getSystemUid()
+    {
+        return systemUid;
     }
 
     public void setLocation(String location) 
@@ -263,7 +277,8 @@ public class Parents extends BaseEntity
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
-            .append("uid", getUid())
+            .append("wechatUid", getWechatUid())
+            .append("systemUid", getSystemUid())
             .append("location", getLocation())
             .append("geo", getGeo())
             .append("region", getRegion())

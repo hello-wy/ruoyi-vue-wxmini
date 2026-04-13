@@ -57,14 +57,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="联系人姓名" prop="contacts">
+      <el-form-item label="发布者用户ID" prop="publisherUid">
         <el-input
-          v-model="queryParams.contacts"
-          placeholder="请输入联系人姓名"
+          v-model="queryParams.publisherUid"
+          placeholder="请输入发布者用户ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="联系人姓名" prop="contacts">
       <el-form-item label="联系电话" prop="phone">
         <el-input
           v-model="queryParams.phone"
@@ -139,6 +140,7 @@
       <el-table-column label="具体时间段" align="center" prop="workTime" />
       <el-table-column label="工作详细地址" align="center" prop="location" />
       <el-table-column label="区域区号" align="center" prop="districtId" />
+      <el-table-column label="发布者用户ID" align="center" prop="publisherUid" />
       <el-table-column label="联系人姓名" align="center" prop="contacts" />
       <el-table-column label="联系电话" align="center" prop="phone" />
       <el-table-column label="工作具体要求内容" align="center" prop="description" />
@@ -200,9 +202,10 @@
         <el-form-item label="区域区号" prop="districtId">
           <el-input v-model="form.districtId" placeholder="请输入区域区号" />
         </el-form-item>
-        <el-form-item label="联系人姓名" prop="contacts">
-          <el-input v-model="form.contacts" placeholder="请输入联系人姓名" />
+        <el-form-item label="发布者用户ID" prop="publisherUid">
+          <el-input v-model="form.publisherUid" placeholder="请输入发布者用户ID" />
         </el-form-item>
+        <el-form-item label="联系人姓名" prop="contacts">
         <el-form-item label="联系电话" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入联系电话" />
         </el-form-item>
@@ -254,6 +257,7 @@ export default {
         workTime: null,
         location: null,
         districtId: null,
+        publisherUid: null,
         contacts: null,
         phone: null,
         description: null,
@@ -307,6 +311,7 @@ export default {
         workTime: null,
         location: null,
         districtId: null,
+        publisherUid: null,
         contacts: null,
         phone: null,
         description: null,

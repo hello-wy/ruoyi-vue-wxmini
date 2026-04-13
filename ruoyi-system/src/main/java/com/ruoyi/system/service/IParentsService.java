@@ -68,10 +68,10 @@ public interface IParentsService
     List<Parents> selectActiveParentsList(Parents parents);
 
     /**
-     * 根据uid查询家长家教单列表
+     * 根据微信用户ID查询家长家教单列表
      *
-     * @param uid 关联的用户id
+     * @param wechatUid 微信用户ID
      * @return 家教单列表
      */
-    List<Parents> selectParentsByUid(Long uid);
+    List<Parents> selectParentsByWechatUid(Long wechatUid);
 }

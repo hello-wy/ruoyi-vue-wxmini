@@ -4,6 +4,7 @@ import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
+import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
@@ -190,6 +191,29 @@ public class WxTutoringController extends BaseController {
     }
 
     /**
+     * 当前登录用户发布家教单
+     * 需要 Wx-Authorization 登录
+     */
+    @ApiOperation("发布家教单（需登录）")
+    @PostMapping("/parents")
+    public AjaxResult addParents(@RequestBody Parents parents) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
+        }
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return AjaxResult.error("用户不存在");
+        }
+        long snowflakeId = SnowflakeIdWorker.nextIdDefault();
+        parents.setId(snowflakeId);
+        parents.setWechatUid(Long.valueOf(userId));
+//        parents.setSystemUid(userInfo.getId());
+        parentsService.insertParents(parents);
+        return AjaxResult.success("操作成功", snowflakeId);
+    }
+
+    /**
      * 当前登录用户查看自己发布的家教单（uid = 当前用户）
      * 需要 Wx-Authorization 登录
      */
@@ -204,7 +228,7 @@ public class WxTutoringController extends BaseController {
         if (userInfo == null) {
             return AjaxResult.error("用户不存在");
         }
-        List<Parents> list = parentsService.selectParentsByUid(userInfo.getId());
+        List<Parents> list = parentsService.selectParentsByWechatUid(Long.valueOf(userId));
         return AjaxResult.success(list);
     }
 }

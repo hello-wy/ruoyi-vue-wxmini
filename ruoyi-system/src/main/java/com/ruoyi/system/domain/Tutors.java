@@ -53,10 +53,6 @@ public class Tutors extends BaseEntity
     @Excel(name = "审核状态", readConverterExp = "0 待=审核、1 已通过、2 已拒绝")
     private Long isCertified;
 
-    /** 薪资要求（如：100元/小时） */
-    @Excel(name = "薪资要求", readConverterExp = "如=：100元/小时")
-    private String salary;
-
     /** 经历/履历 */
     @Excel(name = "经历/履历")
     private String experience;
@@ -185,16 +181,6 @@ public class Tutors extends BaseEntity
     public Long getIsCertified() 
     {
         return isCertified;
-    }
-
-    public void setSalary(String salary) 
-    {
-        this.salary = salary;
-    }
-
-    public String getSalary() 
-    {
-        return salary;
     }
 
     public void setExperience(String experience) 
@@ -328,7 +314,6 @@ public class Tutors extends BaseEntity
             .append("areas", getAreas())
             .append("methods", getMethods())
             .append("isCertified", getIsCertified())
-            .append("salary", getSalary())
             .append("experience", getExperience())
             .append("major", getMajor())
             .append("school", getSchool())

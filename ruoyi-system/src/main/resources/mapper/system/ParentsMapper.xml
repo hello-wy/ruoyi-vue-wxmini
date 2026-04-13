@@ -6,7 +6,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <resultMap type="Parents" id="ParentsResult">
         <result property="id"    column="id"    />
-        <result property="uid"    column="uid"    />
+        <result property="wechatUid"    column="wechat_uid"    />
+        <result property="systemUid"    column="system_uid"    />
         <result property="location"    column="location"    />
         <result property="geo"    column="geo"    />
         <result property="region"    column="region"    />
@@ -25,13 +26,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectParentsVo">
-        select id, uid, location, geo, region, name, grade, subject, methods, requirements, brief, create_date, update_date, status, day_of_week, start_time, end_time from parents
+        select id, wechat_uid, system_uid, location, geo, region, name, grade, subject, methods, requirements, brief, create_date, update_date, status, day_of_week, start_time, end_time from parents
     </sql>
 
     <select id="selectParentsList" parameterType="Parents" resultMap="ParentsResult">
         <include refid="selectParentsVo"/>
         <where>  
-            <if test="uid != null "> and uid = #{uid}</if>
+            <if test="wechatUid != null "> and wechat_uid = #{wechatUid}</if>
+            <if test="systemUid != null "> and system_uid = #{systemUid}</if>
             <if test="location != null  and location != ''"> and location = #{location}</if>
             <if test="geo != null  and geo != ''"> and geo = #{geo}</if>
             <if test="region != null  and region != ''"> and region = #{region}</if>
@@ -59,7 +61,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into parents
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
-            <if test="uid != null">uid,</if>
+            <if test="wechatUid != null">wechat_uid,</if>
+            <if test="systemUid != null">system_uid,</if>
             <if test="location != null">location,</if>
             <if test="geo != null">geo,</if>
             <if test="region != null">region,</if>
@@ -78,7 +81,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
-            <if test="uid != null">#{uid},</if>
+            <if test="wechatUid != null">#{wechatUid},</if>
+            <if test="systemUid != null">#{systemUid},</if>
             <if test="location != null">#{location},</if>
             <if test="geo != null">#{geo},</if>
             <if test="region != null">#{region},</if>
@@ -100,7 +104,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateParents" parameterType="Parents">
         update parents
         <trim prefix="SET" suffixOverrides=",">
-            <if test="uid != null">uid = #{uid},</if>
+            <if test="wechatUid != null">wechat_uid = #{wechatUid},</if>
+            <if test="systemUid != null">system_uid = #{systemUid},</if>
             <if test="location != null">location = #{location},</if>
             <if test="geo != null">geo = #{geo},</if>
             <if test="region != null">region = #{region},</if>

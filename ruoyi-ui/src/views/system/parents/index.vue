@@ -1,10 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="关联user表的主键ID" prop="uid">
+      <el-form-item label="微信用户ID" prop="wechatUid">
         <el-input
-          v-model="queryParams.uid"
-          placeholder="请输入关联user表的主键ID"
+          v-model="queryParams.wechatUid"
+          placeholder="请输入微信用户ID"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="平台用户ID" prop="systemUid">
+        <el-input
+          v-model="queryParams.systemUid"
+          placeholder="请输入平台用户ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -166,7 +174,8 @@
     <el-table v-loading="loading" :data="parentsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="教员表主键ID" align="center" prop="id" />
-      <el-table-column label="关联user表的主键ID" align="center" prop="uid" />
+      <el-table-column label="微信用户ID" align="center" prop="wechatUid" />
+      <el-table-column label="平台用户ID" align="center" prop="systemUid" />
       <el-table-column label="地理位置文本" align="center" prop="location" />
       <el-table-column label="经纬度位置" align="center" prop="geo" />
       <el-table-column label="区域" align="center" prop="region" />
@@ -245,6 +254,12 @@
     <!-- 添加或修改家教订单对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="微信用户ID" prop="wechatUid">
+          <el-input v-model="form.wechatUid" placeholder="请输入微信用户ID" />
+        </el-form-item>
+        <el-form-item label="平台用户ID" prop="systemUid">
+          <el-input v-model="form.systemUid" placeholder="请输入平台用户ID" />
+        </el-form-item>
         <el-form-item label="地理位置文本" prop="location">
           <el-input v-model="form.location" placeholder="请输入地理位置文本" />
         </el-form-item>
@@ -374,7 +389,8 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        uid: null,
+        wechatUid: null,
+        systemUid: null,
         location: null,
         geo: null,
         region: null,
@@ -395,8 +411,8 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        uid: [
-          { required: true, message: "关联user表的主键ID不能为空", trigger: "blur" }
+        wechatUid: [
+          { required: true, message: "微信用户ID不能为空", trigger: "blur" }
         ],
         name: [
           { required: true, message: "家教单的名称不能为空", trigger: "blur" }
@@ -438,7 +454,8 @@ export default {
     reset() {
       this.form = {
         id: null,
-        uid: null,
+        wechatUid: null,
+        systemUid: null,
         location: null,
         geo: null,
         region: null,

@@ -27,14 +27,6 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="薪资要求" prop="salary">
-        <el-input
-          v-model="queryParams.salary"
-          placeholder="请输入薪资要求"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="专业" prop="major">
         <el-input
           v-model="queryParams.major"
@@ -187,7 +179,6 @@
           <dict-tag :options="dict.type.sys_tutor_status" :value="scope.row.isCertified"/>
         </template>
       </el-table-column>
-      <el-table-column label="薪资要求" align="center" prop="salary" />
       <el-table-column label="经历/履历" align="center" prop="experience" />
       <el-table-column label="专业" align="center" prop="major" />
       <el-table-column label="就读/毕业院校" align="center" prop="school" />
@@ -277,9 +268,6 @@
               :label="parseInt(dict.value)"
             >{{dict.label}}</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="薪资要求" prop="salary">
-          <el-input v-model="form.salary" placeholder="请输入薪资要求" />
         </el-form-item>
         <el-form-item label="经历/履历" prop="experience">
           <el-input v-model="form.experience" type="textarea" placeholder="请输入内容" />
@@ -379,7 +367,6 @@ export default {
         areas: null,
         methods: null,
         isCertified: null,
-        salary: null,
         experience: null,
         major: null,
         school: null,
@@ -447,7 +434,6 @@ export default {
         areas: null,
         methods: [],
         isCertified: null,
-        salary: null,
         experience: null,
         major: null,
         school: null,

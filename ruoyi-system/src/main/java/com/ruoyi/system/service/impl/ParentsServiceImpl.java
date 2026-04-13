@@ -118,9 +118,9 @@ public class ParentsServiceImpl implements IParentsService
     }
 
     @Override
-    public List<Parents> selectParentsByUid(Long uid) {
+    public List<Parents> selectParentsByWechatUid(Long wechatUid) {
         LambdaQueryWrapper<Parents> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Parents::getUid, uid);
+        wrapper.eq(Parents::getWechatUid, wechatUid);
         return parentsMapper.selectList(wrapper);
     }
 }

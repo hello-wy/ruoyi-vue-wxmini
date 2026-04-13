@@ -76,6 +76,11 @@ public class DailyJobs extends BaseEntity
     @Excel(name = "工作具体要求内容")
     private String description;
 
+    /** 发布者用户ID */
+    @ApiModelProperty(value = "发布者用户ID", example = "10001")
+    @Excel(name = "发布者用户ID")
+    private Long publisherUid;
+
     /** 状态：0-招募中, 1-已满员, 2-已结束 */
     @ApiModelProperty(value = "状态：0-招募中, 1-已满员, 2-已结束", example = "0")
     @Excel(name = "状态：0-招募中, 1-已满员, 2-已结束")
@@ -201,7 +206,17 @@ public class DailyJobs extends BaseEntity
         return description;
     }
 
-    public void setStatus(Long status) 
+    public void setPublisherUid(Long publisherUid)
+    {
+        this.publisherUid = publisherUid;
+    }
+
+    public Long getPublisherUid()
+    {
+        return publisherUid;
+    }
+
+    public void setStatus(Long status)
     {
         this.status = status;
     }
@@ -245,6 +260,7 @@ public class DailyJobs extends BaseEntity
             .append("contacts", getContacts())
             .append("phone", getPhone())
             .append("description", getDescription())
+            .append("publisherUid", getPublisherUid())
             .append("status", getStatus())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())

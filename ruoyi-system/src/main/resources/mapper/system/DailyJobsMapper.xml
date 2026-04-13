@@ -16,13 +16,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="contacts"    column="contacts"    />
         <result property="phone"    column="phone"    />
         <result property="description"    column="description"    />
+        <result property="publisherUid"    column="publisher_uid"    />
         <result property="status"    column="status"    />
         <result property="createDate"    column="create_date"    />
         <result property="updateDate"    column="update_date"    />
     </resultMap>
 
     <sql id="selectDailyJobsVo">
-        select id, title, category, salary_day, work_date, work_time, location, district_id, contacts, phone, description, status, create_date, update_date from daily_jobs
+        select id, title, category, salary_day, work_date, work_time, location, district_id, contacts, phone, description, publisher_uid, status, create_date, update_date from daily_jobs
     </sql>
 
     <select id="selectDailyJobsList" parameterType="DailyJobs" resultMap="DailyJobsResult">
@@ -38,6 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contacts != null  and contacts != ''"> and contacts = #{contacts}</if>
             <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
             <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="publisherUid != null "> and publisher_uid = #{publisherUid}</if>
             <if test="status != null "> and status = #{status}</if>
             <if test="createDate != null "> and create_date = #{createDate}</if>
             <if test="updateDate != null "> and update_date = #{updateDate}</if>
@@ -62,6 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contacts != null">contacts,</if>
             <if test="phone != null">phone,</if>
             <if test="description != null">description,</if>
+            <if test="publisherUid != null">publisher_uid,</if>
             <if test="status != null">status,</if>
             <if test="createDate != null">create_date,</if>
             <if test="updateDate != null">update_date,</if>
@@ -77,6 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contacts != null">#{contacts},</if>
             <if test="phone != null">#{phone},</if>
             <if test="description != null">#{description},</if>
+            <if test="publisherUid != null">#{publisherUid},</if>
             <if test="status != null">#{status},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="updateDate != null">#{updateDate},</if>
@@ -96,6 +100,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contacts != null">contacts = #{contacts},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="description != null">description = #{description},</if>
+            <if test="publisherUid != null">publisher_uid = #{publisherUid},</if>
             <if test="status != null">status = #{status},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="updateDate != null">update_date = #{updateDate},</if>
