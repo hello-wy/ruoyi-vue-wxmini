@@ -19,6 +19,7 @@
         <result property="workYears" column="work_years"/>
         <result property="personalIntro" column="personal_intro"/>
         <result property="verified" column="verified"/>
+        <result property="userType" column="user_type"/>
     </resultMap>
 
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
@@ -29,6 +30,7 @@
                    else ui.user_name
                end as display_name,
                ui.user_name,
+               ui.user_type,
                ui.phone,
                up.real_name,
                up.nick_name,

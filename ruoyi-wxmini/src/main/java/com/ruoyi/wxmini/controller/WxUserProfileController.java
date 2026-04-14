@@ -3,6 +3,7 @@ package com.ruoyi.wxmini.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
+import com.ruoyi.wxmini.bo.WxUserTypeUpdateBo;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
 import com.ruoyi.wxmini.service.IWxUserProfileService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
@@ -10,6 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +50,33 @@ public class WxUserProfileController extends BaseController {
         }
         int rows = wxUserProfileService.updateCurrentUserProfile(userId, bo);
         return rows > 0 ? success() : error("保存失败");
+    }
+
+    @ApiOperation("首次设置当前登录用户身份")
+    @PostMapping("/user-type/init")
+    public AjaxResult initUserType(@RequestBody WxUserTypeUpdateBo bo) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        if (bo == null || StringUtils.isBlank(bo.getUserType())) {
+            return error("请选择用户身份");
+        }
+        int rows = wxUserProfileService.initCurrentUserType(userId, bo.getUserType());
+        return rows > 0 ? success() : error("身份初始化失败");
+    }
+
+    @ApiOperation("切换当前登录用户身份")
+    @PutMapping("/user-type")
+    public AjaxResult switchUserType(@RequestBody WxUserTypeUpdateBo bo) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        if (bo == null || StringUtils.isBlank(bo.getUserType())) {
+            return error("请选择用户身份");
+        }
+        int rows = wxUserProfileService.switchCurrentUserType(userId, bo.getUserType());
+        return rows > 0 ? success() : error("身份切换失败");
     }
 }

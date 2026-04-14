@@ -13,9 +13,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 public class WxUserProfileServiceImpl implements IWxUserProfileService {
+
+    private static final String USER_TYPE_PARENT = "0";
+    private static final String USER_TYPE_STUDENT = "1";
+    private static final String USER_TYPE_MERCHANT = "2";
 
     @Resource
     private IUserInfoService userInfoService;
@@ -32,6 +38,12 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         if (StringUtils.isBlank(profileVo.getDisplayName())) {
             profileVo.setDisplayName(profileVo.getUserName());
         }
+        profileVo.setUserTypeLabel(resolveUserTypeLabel(profileVo.getUserType()));
+        profileVo.setPrimaryAction(resolvePrimaryAction(profileVo.getUserType()));
+        profileVo.setCanSwitchUserType(!USER_TYPE_MERCHANT.equals(profileVo.getUserType()));
+        profileVo.setSwitchableUserTypes(USER_TYPE_MERCHANT.equals(profileVo.getUserType())
+                ? Collections.singletonList(USER_TYPE_MERCHANT)
+                : Arrays.asList(USER_TYPE_PARENT, USER_TYPE_STUDENT));
         return profileVo;
     }
 
@@ -71,6 +83,59 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
             return wxUserProfileMapper.insert(profile);
         }
         return wxUserProfileMapper.updateById(profile);
+    }
+
+    @Override
+    public int initCurrentUserType(String userId, String userType) {
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
+        if (userInfo == null || StringUtils.isNotBlank(userInfo.getUserType())) {
+            return 0;
+        }
+        if (!isFrontendAllowedUserType(userType)) {
+            return 0;
+        }
+        userInfo.setUserType(userType);
+        return userInfoService.updateUserInfo(userInfo);
+    }
+
+    @Override
+    public int switchCurrentUserType(String userId, String userType) {
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
+        if (userInfo == null || !isFrontendAllowedUserType(userType)) {
+            return 0;
+        }
+        userInfo.setUserType(userType);
+        return userInfoService.updateUserInfo(userInfo);
+    }
+
+    private boolean isFrontendAllowedUserType(String userType) {
+        return USER_TYPE_PARENT.equals(userType) || USER_TYPE_STUDENT.equals(userType);
+    }
+
+    private String resolveUserTypeLabel(String userType) {
+        if (USER_TYPE_PARENT.equals(userType)) {
+            return "家长";
+        }
+        if (USER_TYPE_STUDENT.equals(userType)) {
+            return "学生";
+        }
+        if (USER_TYPE_MERCHANT.equals(userType)) {
+            return "商家";
+        }
+        return "未选择";
+    }
+
+    private String resolvePrimaryAction(String userType) {
+        if (USER_TYPE_PARENT.equals(userType)) {
+            return "/pages/tutoring/parent/apply";
+        }
+        if (USER_TYPE_STUDENT.equals(userType)) {
+            return "/pages/tutoring/tutor/apply";
+        }
+        if (USER_TYPE_MERCHANT.equals(userType)) {
+            return "/pages/jobs/apply";
+        }
+        return "/pages/guide/index";
     }
 
     private String resolveName(WxUserProfileUpdateBo bo) {

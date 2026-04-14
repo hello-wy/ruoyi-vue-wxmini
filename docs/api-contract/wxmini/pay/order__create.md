@@ -1,8 +1,8 @@
-# POST /wxmini/pay/order/create
+# POST /wxmini/pay/salon/orders/create
 
 ## 用途
 
-创建微信 JSAPI 支付订单，返回小程序唤起支付所需参数。
+从沙龙详情页创建微信 JSAPI 支付订单，返回小程序拉起支付所需参数。
 
 ## 鉴权
 
@@ -10,7 +10,11 @@
 
 ## Body
 
-- 当前 controller 无请求体
+```json
+{
+  "salonId": 1
+}
+```
 
 ## 成功响应示例
 
@@ -19,19 +23,19 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "appId": "appid",
-    "timeStamp": "1710000000",
-    "nonceStr": "nonce",
-    "packageValue": "prepay_id=xxx",
-    "paySign": "sign"
+    "orderNo": "SALON202604141234561712345678901",
+    "payParam": {
+      "appId": "wx123",
+      "timeStamp": "1710000000",
+      "nonceStr": "nonce",
+      "packageValue": "prepay_id=wx123",
+      "paySign": "sign"
+    }
   }
 }
 ```
 
-## 特殊说明
+## 说明
 
-- 当前实现中订单描述、回调地址、金额等参数仍是写死示例，前端联调时不要自行推断真实业务参数。
-
-## 实现来源
-
-- `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxPayController.java`
+- 支付金额以后端读取 `salon_info.current_price` 为准
+- 前端不能将 `requestPayment` 返回直接视为支付成功，必须继续查询订单状态

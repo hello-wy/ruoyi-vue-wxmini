@@ -1,16 +1,16 @@
-# GET /wxmini/pay/order/query
+# GET /wxmini/pay/salon/orders/{orderNo}
 
 ## 用途
 
-主动查询微信支付订单状态。
+查询当前登录用户的沙龙支付订单状态与展示信息。
 
 ## 鉴权
 
 - 需要 `Wx-Authorization: Bearer <token>`
 
-## Query 参数
+## Path 参数
 
-- `outTradeNo`：必填，商户系统内部订单号
+- `orderNo`：必填，平台订单号
 
 ## 成功响应示例
 
@@ -19,11 +19,16 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "tradeState": "SUCCESS"
+    "orderNo": "SALON202604141234561712345678901",
+    "title": "组局思维",
+    "amount": 128.00,
+    "payTime": "2026-04-14 12:35:10",
+    "status": "PAID"
   }
 }
 ```
 
-## 实现来源
+## 说明
 
-- `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxPayController.java`
+- 仅允许查询当前登录用户自己的订单
+- 前端只有在 `status=PAID` 时才能跳转到订单详情页

@@ -8,4 +8,8 @@ public interface IWxUserProfileService {
     WxUserProfileVo getCurrentUserProfile(String userId);
 
     int updateCurrentUserProfile(String userId, WxUserProfileUpdateBo bo);
+
+    int initCurrentUserType(String userId, String userType);
+
+    int switchCurrentUserType(String userId, String userType);
 }

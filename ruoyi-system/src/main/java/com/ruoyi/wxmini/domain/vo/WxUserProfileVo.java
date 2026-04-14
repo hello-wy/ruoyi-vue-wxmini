@@ -1,5 +1,7 @@
 package com.ruoyi.wxmini.domain.vo;
 
+import java.util.List;
+
 public class WxUserProfileVo {
 
     private Long userInfoId;
@@ -29,6 +31,16 @@ public class WxUserProfileVo {
     private String personalIntro;
 
     private Boolean verified;
+
+    private String userType;
+
+    private String userTypeLabel;
+
+    private Boolean canSwitchUserType;
+
+    private String primaryAction;
+
+    private List<String> switchableUserTypes;
 
     public Long getUserInfoId() {
         return userInfoId;
@@ -140,5 +152,45 @@ public class WxUserProfileVo {
 
     public void setVerified(Boolean verified) {
         this.verified = verified;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
+    public String getUserTypeLabel() {
+        return userTypeLabel;
+    }
+
+    public void setUserTypeLabel(String userTypeLabel) {
+        this.userTypeLabel = userTypeLabel;
+    }
+
+    public Boolean getCanSwitchUserType() {
+        return canSwitchUserType;
+    }
+
+    public void setCanSwitchUserType(Boolean canSwitchUserType) {
+        this.canSwitchUserType = canSwitchUserType;
+    }
+
+    public String getPrimaryAction() {
+        return primaryAction;
+    }
+
+    public void setPrimaryAction(String primaryAction) {
+        this.primaryAction = primaryAction;
+    }
+
+    public List<String> getSwitchableUserTypes() {
+        return switchableUserTypes;
+    }
+
+    public void setSwitchableUserTypes(List<String> switchableUserTypes) {
+        this.switchableUserTypes = switchableUserTypes;
     }
 }

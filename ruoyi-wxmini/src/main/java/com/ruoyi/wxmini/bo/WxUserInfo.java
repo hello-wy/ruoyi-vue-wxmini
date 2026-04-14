@@ -37,8 +37,5 @@ public class WxUserInfo {
         if (StringUtils.isEmpty(this.userName)) {
             this.userName = "微信用户";
         }
-        if (StringUtils.isEmpty(this.userType)) {
-            this.userType = "0";
-        }
     }
 }
