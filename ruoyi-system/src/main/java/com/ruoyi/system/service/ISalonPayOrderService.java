@@ -1,0 +1,16 @@
+package com.ruoyi.system.service;
+
+import java.util.List;
+import com.ruoyi.system.domain.SalonPayOrder;
+
+public interface ISalonPayOrderService {
+    SalonPayOrder selectSalonPayOrderByOrderNo(String orderNo);
+
+    List<SalonPayOrder> selectSalonPayOrderList(SalonPayOrder order);
+
+    SalonPayOrder selectLatestPaidOrderByUserIdAndSalonId(String userId, Long salonId);
+
+    int insertSalonPayOrder(SalonPayOrder order);
+
+    int updateSalonPayOrder(SalonPayOrder order);
+}

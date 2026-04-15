@@ -28,3 +28,4 @@
 ## 实现来源
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxPayController.java`
+

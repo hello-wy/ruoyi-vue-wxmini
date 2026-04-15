@@ -1,0 +1,17 @@
+package com.ruoyi.system.mapper;
+
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+import com.ruoyi.system.domain.SalonPayOrder;
+
+public interface SalonPayOrderMapper {
+    SalonPayOrder selectSalonPayOrderByOrderNo(String orderNo);
+
+    List<SalonPayOrder> selectSalonPayOrderList(SalonPayOrder order);
+
+    SalonPayOrder selectLatestPaidOrderByUserIdAndSalonId(@Param("userId") String userId, @Param("salonId") Long salonId);
+
+    int insertSalonPayOrder(SalonPayOrder order);
+
+    int updateSalonPayOrder(SalonPayOrder order);
+}
