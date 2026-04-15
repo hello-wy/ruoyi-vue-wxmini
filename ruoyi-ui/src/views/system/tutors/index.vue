@@ -215,6 +215,20 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-check"
+            @click="handleReview(scope.row, 1)"
+            v-hasPermi="['system:tutors:review']"
+          >通过</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-close"
+            @click="handleReview(scope.row, 2)"
+            v-hasPermi="['system:tutors:review']"
+          >拒绝</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:tutors:remove']"
@@ -331,7 +345,7 @@
 </template>
 
 <script>
-import { listTutors, getTutors, delTutors, addTutors, updateTutors } from "@/api/system/tutors"
+import { listTutors, getTutors, delTutors, addTutors, updateTutors, reviewTutors } from "@/api/system/tutors"
 
 export default {
   name: "Tutors",
@@ -504,6 +518,16 @@ export default {
           }
         }
       })
+    },
+    /** 审核按钮操作 */
+    handleReview(row, isCertified) {
+      const statusText = isCertified === 1 ? "通过" : "拒绝"
+      this.$modal.confirm('是否确认' + statusText + '教员编号为"' + row.id + '"的认证申请？').then(function() {
+        return reviewTutors({ id: row.id, isCertified: isCertified })
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess("审核操作成功")
+      }).catch(() => {})
     },
     /** 删除按钮操作 */
     handleDelete(row) {

@@ -112,7 +112,7 @@ public class TutorsController extends BaseController
      * 审核教员（修改 isCertified：0-待审核 / 1-已通过 / 2-已拒绝）
      */
     @ApiOperation("审核教员认证状态（0-待审核 1-已通过 2-已拒绝）")
-    @PreAuthorize("@ss.hasPermi('system:tutors:edit')")
+    @PreAuthorize("@ss.hasPermi('system:tutors:review')")
     @Log(title = "大学生/教员审核", businessType = BusinessType.UPDATE)
     @PutMapping("/review")
     public AjaxResult review(@RequestBody Tutors tutors)
@@ -129,7 +129,8 @@ public class TutorsController extends BaseController
         Tutors update = new Tutors();
         update.setId(tutors.getId());
         update.setIsCertified(isCertified);
-        return toAjax(tutorsService.updateTutors(update));
+        int rows = tutorsService.updateTutors(update);
+        return rows > 0 ? AjaxResult.success("审核操作成功") : AjaxResult.error("操作失败，记录不存在");
     }
 
     /**

@@ -107,41 +107,6 @@ public class WxTutoringController extends BaseController {
     }
 
     /**
-     * 管理员审核教员（修改 isCertified：0-待审核 / 1-已通过 / 2-已拒绝）
-     * 需要管理员权限（wx token 中 userType = "admin"）
-     *
-     * @param id          tutors 主键
-     * @param isCertified 审核结果：0-待审核 1-已通过 2-已拒绝
-     */
-    @ApiOperation("审核教员认证状态（需管理员权限，0-待审核 1-已通过 2-已拒绝）")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "isCertified", value = "审核结果：0-待审核 1-已通过 2-已拒绝", required = true, dataType = "Long", paramType = "query", dataTypeClass = Long.class)
-    })
-    @PutMapping("/review")
-    public AjaxResult reviewTutor(
-            @RequestParam Long id,
-            @RequestParam Long isCertified) {
-        String userId = WxMiniUserContext.getCurrentUserId();
-        if (StringUtils.isBlank(userId)) {
-            return AjaxResult.error("请先登录");
-        }
-        // 校验管理员身份
-        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
-        if (userInfo == null || !"admin".equals(userInfo.getUserType())) {
-            return AjaxResult.error("无权限操作");
-        }
-        if (!isCertified.equals(0L) && !isCertified.equals(1L) && !isCertified.equals(2L)) {
-            return AjaxResult.error("isCertified 参数非法，只允许 0/1/2");
-        }
-        Tutors tutors = new Tutors();
-        tutors.setId(id);
-        tutors.setIsCertified(isCertified);
-        int rows = tutorsService.updateTutors(tutors);
-        return rows > 0 ? AjaxResult.success("审核操作成功") : AjaxResult.error("操作失败，记录不存在");
-    }
-
-    /**
      * 当前登录用户查看自己的教员信息（uid = 当前用户）
      * 多地区所有的是一个list
      * 需要 Wx-Authorization 登录
