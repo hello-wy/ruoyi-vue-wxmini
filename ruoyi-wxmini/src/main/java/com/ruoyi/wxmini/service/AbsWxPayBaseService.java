@@ -28,7 +28,7 @@ public abstract class AbsWxPayBaseService<P> {
     @Resource
     private WxPayService wxPayService;
 
-    private static final String WX_PAY_NOTIFY_URL = "https://xxx.com/api/wxmini/pay/notify";
+    private static final String WX_PAY_NOTIFY_URL = "https://xxx.com/api/wxmini/pay/salon/notify";
     // 无锁化的Map+原子操作，记录资源的“占用状态”。synchronized会让同一资源的请求串行化，虽然能保证唯一性，但高并发下会阻塞线程，影响吞吐量。
     private ConcurrentHashMap<String, Object> resourceFlagMap = new ConcurrentHashMap<>();
 
