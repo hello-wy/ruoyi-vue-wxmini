@@ -33,7 +33,7 @@ public class UserInfo extends BaseEntity {
      * 用户类型。在小程序端可以根据用户类型做页面权限访问控制
      */
     @Excel(name = "用户类型")
-    private String userType;
+    private Integer userType;
 
     /**
      * 手机号
@@ -80,11 +80,11 @@ public class UserInfo extends BaseEntity {
         return userName;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(Integer userType) {
         this.userType = userType;
     }
 
-    public String getUserType() {
+    public Integer getUserType() {
         return userType;
     }
 

@@ -59,7 +59,7 @@ public class WxUserProfileController extends BaseController {
         if (StringUtils.isBlank(userId)) {
             return error("请先登录");
         }
-        if (bo == null || StringUtils.isBlank(bo.getUserType())) {
+        if (bo == null || bo.getUserType() == null) {
             return error("请选择用户身份");
         }
         int rows = wxUserProfileService.initCurrentUserType(userId, bo.getUserType());
@@ -73,7 +73,7 @@ public class WxUserProfileController extends BaseController {
         if (StringUtils.isBlank(userId)) {
             return error("请先登录");
         }
-        if (bo == null || StringUtils.isBlank(bo.getUserType())) {
+        if (bo == null || bo.getUserType() == null) {
             return error("请选择用户身份");
         }
         int rows = wxUserProfileService.switchCurrentUserType(userId, bo.getUserType());

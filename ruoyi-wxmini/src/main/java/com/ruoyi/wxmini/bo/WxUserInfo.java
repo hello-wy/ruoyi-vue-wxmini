@@ -19,7 +19,7 @@ public class WxUserInfo {
     /**
      * 用户类型。在小程序端可以根据用户类型做页面权限访问控制
      */
-    private String userType;
+    private Integer userType;
     private String phone;
     private String avatarUrl;
 

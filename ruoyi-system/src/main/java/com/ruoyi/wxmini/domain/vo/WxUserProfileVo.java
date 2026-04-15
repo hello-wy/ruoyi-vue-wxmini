@@ -32,7 +32,7 @@ public class WxUserProfileVo {
 
     private Boolean verified;
 
-    private String userType;
+    private Integer userType;
 
     private String userTypeLabel;
 
@@ -40,7 +40,7 @@ public class WxUserProfileVo {
 
     private String primaryAction;
 
-    private List<String> switchableUserTypes;
+    private List<Integer> switchableUserTypes;
 
     public Long getUserInfoId() {
         return userInfoId;
@@ -154,11 +154,11 @@ public class WxUserProfileVo {
         this.verified = verified;
     }
 
-    public String getUserType() {
+    public Integer getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(Integer userType) {
         this.userType = userType;
     }
 
@@ -186,11 +186,11 @@ public class WxUserProfileVo {
         this.primaryAction = primaryAction;
     }
 
-    public List<String> getSwitchableUserTypes() {
+    public List<Integer> getSwitchableUserTypes() {
         return switchableUserTypes;
     }
 
-    public void setSwitchableUserTypes(List<String> switchableUserTypes) {
+    public void setSwitchableUserTypes(List<Integer> switchableUserTypes) {
         this.switchableUserTypes = switchableUserTypes;
     }
 }

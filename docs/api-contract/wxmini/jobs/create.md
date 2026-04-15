@@ -5,7 +5,7 @@
 
 ## 鉴权
 - 需要 `Wx-Authorization: Bearer <token>`
-- 仅商家身份(`userType=2`)允许调用
+- 仅商家身份（数字 `userType=2`）允许调用
 
 ## 请求体
 ```json

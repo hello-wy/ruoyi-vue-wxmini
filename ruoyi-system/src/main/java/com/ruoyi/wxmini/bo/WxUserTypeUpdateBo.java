@@ -2,13 +2,13 @@ package com.ruoyi.wxmini.bo;
 
 public class WxUserTypeUpdateBo {
 
-    private String userType;
+    private Integer userType;
 
-    public String getUserType() {
+    public Integer getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
+    public void setUserType(Integer userType) {
         this.userType = userType;
     }
 }

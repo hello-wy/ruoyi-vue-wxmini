@@ -32,7 +32,7 @@ import java.util.Map;
 @RequestMapping("/wxmini/jobs")
 public class WxDailyJobController extends BaseController {
 
-    private static final String USER_TYPE_MERCHANT = "2";
+    private static final Integer USER_TYPE_MERCHANT = 2;
 
     @Autowired
     private IDailyJobsService dailyJobsService;

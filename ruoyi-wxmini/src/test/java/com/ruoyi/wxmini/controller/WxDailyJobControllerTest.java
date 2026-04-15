@@ -81,7 +81,7 @@ class WxDailyJobControllerTest {
         userInfo.setUserId("123");
         userInfo.setUserName("商家A");
         userInfo.setPhone("13800138000");
-        userInfo.setUserType("2");
+        userInfo.setUserType(2);
         WxMiniUserContext.setCurrentUserId("123");
         when(userInfoService.selectUserInfoByUserId("123")).thenReturn(userInfo);
 
@@ -94,7 +94,7 @@ class WxDailyJobControllerTest {
     void createShouldRejectWhenUserIsNotMerchant() {
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId("123");
-        userInfo.setUserType("1");
+        userInfo.setUserType(1);
         WxMiniUserContext.setCurrentUserId("123");
         when(userInfoService.selectUserInfoByUserId("123")).thenReturn(userInfo);
 
@@ -108,7 +108,7 @@ class WxDailyJobControllerTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(9L);
         userInfo.setUserId("123");
-        userInfo.setUserType("2");
+        userInfo.setUserType(2);
         WxMiniUserContext.setCurrentUserId("123");
         when(userInfoService.selectUserInfoByUserId("123")).thenReturn(userInfo);
         when(dailyJobsService.insertDailyJobs(any(DailyJobs.class))).thenReturn(1);

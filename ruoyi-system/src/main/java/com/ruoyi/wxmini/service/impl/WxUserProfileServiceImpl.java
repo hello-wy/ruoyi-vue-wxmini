@@ -14,14 +14,13 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
-import java.util.Collections;
 
 @Service
 public class WxUserProfileServiceImpl implements IWxUserProfileService {
 
-    private static final String USER_TYPE_PARENT = "0";
-    private static final String USER_TYPE_STUDENT = "1";
-    private static final String USER_TYPE_MERCHANT = "2";
+    private static final Integer USER_TYPE_PARENT = 0;
+    private static final Integer USER_TYPE_STUDENT = 1;
+    private static final Integer USER_TYPE_MERCHANT = 2;
 
     @Resource
     private IUserInfoService userInfoService;
@@ -40,10 +39,8 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         }
         profileVo.setUserTypeLabel(resolveUserTypeLabel(profileVo.getUserType()));
         profileVo.setPrimaryAction(resolvePrimaryAction(profileVo.getUserType()));
-        profileVo.setCanSwitchUserType(!USER_TYPE_MERCHANT.equals(profileVo.getUserType()));
-        profileVo.setSwitchableUserTypes(USER_TYPE_MERCHANT.equals(profileVo.getUserType())
-                ? Collections.singletonList(USER_TYPE_MERCHANT)
-                : Arrays.asList(USER_TYPE_PARENT, USER_TYPE_STUDENT));
+        profileVo.setCanSwitchUserType(true);
+        profileVo.setSwitchableUserTypes(Arrays.asList(USER_TYPE_PARENT, USER_TYPE_STUDENT, USER_TYPE_MERCHANT));
         return profileVo;
     }
 
@@ -86,9 +83,9 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     }
 
     @Override
-    public int initCurrentUserType(String userId, String userType) {
+    public int initCurrentUserType(String userId, Integer userType) {
         UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
-        if (userInfo == null || StringUtils.isNotBlank(userInfo.getUserType())) {
+        if (userInfo == null || userInfo.getUserType() != null) {
             return 0;
         }
         if (!isFrontendAllowedUserType(userType)) {
@@ -99,7 +96,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     }
 
     @Override
-    public int switchCurrentUserType(String userId, String userType) {
+    public int switchCurrentUserType(String userId, Integer userType) {
         UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
         if (userInfo == null || !isFrontendAllowedUserType(userType)) {
             return 0;
@@ -108,11 +105,11 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         return userInfoService.updateUserInfo(userInfo);
     }
 
-    private boolean isFrontendAllowedUserType(String userType) {
-        return USER_TYPE_PARENT.equals(userType) || USER_TYPE_STUDENT.equals(userType);
+    private boolean isFrontendAllowedUserType(Integer userType) {
+        return USER_TYPE_PARENT.equals(userType) || USER_TYPE_STUDENT.equals(userType) || USER_TYPE_MERCHANT.equals(userType);
     }
 
-    private String resolveUserTypeLabel(String userType) {
+    private String resolveUserTypeLabel(Integer userType) {
         if (USER_TYPE_PARENT.equals(userType)) {
             return "家长";
         }
@@ -125,7 +122,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         return "未选择";
     }
 
-    private String resolvePrimaryAction(String userType) {
+    private String resolvePrimaryAction(Integer userType) {
         if (USER_TYPE_PARENT.equals(userType)) {
             return "/pages/tutoring/parent/apply";
         }

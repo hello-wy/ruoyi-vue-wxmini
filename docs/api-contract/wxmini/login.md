@@ -36,7 +36,7 @@
     "sessionKey": "session-key",
     "openId": "openid",
     "userName": "微信用户",
-    "userType": "0",
+    "userType": null,
     "phone": null,
     "avatarUrl": null
   }
@@ -49,7 +49,7 @@
 - 返回字段与 `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/bo/WxUserInfo.java` 一致，不返回 `unionId`
 - `phone` 为空表示用户尚未完成手机号实时验证。前端必须继续调用 `POST /wxmini/user/phone`，登录态才算补全
 - `userName` 为空时后端默认返回 `微信用户`
-- `userType` 为空时后端默认返回 `0`
+- `userType` 为空时后端返回 `null`，表示未选择身份
 
 ## 实现来源文件
 

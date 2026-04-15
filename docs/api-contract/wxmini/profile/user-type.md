@@ -9,6 +9,9 @@
 ## 请求体
 ```json
 {
-  "userType": "1"
+  "userType": 1
 }
 ```
+
+## 字段说明
+- `userType`: number，`0`=家长，`1`=学生；普通切换入口不允许传 `2`

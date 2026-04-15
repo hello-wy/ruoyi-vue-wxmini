@@ -648,7 +648,7 @@ CREATE TABLE `user_info` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(64) NOT NULL COMMENT '平台用户id',
   `user_name` varchar(64) NOT NULL DEFAULT '微信用户' COMMENT '用户名',
-  `user_type` varchar(64) NOT NULL DEFAULT '1' COMMENT '用户类型',
+  `user_type` int DEFAULT NULL COMMENT '用户类型：0-家长，1-学生，2-商家',
   `phone` varchar(64) DEFAULT NULL COMMENT '手机号',
   `open_id` varchar(128) DEFAULT NULL COMMENT '微信用户唯一标识',
   `union_id` varchar(128) DEFAULT NULL COMMENT '微信全平台用户唯一标识',

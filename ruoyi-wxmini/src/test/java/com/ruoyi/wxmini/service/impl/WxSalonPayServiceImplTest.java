@@ -1,13 +1,14 @@
 package com.ruoyi.wxmini.service.impl;
 
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
+import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
+import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.system.domain.SalonInfo;
 import com.ruoyi.system.domain.SalonPayOrder;
 import com.ruoyi.system.service.ISalonInfoService;
 import com.ruoyi.system.service.ISalonPayOrderService;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
-import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.vo.WxPayParamVo;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,8 @@ class WxSalonPayServiceImplTest {
     private ISalonPayOrderService salonPayOrderService;
     @Mock
     private IUserInfoService userInfoService;
+    @Mock
+    private WxPayService wxPayService;
 
     @InjectMocks
     private WxSalonPayServiceImpl service;
@@ -70,7 +73,27 @@ class WxSalonPayServiceImplTest {
 
         assertTrue(service.handleSalonPaidCallback(result, "req-1"));
         order.setStatus("PAID");
+        order.setPayTime(new Date());
         assertTrue(service.handleSalonPaidCallback(result, "req-1"));
+    }
+
+    @Test
+    void should_fill_pay_time_when_query_result_confirms_paid() throws Exception {
+        SalonPayOrder order = new SalonPayOrder();
+        order.setId(1L);
+        order.setOrderNo("order-1");
+        order.setStatus("PENDING");
+        when(salonPayOrderService.selectSalonPayOrderByOrderNo("order-1")).thenReturn(order);
+        when(salonPayOrderService.updateSalonPayOrder(order)).thenReturn(1);
+
+        WxPayOrderQueryV3Result queryResult = new WxPayOrderQueryV3Result();
+        queryResult.setTradeState("SUCCESS");
+        queryResult.setSuccessTime("2026-04-15T08:30:00+08:00");
+        when(wxPayService.queryOrderV3(org.mockito.ArgumentMatchers.any(WxPayOrderQueryV3Request.class))).thenReturn(queryResult);
+
+        assertTrue(service.updOrderWithPaySuccess("order-1"));
+        assertEquals("PAID", order.getStatus());
+        assertNotNull(order.getPayTime());
     }
 
     @Test

@@ -9,7 +9,7 @@ public interface IWxUserProfileService {
 
     int updateCurrentUserProfile(String userId, WxUserProfileUpdateBo bo);
 
-    int initCurrentUserType(String userId, String userType);
+    int initCurrentUserType(String userId, Integer userType);
 
-    int switchCurrentUserType(String userId, String userType);
+    int switchCurrentUserType(String userId, Integer userType);
 }

@@ -15,7 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +47,7 @@ class WxUserProfileControllerTest {
     void detailShouldReturn200WhenUserExists() {
         WxUserProfileVo profile = new WxUserProfileVo();
         profile.setUserInfoId(1L);
-        profile.setUserType("0");
+        profile.setUserType(0);
         WxMiniUserContext.setCurrentUserId(USER_ID);
         when(wxUserProfileService.getCurrentUserProfile(USER_ID)).thenReturn(profile);
         AjaxResult result = controller.detail();
@@ -63,8 +66,8 @@ class WxUserProfileControllerTest {
     void initUserTypeShouldReturn200WhenSuccess() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
         WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
-        bo.setUserType("0");
-        when(wxUserProfileService.initCurrentUserType(USER_ID, "0")).thenReturn(1);
+        bo.setUserType(0);
+        when(wxUserProfileService.initCurrentUserType(USER_ID, 0)).thenReturn(1);
         AjaxResult result = controller.initUserType(bo);
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
     }
@@ -73,9 +76,21 @@ class WxUserProfileControllerTest {
     void switchUserTypeShouldReturnNon200WhenRejected() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
         WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
-        bo.setUserType("2");
-        when(wxUserProfileService.switchCurrentUserType(USER_ID, "2")).thenReturn(0);
+        bo.setUserType(2);
+        when(wxUserProfileService.switchCurrentUserType(USER_ID, 2)).thenReturn(0);
         AjaxResult result = controller.switchUserType(bo);
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
+    }
+
+    @Test
+    void initUserTypeShouldRejectNullUserType() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
+
+        AjaxResult result = controller.initUserType(bo);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请选择用户身份", result.get(AjaxResult.MSG_TAG));
+        verify(wxUserProfileService, never()).initCurrentUserType(anyString(), any());
     }
 }

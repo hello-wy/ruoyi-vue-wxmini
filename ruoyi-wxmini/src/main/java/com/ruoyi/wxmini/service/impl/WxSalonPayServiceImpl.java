@@ -4,6 +4,9 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
+import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
+import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
+import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.SalonInfo;
 import com.ruoyi.system.domain.SalonPayOrder;
@@ -21,6 +24,7 @@ import com.ruoyi.wxmini.vo.WxSalonPayOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,6 +42,8 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
     private ISalonPayOrderService salonPayOrderService;
     @Autowired
     private IUserInfoService userInfoService;
+    @Resource
+    private WxPayService wxPayService;
 
     @Override
     public WxPayParamVo createSalonOrder(String userId, WxSalonPayCreateOrderBo bo) throws Exception {
@@ -84,14 +90,14 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
         if (order == null) {
             return false;
         }
-        if (STATUS_PAID.equals(order.getStatus())) {
+        if (STATUS_PAID.equals(order.getStatus()) && order.getPayTime() != null) {
             return true;
         }
-        order.setStatus(STATUS_PAID);
-        order.setWechatTransactionId(result.getResult().getTransactionId());
-        order.setRequestId(requestId);
-        order.setPayTime(DateUtil.parse(result.getResult().getSuccessTime(), DatePattern.UTC_WITH_XXX_OFFSET_PATTERN));
-        return salonPayOrderService.updateSalonPayOrder(order) > 0;
+        Date successTime = parseSuccessTime(result.getResult().getSuccessTime());
+        if (successTime == null) {
+            successTime = DateUtils.getNowDate();
+        }
+        return markOrderPaid(order, result.getResult().getTransactionId(), requestId, successTime);
     }
 
     @Override
@@ -156,12 +162,14 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
     @Override
     public Boolean updOrderWithPaySuccess(String orderNo) {
         SalonPayOrder order = salonPayOrderService.selectSalonPayOrderByOrderNo(orderNo);
-        if (order == null || STATUS_PAID.equals(order.getStatus())) {
-            return order != null;
+        if (order == null) {
+            return false;
         }
-        order.setStatus(STATUS_PAID);
-        order.setPayTime(DateUtils.getNowDate());
-        return salonPayOrderService.updateSalonPayOrder(order) > 0;
+        if (STATUS_PAID.equals(order.getStatus()) && order.getPayTime() != null) {
+            return true;
+        }
+        Date payTime = resolvePaidTime(orderNo);
+        return markOrderPaid(order, order.getWechatTransactionId(), order.getRequestId(), payTime);
     }
 
     @Override
@@ -172,5 +180,40 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
         }
         order.setStatus(STATUS_CANCELED);
         return salonPayOrderService.updateSalonPayOrder(order) > 0;
+    }
+
+    private boolean markOrderPaid(SalonPayOrder order, String transactionId, String requestId, Date payTime) {
+        order.setStatus(STATUS_PAID);
+        if (transactionId != null && !transactionId.isEmpty()) {
+            order.setWechatTransactionId(transactionId);
+        }
+        if (requestId != null && !requestId.isEmpty()) {
+            order.setRequestId(requestId);
+        }
+        order.setPayTime(payTime == null ? DateUtils.getNowDate() : payTime);
+        return salonPayOrderService.updateSalonPayOrder(order) > 0;
+    }
+
+    private Date resolvePaidTime(String orderNo) {
+        try {
+            WxPayOrderQueryV3Request request = new WxPayOrderQueryV3Request();
+            request.setOutTradeNo(orderNo);
+            WxPayOrderQueryV3Result result = wxPayService.queryOrderV3(request);
+            if (result != null && "SUCCESS".equals(result.getTradeState())) {
+                Date successTime = parseSuccessTime(result.getSuccessTime());
+                if (successTime != null) {
+                    return successTime;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return DateUtils.getNowDate();
+    }
+
+    private Date parseSuccessTime(String successTime) {
+        if (successTime == null || successTime.isEmpty()) {
+            return null;
+        }
+        return DateUtil.parse(successTime, DatePattern.UTC_WITH_XXX_OFFSET_PATTERN);
     }
 }

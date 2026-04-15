@@ -61,7 +61,7 @@ class WxLoginControllerTest {
         assertEquals(SESSION_KEY, data.getSessionKey());
         assertEquals(OPEN_ID, data.getOpenId());
         assertEquals("测试用户", data.getUserName());
-        assertEquals("1", data.getUserType());
+        assertEquals(1, data.getUserType());
         assertEquals(PHONE, data.getPhone());
         assertEquals("https://img.example/avatar.png", data.getAvatarUrl());
         assertNull(result.get("unionId"));
@@ -83,7 +83,7 @@ class WxLoginControllerTest {
         userInfo.setOpenId(OPEN_ID);
         userInfo.setUnionId(UNION_ID);
         userInfo.setUserName("测试用户");
-        userInfo.setUserType("1");
+        userInfo.setUserType(1);
         userInfo.setPhone(PHONE);
         userInfo.setAvatarUrl("https://img.example/avatar.png");
         return userInfo;

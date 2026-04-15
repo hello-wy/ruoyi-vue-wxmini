@@ -16,11 +16,11 @@
     "displayName": "张三",
     "userName": "张三",
     "phone": "13800138000",
-    "userType": "0",
+    "userType": 0,
     "userTypeLabel": "家长",
     "canSwitchUserType": true,
     "primaryAction": "/pages/tutoring/parent/apply",
-    "switchableUserTypes": ["0", "1"]
+    "switchableUserTypes": [0, 1]
   }
 }
 ```

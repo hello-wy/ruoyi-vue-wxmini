@@ -36,7 +36,7 @@
         <where>
             <if test="userId != null  and userId != ''">and user_id = #{userId}</if>
             <if test="userName != null  and userName != ''">and user_name like concat('%', #{userName}, '%')</if>
-            <if test="userType != null  and userType != ''">and user_type = #{userType}</if>
+            <if test="userType != null">and user_type = #{userType}</if>
             <if test="phone != null  and phone != ''">and phone = #{phone}</if>
             <if test="openId != null  and openId != ''">and open_id = #{openId}</if>
             <if test="unionId != null  and unionId != ''">and union_id = #{unionId}</if>
@@ -54,7 +54,7 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="userId != null and userId != ''">user_id,</if>
             <if test="userName != null and userName != ''">user_name,</if>
-            <if test="userType != null and userType != ''">user_type,</if>
+            <if test="userType != null">user_type,</if>
             <if test="phone != null">phone,</if>
             <if test="openId != null">open_id,</if>
             <if test="unionId != null">union_id,</if>
@@ -65,7 +65,7 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null and userId != ''">#{userId},</if>
             <if test="userName != null and userName != ''">#{userName},</if>
-            <if test="userType != null and userType != ''">#{userType},</if>
+            <if test="userType != null">#{userType},</if>
             <if test="phone != null">#{phone},</if>
             <if test="openId != null">#{openId},</if>
             <if test="unionId != null">#{unionId},</if>
@@ -80,7 +80,7 @@
         <trim prefix="SET" suffixOverrides=",">
             <if test="userId != null and userId != ''">user_id = #{userId},</if>
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
-            <if test="userType != null and userType != ''">user_type = #{userType},</if>
+            <if test="userType != null">user_type = #{userType},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="openId != null">open_id = #{openId},</if>
             <if test="unionId != null">union_id = #{unionId},</if>
