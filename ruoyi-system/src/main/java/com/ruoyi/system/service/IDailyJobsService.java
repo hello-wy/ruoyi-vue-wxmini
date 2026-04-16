@@ -51,6 +51,10 @@ public interface IDailyJobsService
      */
     public int deleteDailyJobsByIds(Long[] ids);
 
+    DailyJobs selectDailyJobsByIdForUpdate(Long id);
+
+    int countPaidSignupOrders(Long jobId, Integer paidStatus);
+
     /**
      * 删除兼职日结工作信息
      * 

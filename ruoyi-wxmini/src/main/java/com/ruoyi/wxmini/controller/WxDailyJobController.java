@@ -86,6 +86,9 @@ public class WxDailyJobController extends BaseController {
         if (dailyJobs.getStatus() == null) {
             dailyJobs.setStatus(0L);
         }
+        if (dailyJobs.getSignupLimit() == null) {
+            dailyJobs.setSignupLimit(1);
+        }
         int rows = dailyJobsService.insertDailyJobs(dailyJobs);
         return rows > 0 ? AjaxResult.success("操作成功", dailyJobs.getId()) : AjaxResult.error("发布失败");
     }
@@ -128,6 +131,9 @@ public class WxDailyJobController extends BaseController {
         }
         if (StringUtils.isBlank(dailyJobs.getDescription())) {
             return "请填写工作要求描述";
+        }
+        if (dailyJobs.getSignupLimit() == null || dailyJobs.getSignupLimit() <= 0) {
+            return "请填写正确的报名人数";
         }
         return null;
     }

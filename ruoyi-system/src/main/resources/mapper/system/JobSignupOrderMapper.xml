@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JobSignupOrderMapper">
+
+    <resultMap type="com.ruoyi.system.domain.JobSignupOrder" id="JobSignupOrderResult">
+        <result property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="wechatTransactionId" column="wechat_transaction_id"/>
+        <result property="refundNo" column="refund_no"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="refundTime" column="refund_time"/>
+        <result property="requestId" column="request_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectJobSignupOrderVo">
+        select id, order_no, user_id, job_id, amount, status, wechat_transaction_id, refund_no, pay_time, refund_time, request_id, create_time, update_time
+        from job_signup_order
+    </sql>
+
+    <select id="selectJobSignupOrderByOrderNo" parameterType="String" resultMap="JobSignupOrderResult">
+        <include refid="selectJobSignupOrderVo"/>
+        where order_no = #{orderNo}
+    </select>
+
+    <select id="selectJobSignupOrderList" parameterType="com.ruoyi.system.domain.JobSignupOrder" resultMap="JobSignupOrderResult">
+        <include refid="selectJobSignupOrderVo"/>
+        <where>
+            <if test="orderNo != null and orderNo != ''">and order_no = #{orderNo}</if>
+            <if test="userId != null and userId != ''">and user_id = #{userId}</if>
+            <if test="jobId != null">and job_id = #{jobId}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectMyJobSignupOrders" resultMap="JobSignupOrderResult">
+        <include refid="selectJobSignupOrderVo"/>
+        where user_id = #{userId}
+        order by create_time desc, id desc
+    </select>
+
+    <select id="selectLatestPaidOrder" resultMap="JobSignupOrderResult">
+        <include refid="selectJobSignupOrderVo"/>
+        where user_id = #{userId}
+          and job_id = #{jobId}
+          and status = 1
+        order by pay_time desc, id desc
+        limit 1
+    </select>
+
+    <select id="selectLatestPendingOrder" resultMap="JobSignupOrderResult">
+        <include refid="selectJobSignupOrderVo"/>
+        where user_id = #{userId}
+          and job_id = #{jobId}
+          and status = 0
+        order by create_time desc, id desc
+        limit 1
+    </select>
+
+    <insert id="insertJobSignupOrder" parameterType="com.ruoyi.system.domain.JobSignupOrder">
+        insert into job_signup_order (id, order_no, user_id, job_id, amount, status, wechat_transaction_id, refund_no, pay_time, refund_time, request_id, create_time, update_time)
+        values (#{id}, #{orderNo}, #{userId}, #{jobId}, #{amount}, #{status}, #{wechatTransactionId}, #{refundNo}, #{payTime}, #{refundTime}, #{requestId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateJobSignupOrder" parameterType="com.ruoyi.system.domain.JobSignupOrder">
+        update job_signup_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="jobId != null">job_id = #{jobId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="wechatTransactionId != null">wechat_transaction_id = #{wechatTransactionId},</if>
+            <if test="refundNo != null">refund_no = #{refundNo},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="refundTime != null">refund_time = #{refundTime},</if>
+            <if test="requestId != null">request_id = #{requestId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>

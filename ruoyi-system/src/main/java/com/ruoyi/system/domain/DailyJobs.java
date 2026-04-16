@@ -86,6 +86,11 @@ public class DailyJobs extends BaseEntity
     @Excel(name = "状态：0-招募中, 1-已满员, 2-已结束")
     private Long status;
 
+    /** 报名人数上限 */
+    @ApiModelProperty(value = "报名人数上限", example = "10")
+    @Excel(name = "报名人数上限")
+    private Integer signupLimit;
+
     /** 创建时间 */
     @ApiModelProperty(value = "创建时间", example = "2026-03-05 10:00:00")
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
@@ -221,12 +226,22 @@ public class DailyJobs extends BaseEntity
         this.status = status;
     }
 
-    public Long getStatus() 
+    public Long getStatus()
     {
         return status;
     }
 
-    public void setCreateDate(Date createDate) 
+    public void setSignupLimit(Integer signupLimit)
+    {
+        this.signupLimit = signupLimit;
+    }
+
+    public Integer getSignupLimit()
+    {
+        return signupLimit;
+    }
+
+    public void setCreateDate(Date createDate)
     {
         this.createDate = createDate;
     }
@@ -262,6 +277,7 @@ public class DailyJobs extends BaseEntity
             .append("description", getDescription())
             .append("publisherUid", getPublisherUid())
             .append("status", getStatus())
+            .append("signupLimit", getSignupLimit())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .toString();

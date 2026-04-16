@@ -79,6 +79,16 @@ public class DailyJobsServiceImpl implements IDailyJobsService
         return dailyJobsMapper.deleteDailyJobsByIds(ids);
     }
 
+    @Override
+    public DailyJobs selectDailyJobsByIdForUpdate(Long id) {
+        return dailyJobsMapper.selectDailyJobsByIdForUpdate(id);
+    }
+
+    @Override
+    public int countPaidSignupOrders(Long jobId, Integer paidStatus) {
+        return dailyJobsMapper.countPaidSignupOrders(jobId, paidStatus);
+    }
+
     /**
      * 删除兼职日结工作信息
      * 

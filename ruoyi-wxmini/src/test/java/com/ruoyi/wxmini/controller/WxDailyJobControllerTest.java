@@ -123,6 +123,7 @@ class WxDailyJobControllerTest {
         dailyJobs.setContacts("王老师");
         dailyJobs.setPhone("13800138000");
         dailyJobs.setDescription("负责初中数学辅导");
+        dailyJobs.setSignupLimit(10);
 
         AjaxResult result = controller.create(dailyJobs);
 

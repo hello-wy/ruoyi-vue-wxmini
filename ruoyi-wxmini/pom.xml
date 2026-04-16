@@ -32,11 +32,6 @@
         </dependency>
         <dependency>
             <groupId>com.github.binarywang</groupId>
-            <artifactId>weixin-java-miniapp</artifactId>
-            <version>${weixin-java-miniapp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.binarywang</groupId>
             <artifactId>wx-java-pay-spring-boot-starter</artifactId>
             <version>${wx-java-pay.version}</version>
         </dependency>

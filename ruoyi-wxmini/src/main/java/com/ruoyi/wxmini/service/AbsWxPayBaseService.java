@@ -28,7 +28,7 @@ public abstract class AbsWxPayBaseService<P> {
     @Resource
     private WxPayService wxPayService;
 
-    private static final String WX_PAY_NOTIFY_URL = "https://zhiyujia.xyz/api/wxmini/pay/salon/notify";
+    private static final String DEFAULT_WX_PAY_NOTIFY_URL = "https://zhiyujia.xyz/api/wxmini/pay/salon/notify";
     // 无锁化的Map+原子操作，记录资源的“占用状态”。synchronized会让同一资源的请求串行化，虽然能保证唯一性，但高并发下会阻塞线程，影响吞吐量。
     private ConcurrentHashMap<String, Object> resourceFlagMap = new ConcurrentHashMap<>();
 
@@ -61,7 +61,7 @@ public abstract class AbsWxPayBaseService<P> {
                 return null;
             }
             // 3、获取支付参数
-            WxPayUnifiedOrderV3Result.JsapiResult jsapiResult = this.createOrder(orderParam);
+            WxPayUnifiedOrderV3Result.JsapiResult jsapiResult = this.createOrder(payVo, orderParam);
             if (jsapiResult == null) {
                 return null;
             }
@@ -241,6 +241,10 @@ public abstract class AbsWxPayBaseService<P> {
      */
     public abstract Boolean closeOrder(String orderNo);
 
+    protected String getNotifyUrl(P payVo) {
+        return DEFAULT_WX_PAY_NOTIFY_URL;
+    }
+
     /**
      * 创建支付订单参数
      *
@@ -249,7 +253,7 @@ public abstract class AbsWxPayBaseService<P> {
      * @throws
      * @date 2025/6/12 23:52
      */
-    private WxPayUnifiedOrderV3Result.JsapiResult createOrder(WxPayCreateOrderParam orderParam) throws WxPayException {
+    private WxPayUnifiedOrderV3Result.JsapiResult createOrder(P payVo, WxPayCreateOrderParam orderParam) throws WxPayException {
         // 1. 创建下单请求对象
         WxPayUnifiedOrderV3Request v3Request = new WxPayUnifiedOrderV3Request();
         v3Request.setAppid(wxPayService.getConfig().getAppId());
@@ -260,7 +264,7 @@ public abstract class AbsWxPayBaseService<P> {
 
         // https://github.com/binarywang/WxJava/issues/949
 //        v3Request.setNotifyUrl(wxPayService.getConfig().getNotifyUrl());
-        v3Request.setNotifyUrl(WX_PAY_NOTIFY_URL);
+        v3Request.setNotifyUrl(getNotifyUrl(payVo));
 
         WxPayUnifiedOrderV3Request.Amount amountObj = new WxPayUnifiedOrderV3Request.Amount();
         amountObj.setTotal(orderParam.getAmount()); // 单位分
