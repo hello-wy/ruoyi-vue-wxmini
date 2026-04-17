@@ -15,6 +15,8 @@ public class WxJobSignupOrderDetailVo {
     private Date payTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date refundTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime;
 
     public String getOrderNo() { return orderNo; }
     public void setOrderNo(String orderNo) { this.orderNo = orderNo; }
@@ -30,4 +32,6 @@ public class WxJobSignupOrderDetailVo {
     public void setPayTime(Date payTime) { this.payTime = payTime; }
     public Date getRefundTime() { return refundTime; }
     public void setRefundTime(Date refundTime) { this.refundTime = refundTime; }
+    public Date getCreateTime() { return createTime; }
+    public void setCreateTime(Date createTime) { this.createTime = createTime; }
 }

@@ -100,10 +100,8 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
 
     @Override
     public WxJobSignupOrderDetailVo queryJobOrder(String userId, String orderNo) {
-        JobSignupOrder order = jobSignupOrderService.selectJobSignupOrderByOrderNo(orderNo);
-        if (order == null || !userId.equals(order.getUserId())) {
-            throw new RuntimeException("订单不存在");
-        }
+        JobSignupOrder order = loadOwnedJobOrder(userId, orderNo);
+        order = compensatePendingOrder(order);
         return toDetailVo(order);
     }
 
@@ -268,6 +266,26 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         return jobSignupOrderService.updateJobSignupOrder(order) > 0;
     }
 
+    private JobSignupOrder loadOwnedJobOrder(String userId, String orderNo) {
+        JobSignupOrder order = jobSignupOrderService.selectJobSignupOrderByOrderNo(orderNo);
+        if (order == null || !userId.equals(order.getUserId())) {
+            throw new RuntimeException("订单不存在");
+        }
+        return order;
+    }
+
+    private JobSignupOrder compensatePendingOrder(JobSignupOrder order) {
+        if (order == null || order.getStatus() != JobSignupOrderStatusEnum.PENDING.getCode()) {
+            return order;
+        }
+        try {
+            queryPayResultAndUpdOrderStatus(order.getOrderNo());
+        } catch (Exception e) {
+            throw new RuntimeException("同步支付状态失败", e);
+        }
+        return jobSignupOrderService.selectJobSignupOrderByOrderNo(order.getOrderNo());
+    }
+
     private WxJobSignupOrderDetailVo toDetailVo(JobSignupOrder order) {
         DailyJobs job = dailyJobsService.selectDailyJobsById(order.getJobId());
         WxJobSignupOrderDetailVo detailVo = new WxJobSignupOrderDetailVo();
@@ -278,6 +296,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         detailVo.setStatus(order.getStatus());
         detailVo.setPayTime(order.getPayTime());
         detailVo.setRefundTime(order.getRefundTime());
+        detailVo.setCreateTime(order.getCreateTime());
         return detailVo;
     }
 

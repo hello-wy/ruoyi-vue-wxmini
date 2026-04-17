@@ -35,6 +35,18 @@ public class WxPayController {
     @Resource
     private IWxJobSignupPayService wxJobSignupPayService;
 
+    @ApiOperation("查询当前用户沙龙订单列表（需登录）")
+    @GetMapping("/salon/orders/my")
+    public AjaxResult mySalonOrders() {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxSalonPayService.listMyOrders(userId));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @ApiOperation("创建沙龙微信支付订单，返回 JSAPI 支付参数（需登录）")
     @PostMapping("/salon/orders/create")
     public AjaxResult createSalonOrder(@RequestBody @Validated WxSalonPayCreateOrderBo bo) {

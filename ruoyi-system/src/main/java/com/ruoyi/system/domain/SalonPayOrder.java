@@ -16,6 +16,7 @@ public class SalonPayOrder extends BaseEntity {
     private String wechatTransactionId;
     private String userId;
     private Long salonId;
+    private String title;
     private BigDecimal amount;
     private String status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -60,6 +61,14 @@ public class SalonPayOrder extends BaseEntity {
 
     public void setSalonId(Long salonId) {
         this.salonId = salonId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public BigDecimal getAmount() {

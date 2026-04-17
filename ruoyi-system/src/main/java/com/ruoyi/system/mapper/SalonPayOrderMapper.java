@@ -9,6 +9,8 @@ public interface SalonPayOrderMapper {
 
     List<SalonPayOrder> selectSalonPayOrderList(SalonPayOrder order);
 
+    List<SalonPayOrder> selectMySalonOrders(@Param("userId") String userId);
+
     SalonPayOrder selectLatestPaidOrderByUserIdAndSalonId(@Param("userId") String userId, @Param("salonId") Long salonId);
 
     int insertSalonPayOrder(SalonPayOrder order);

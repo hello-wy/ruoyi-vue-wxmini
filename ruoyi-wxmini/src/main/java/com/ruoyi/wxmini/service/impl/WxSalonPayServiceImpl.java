@@ -26,8 +26,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo> implements IWxSalonPayService {
@@ -46,6 +48,16 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
     private WxPayService wxPayService;
 
     @Override
+    public List<WxSalonPayOrderDetailVo> listMyOrders(String userId) {
+        List<SalonPayOrder> orders = salonPayOrderService.selectMySalonOrders(userId);
+        List<WxSalonPayOrderDetailVo> result = new ArrayList<>();
+        for (SalonPayOrder order : orders) {
+            result.add(toDetailVo(order));
+        }
+        return result;
+    }
+
+    @Override
     public WxPayParamVo createSalonOrder(String userId, WxSalonPayCreateOrderBo bo) throws Exception {
         SalonInfo salonInfo = salonInfoService.selectSalonInfoById(bo.getSalonId());
         if (salonInfo == null || salonInfo.getStatus() == null || salonInfo.getStatus() != 1L) {
@@ -59,23 +71,17 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
         payVo.setUserId(userId);
         payVo.setSalonId(bo.getSalonId());
         payVo.setAmount(salonInfo.getCurrentPrice());
-        payVo.setTitle(salonInfo.getTitle());
+        payVo.setTitle("沙龙活动："+salonInfo.getTitle());
         payVo.setOpenId(userInfo.getOpenId());
         return this.createOrder(userId, payVo);
     }
 
     @Override
     public WxSalonPayOrderDetailVo querySalonOrder(String userId, String orderNo) {
-        SalonPayOrder order = salonPayOrderService.selectSalonPayOrderByOrderNo(orderNo);
-        if (order == null || !userId.equals(order.getUserId())) {
-            throw new RuntimeException("订单不存在");
-        }
+        SalonPayOrder order = loadOwnedSalonOrder(userId, orderNo);
+        order = compensatePendingOrder(order);
         SalonInfo salonInfo = salonInfoService.selectSalonInfoById(order.getSalonId());
-        WxSalonPayOrderDetailVo detailVo = new WxSalonPayOrderDetailVo();
-        detailVo.setOrderNo(order.getOrderNo());
-        detailVo.setAmount(order.getAmount());
-        detailVo.setPayTime(order.getPayTime());
-        detailVo.setStatus(order.getStatus());
+        WxSalonPayOrderDetailVo detailVo = toDetailVo(order);
         detailVo.setTitle(salonInfo == null ? null : salonInfo.getTitle());
         return detailVo;
     }
@@ -180,6 +186,38 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
         }
         order.setStatus(STATUS_CANCELED);
         return salonPayOrderService.updateSalonPayOrder(order) > 0;
+    }
+
+    private WxSalonPayOrderDetailVo toDetailVo(SalonPayOrder order) {
+        WxSalonPayOrderDetailVo detailVo = new WxSalonPayOrderDetailVo();
+        detailVo.setOrderNo(order.getOrderNo());
+        detailVo.setSalonId(order.getSalonId());
+        detailVo.setTitle(order.getTitle());
+        detailVo.setAmount(order.getAmount());
+        detailVo.setPayTime(order.getPayTime());
+        detailVo.setCreateTime(order.getCreateTime());
+        detailVo.setStatus(order.getStatus());
+        return detailVo;
+    }
+
+    private SalonPayOrder loadOwnedSalonOrder(String userId, String orderNo) {
+        SalonPayOrder order = salonPayOrderService.selectSalonPayOrderByOrderNo(orderNo);
+        if (order == null || !userId.equals(order.getUserId())) {
+            throw new RuntimeException("订单不存在");
+        }
+        return order;
+    }
+
+    private SalonPayOrder compensatePendingOrder(SalonPayOrder order) {
+        if (!STATUS_PENDING.equals(order.getStatus())) {
+            return order;
+        }
+        try {
+            queryPayResultAndUpdOrderStatus(order.getOrderNo());
+        } catch (Exception e) {
+            throw new RuntimeException("同步支付状态失败", e);
+        }
+        return salonPayOrderService.selectSalonPayOrderByOrderNo(order.getOrderNo());
     }
 
     private boolean markOrderPaid(SalonPayOrder order, String transactionId, String requestId, Date payTime) {

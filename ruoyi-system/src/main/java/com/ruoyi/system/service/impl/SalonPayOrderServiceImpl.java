@@ -24,6 +24,11 @@ public class SalonPayOrderServiceImpl implements ISalonPayOrderService {
     }
 
     @Override
+    public List<SalonPayOrder> selectMySalonOrders(String userId) {
+        return salonPayOrderMapper.selectMySalonOrders(userId);
+    }
+
+    @Override
     public SalonPayOrder selectLatestPaidOrderByUserIdAndSalonId(String userId, Long salonId) {
         return salonPayOrderMapper.selectLatestPaidOrderByUserIdAndSalonId(userId, salonId);
     }

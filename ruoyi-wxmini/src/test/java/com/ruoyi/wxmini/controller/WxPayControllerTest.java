@@ -4,6 +4,7 @@ import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
+import com.ruoyi.wxmini.service.IWxJobSignupPayService;
 import com.ruoyi.wxmini.service.IWxSalonPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import com.ruoyi.wxmini.vo.WxSalonPayOrderDetailVo;
@@ -19,6 +20,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +35,8 @@ class WxPayControllerTest {
     private WxPayService wxPayService;
     @Mock
     private IWxSalonPayService wxSalonPayService;
+    @Mock
+    private IWxJobSignupPayService wxJobSignupPayService;
 
     @InjectMocks
     private WxPayController controller;
@@ -40,6 +44,14 @@ class WxPayControllerTest {
     @AfterEach
     void clearContext() {
         WxMiniUserContext.clear();
+    }
+
+    @Test
+    void mySalonOrdersShouldReturn200WhenServiceReturnsData() {
+        WxMiniUserContext.setCurrentUserId("user-1");
+        when(wxSalonPayService.listMyOrders("user-1")).thenReturn(Collections.singletonList(new WxSalonPayOrderDetailVo()));
+        AjaxResult result = controller.mySalonOrders();
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
     }
 
     @Test

@@ -8,6 +8,8 @@ public interface ISalonPayOrderService {
 
     List<SalonPayOrder> selectSalonPayOrderList(SalonPayOrder order);
 
+    List<SalonPayOrder> selectMySalonOrders(String userId);
+
     SalonPayOrder selectLatestPaidOrderByUserIdAndSalonId(String userId, Long salonId);
 
     int insertSalonPayOrder(SalonPayOrder order);

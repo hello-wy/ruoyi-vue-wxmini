@@ -10,6 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="wechatTransactionId" column="wechat_transaction_id"/>
         <result property="userId" column="user_id"/>
         <result property="salonId" column="salon_id"/>
+        <result property="title" column="title"/>
         <result property="amount" column="amount"/>
         <result property="status" column="status"/>
         <result property="payTime" column="pay_time"/>
@@ -37,6 +38,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null and status != ''">and status = #{status}</if>
         </where>
         order by create_time desc
+    </select>
+
+    <select id="selectMySalonOrders" resultMap="SalonPayOrderResult">
+        select spo.id,
+               spo.order_no,
+               spo.wechat_transaction_id,
+               spo.user_id,
+               spo.salon_id,
+               si.title,
+               spo.amount,
+               spo.status,
+               spo.pay_time,
+               spo.request_id,
+               spo.create_time,
+               spo.update_time
+        from salon_pay_order spo
+                 left join salon_info si on si.id = spo.salon_id
+        where spo.user_id = #{userId}
+        order by spo.create_time desc, spo.id desc
     </select>
 
     <select id="selectLatestPaidOrderByUserIdAndSalonId" resultMap="SalonPayOrderResult">

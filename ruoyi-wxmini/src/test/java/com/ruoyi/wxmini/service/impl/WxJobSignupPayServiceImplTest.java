@@ -1,6 +1,8 @@
 package com.ruoyi.wxmini.service.impl;
 
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
+import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
+import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -57,6 +59,7 @@ class WxJobSignupPayServiceImplTest {
         order.setAmount(new BigDecimal("50.00"));
         order.setStatus(JobSignupOrderStatusEnum.PAID.getCode());
         order.setPayTime(new Date());
+        order.setCreateTime(new Date());
         DailyJobs job = new DailyJobs();
         job.setId(1L);
         job.setTitle("日结助教");
@@ -67,6 +70,38 @@ class WxJobSignupPayServiceImplTest {
 
         assertEquals("日结助教", detail.getJobTitle());
         assertEquals(JobSignupOrderStatusEnum.PAID.getCode(), detail.getStatus());
+        assertEquals(order.getCreateTime(), detail.getCreateTime());
+    }
+
+    @Test
+    void should_compensate_pending_order_when_query_confirms_paid() throws Exception {
+        JobSignupOrder order = new JobSignupOrder();
+        order.setId(1L);
+        order.setOrderNo("order-1");
+        order.setUserId("user-1");
+        order.setJobId(1L);
+        order.setAmount(new BigDecimal("50.00"));
+        order.setStatus(JobSignupOrderStatusEnum.PENDING.getCode());
+        DailyJobs job = new DailyJobs();
+        job.setId(1L);
+        job.setTitle("日结助教");
+        job.setStatus(0L);
+        job.setSignupLimit(2);
+        when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
+        when(jobSignupOrderService.updateJobSignupOrder(order)).thenReturn(1);
+        when(dailyJobsService.selectDailyJobsById(1L)).thenReturn(job);
+        when(dailyJobsService.selectDailyJobsByIdForUpdate(1L)).thenReturn(job);
+        when(dailyJobsService.countPaidSignupOrders(1L, JobSignupOrderStatusEnum.PAID.getCode())).thenReturn(0);
+
+        WxPayOrderQueryV3Result queryResult = new WxPayOrderQueryV3Result();
+        queryResult.setTradeState("SUCCESS");
+        queryResult.setSuccessTime("2026-04-16T10:00:00+08:00");
+        when(wxPayService.queryOrderV3(any(WxPayOrderQueryV3Request.class))).thenReturn(queryResult);
+
+        WxJobSignupOrderDetailVo detail = service.queryJobOrder("user-1", "order-1");
+
+        assertEquals(JobSignupOrderStatusEnum.PAID.getCode(), detail.getStatus());
+        assertEquals("日结助教", detail.getJobTitle());
     }
 
     @Test
