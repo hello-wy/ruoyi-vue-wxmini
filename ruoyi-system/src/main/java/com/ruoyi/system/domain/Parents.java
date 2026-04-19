@@ -37,6 +37,10 @@ public class Parents extends BaseEntity
     @Excel(name = "平台用户ID")
     private Long systemUid;
 
+    /** 关联萌娃ID */
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long babyId;
+
     /** 地理位置文本（如：XX小区） */
     @Excel(name = "地理位置文本", readConverterExp = "如=：XX小区")
     private String location;
@@ -129,7 +133,17 @@ public class Parents extends BaseEntity
         return systemUid;
     }
 
-    public void setLocation(String location) 
+    public void setBabyId(Long babyId)
+    {
+        this.babyId = babyId;
+    }
+
+    public Long getBabyId()
+    {
+        return babyId;
+    }
+
+    public void setLocation(String location)
     {
         this.location = location;
     }
@@ -279,6 +293,7 @@ public class Parents extends BaseEntity
             .append("id", getId())
             .append("wechatUid", getWechatUid())
             .append("systemUid", getSystemUid())
+            .append("babyId", getBabyId())
             .append("location", getLocation())
             .append("geo", getGeo())
             .append("region", getRegion())

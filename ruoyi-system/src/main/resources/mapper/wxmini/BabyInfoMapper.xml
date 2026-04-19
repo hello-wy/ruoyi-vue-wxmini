@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wxmini.mapper.BabyInfoMapper">
+
+    <resultMap id="BabyInfoResult" type="BabyInfo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="realName" column="real_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="gender" column="gender"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="grade" column="grade"/>
+        <result property="specialNote" column="special_note"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectBabyInfoVo">
+        select id,
+               user_id,
+               real_name,
+               nick_name,
+               birth_date,
+               gender,
+               school_name,
+               grade,
+               special_note,
+               create_time,
+               update_time
+        from baby_info
+    </sql>
+
+    <select id="selectBabyInfoListByUserId" resultMap="BabyInfoResult">
+        <include refid="selectBabyInfoVo"/>
+        where user_id = #{userId}
+        order by create_time desc, id desc
+    </select>
+
+    <select id="selectBabyInfoByIdAndUserId" resultMap="BabyInfoResult">
+        <include refid="selectBabyInfoVo"/>
+        where id = #{id}
+          and user_id = #{userId}
+    </select>
+
+    <insert id="insertBabyInfo" parameterType="BabyInfo">
+        insert into baby_info (
+            id,
+            user_id,
+            real_name,
+            nick_name,
+            birth_date,
+            gender,
+            school_name,
+            grade,
+            special_note,
+            create_time,
+            update_time
+        ) values (
+            #{id},
+            #{userId},
+            #{realName},
+            #{nickName},
+            #{birthDate},
+            #{gender},
+            #{schoolName},
+            #{grade},
+            #{specialNote},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <update id="updateBabyInfo" parameterType="BabyInfo">
+        update baby_info
+        set real_name = #{realName},
+            nick_name = #{nickName},
+            birth_date = #{birthDate},
+            gender = #{gender},
+            school_name = #{schoolName},
+            grade = #{grade},
+            special_note = #{specialNote},
+            update_time = #{updateTime}
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <delete id="deleteBabyInfoByIdAndUserId">
+        delete from baby_info
+        where id = #{id}
+          and user_id = #{userId}
+    </delete>
+</mapper>
