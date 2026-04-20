@@ -12,6 +12,7 @@
         <result property="realName" column="real_name"/>
         <result property="nickName" column="nick_name"/>
         <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
         <result property="companyName" column="company_name"/>
         <result property="companyAddress" column="company_address"/>
         <result property="companyPosition" column="company_position"/>
@@ -20,6 +21,33 @@
         <result property="personalIntro" column="personal_intro"/>
         <result property="verified" column="verified"/>
         <result property="userType" column="user_type"/>
+    </resultMap>
+
+    <resultMap id="StudentListVoResult" type="com.ruoyi.system.domain.vo.StudentListVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="displayName" column="display_name"/>
+        <result property="realName" column="real_name"/>
+        <result property="userType" column="user_type"/>
+    </resultMap>
+
+    <resultMap id="StudentDetailVoResult" type="com.ruoyi.system.domain.vo.StudentDetailVo">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="displayName" column="display_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="phone" column="phone"/>
+        <result property="realName" column="real_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="gender" column="gender"/>
+        <result property="age" column="age"/>
+        <result property="userType" column="user_type"/>
+        <result property="companyName" column="company_name"/>
+        <result property="companyAddress" column="company_address"/>
+        <result property="companyPosition" column="company_position"/>
+        <result property="industry" column="industry"/>
+        <result property="workYears" column="work_years"/>
+        <result property="personalIntro" column="personal_intro"/>
     </resultMap>
 
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
@@ -35,6 +63,7 @@
                up.real_name,
                up.nick_name,
                up.gender,
+               up.age,
                up.company_name,
                up.company_address,
                up.company_position,
@@ -48,6 +77,53 @@
         from user_info ui
                  left join wx_user_profile up on up.uid = ui.id
         where ui.user_id = #{userId}
+        limit 1
+    </select>
+
+    <select id="selectAdminStudentList" parameterType="com.ruoyi.system.domain.bo.StudentQueryBo" resultMap="StudentListVoResult">
+        select ui.id,
+               ui.user_id,
+               ui.user_type,
+               up.real_name,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as display_name
+        from user_info ui
+                 left join wx_user_profile up on up.uid = ui.id
+        <where>
+            <if test="realName != null and realName != ''">
+                and up.real_name like concat('%', #{realName}, '%')
+            </if>
+        </where>
+        order by ui.create_time desc, ui.id desc
+    </select>
+
+    <select id="selectAdminStudentDetailById" parameterType="Long" resultMap="StudentDetailVoResult">
+        select ui.id,
+               ui.user_id,
+               ui.user_name,
+               ui.phone,
+               ui.user_type,
+               up.real_name,
+               up.nick_name,
+               up.gender,
+               up.age,
+               up.company_name,
+               up.company_address,
+               up.company_position,
+               up.industry,
+               up.work_years,
+               up.personal_intro,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as display_name
+        from user_info ui
+                 left join wx_user_profile up on up.uid = ui.id
+        where ui.id = #{id}
         limit 1
     </select>
 </mapper>

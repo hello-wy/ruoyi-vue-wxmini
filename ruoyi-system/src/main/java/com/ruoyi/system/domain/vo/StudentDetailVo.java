@@ -1,44 +1,63 @@
-package com.ruoyi.wxmini.domain;
+package com.ruoyi.system.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.ruoyi.common.core.domain.BaseEntity;
+public class StudentDetailVo {
 
-@TableName("wx_user_profile")
-public class WxUserProfile extends BaseEntity {
-    private static final long serialVersionUID = 1L;
-
-    @TableId(value = "uid", type = IdType.INPUT)
-    private Long userInfoId;
-
+    private Long id;
+    private String userId;
+    private String displayName;
+    private String userName;
+    private String phone;
     private String realName;
-
     private String nickName;
-
     private Integer gender;
-
     private Integer age;
-
+    private Integer userType;
+    private String userTypeLabel;
     private String companyName;
-
     private String companyAddress;
-
     private String companyPosition;
-
     private String industry;
-
     private String workYears;
-
     private String personalIntro;
 
-
-    public Long getUserInfoId() {
-        return userInfoId;
+    public Long getId() {
+        return id;
     }
 
-    public void setUserInfoId(Long userInfoId) {
-        this.userInfoId = userInfoId;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getRealName() {
@@ -71,6 +90,22 @@ public class WxUserProfile extends BaseEntity {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public Integer getUserType() {
+        return userType;
+    }
+
+    public void setUserType(Integer userType) {
+        this.userType = userType;
+    }
+
+    public String getUserTypeLabel() {
+        return userTypeLabel;
+    }
+
+    public void setUserTypeLabel(String userTypeLabel) {
+        this.userTypeLabel = userTypeLabel;
     }
 
     public String getCompanyName() {

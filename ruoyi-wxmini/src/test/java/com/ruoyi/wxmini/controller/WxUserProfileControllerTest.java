@@ -73,6 +73,16 @@ class WxUserProfileControllerTest {
     }
 
     @Test
+    void switchUserTypeShouldReturn200WhenAuntTypeAccepted() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
+        bo.setUserType(3);
+        when(wxUserProfileService.switchCurrentUserType(USER_ID, 3)).thenReturn(1);
+        AjaxResult result = controller.switchUserType(bo);
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
     void switchUserTypeShouldReturnNon200WhenRejected() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
         WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();

@@ -1,12 +1,12 @@
 package com.ruoyi.wxmini.service.impl;
 
+import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
 import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,8 +15,8 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WxUserProfileServiceImplTest {
@@ -48,7 +48,22 @@ class WxUserProfileServiceImplTest {
     }
 
     @Test
-    void getCurrentUserProfileShouldExposeMerchantAsSwitchableType() {
+    void switchCurrentUserTypeShouldAllowAuntType() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setUserType(0);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(userInfoService.updateUserInfo(userInfo)).thenReturn(1);
+
+        int rows = service.switchCurrentUserType(USER_ID, 3);
+
+        assertEquals(1, rows);
+        assertEquals(3, userInfo.getUserType());
+        verify(userInfoService).updateUserInfo(userInfo);
+    }
+
+    @Test
+    void getCurrentUserProfileShouldExposeAuntAsSwitchableType() {
         WxUserProfileVo profile = new WxUserProfileVo();
         profile.setUserInfoId(1L);
         profile.setUserName("张三");
@@ -58,6 +73,34 @@ class WxUserProfileServiceImplTest {
         WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
 
         assertTrue(result.getCanSwitchUserType());
-        assertEquals(Arrays.asList(0, 1, 2), result.getSwitchableUserTypes());
+        assertEquals(Arrays.asList(0, 1, 2, 3), result.getSwitchableUserTypes());
+    }
+
+    @Test
+    void getCurrentUserProfileShouldReturnAuntPrimaryActionAndLabel() {
+        WxUserProfileVo profile = new WxUserProfileVo();
+        profile.setUserInfoId(1L);
+        profile.setUserName("李阿姨");
+        profile.setUserType(3);
+        profile.setAge(48);
+        when(wxUserProfileMapper.selectProfileDetailByUserId(USER_ID)).thenReturn(profile);
+
+        WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
+
+        assertEquals("阿姨", result.getUserTypeLabel());
+        assertEquals("/pages/mine/info/index", result.getPrimaryAction());
+        assertEquals(Integer.valueOf(48), result.getAge());
+    }
+
+    @Test
+    void getAdminStudentDetailShouldKeepAuntAgeData() {
+        StudentDetailVo detail = new StudentDetailVo();
+        detail.setUserType(3);
+        detail.setAge(48);
+        when(wxUserProfileMapper.selectAdminStudentDetailById(9L)).thenReturn(detail);
+
+        StudentDetailVo result = wxUserProfileMapper.selectAdminStudentDetailById(9L);
+
+        assertEquals(Integer.valueOf(48), result.getAge());
     }
 }

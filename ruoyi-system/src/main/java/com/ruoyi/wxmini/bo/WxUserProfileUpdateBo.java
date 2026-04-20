@@ -12,6 +12,8 @@ public class WxUserProfileUpdateBo {
 
     private Integer gender;
 
+    private Integer age;
+
     private String companyName;
 
     private String companyAddress;
@@ -62,6 +64,14 @@ public class WxUserProfileUpdateBo {
 
     public void setGender(Integer gender) {
         this.gender = gender;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 
     public String getCompanyName() {

@@ -21,6 +21,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     private static final Integer USER_TYPE_PARENT = 0;
     private static final Integer USER_TYPE_STUDENT = 1;
     private static final Integer USER_TYPE_MERCHANT = 2;
+    private static final Integer USER_TYPE_AUNT = 3;
 
     @Resource
     private IUserInfoService userInfoService;
@@ -40,7 +41,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         profileVo.setUserTypeLabel(resolveUserTypeLabel(profileVo.getUserType()));
         profileVo.setPrimaryAction(resolvePrimaryAction(profileVo.getUserType()));
         profileVo.setCanSwitchUserType(true);
-        profileVo.setSwitchableUserTypes(Arrays.asList(USER_TYPE_PARENT, USER_TYPE_STUDENT, USER_TYPE_MERCHANT));
+        profileVo.setSwitchableUserTypes(Arrays.asList(USER_TYPE_PARENT, USER_TYPE_STUDENT, USER_TYPE_MERCHANT, USER_TYPE_AUNT));
         return profileVo;
     }
 
@@ -68,6 +69,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         profile.setRealName(bo.getRealName());
         profile.setNickName(bo.getNickName());
         profile.setGender(bo.getGender());
+        profile.setAge(bo.getAge());
         profile.setCompanyName(bo.getCompanyName());
         profile.setCompanyAddress(bo.getCompanyAddress());
         profile.setCompanyPosition(bo.getCompanyPosition());
@@ -106,7 +108,10 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     }
 
     private boolean isFrontendAllowedUserType(Integer userType) {
-        return USER_TYPE_PARENT.equals(userType) || USER_TYPE_STUDENT.equals(userType) || USER_TYPE_MERCHANT.equals(userType);
+        return USER_TYPE_PARENT.equals(userType)
+                || USER_TYPE_STUDENT.equals(userType)
+                || USER_TYPE_MERCHANT.equals(userType)
+                || USER_TYPE_AUNT.equals(userType);
     }
 
     private String resolveUserTypeLabel(Integer userType) {
@@ -119,7 +124,10 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         if (USER_TYPE_MERCHANT.equals(userType)) {
             return "商家";
         }
-        return "未选择";
+        if (USER_TYPE_AUNT.equals(userType)) {
+            return "阿姨";
+        }
+        return "未知";
     }
 
     private String resolvePrimaryAction(Integer userType) {
@@ -131,6 +139,9 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         }
         if (USER_TYPE_MERCHANT.equals(userType)) {
             return "/pages/jobs/apply";
+        }
+        if (USER_TYPE_AUNT.equals(userType)) {
+            return "/pages/mine/info/index";
         }
         return "/pages/guide/index";
     }
