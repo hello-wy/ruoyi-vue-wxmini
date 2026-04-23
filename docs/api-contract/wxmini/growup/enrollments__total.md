@@ -2,26 +2,46 @@
 
 ## 用途
 
-获取当前登录用户的总学时余量。
+- `GET`：获取当前登录用户的总学时余量（需登录）。
 
 ## 鉴权
 
-- 需要 `Wx-Authorization: Bearer <token>`
+- 需要 `Wx-Authorization: Bearer <token>`。
 
-## 成功响应示例
+## 请求头
+
+- `Wx-Authorization: Bearer <token>`
+
+## Path 参数
+
+- 无。
+
+## GET 请求
+
+### Query 参数
+
+- 无。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
-  "data": 20
+  "data": {
+    "id": 1
+  }
 }
 ```
 
-## 失败说明
+### 失败场景或特殊说明
 
-- 当前 token 对应不到用户时，返回 `code != 200` 且 `msg = 用户不存在`
+- 未登录或 token 无效时，请求会失败。
 
-## 实现来源
+## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxGrowupController.java`

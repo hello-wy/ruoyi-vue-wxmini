@@ -2,30 +2,31 @@
 
 ## 用途
 
-微信小程序匿名登录入口。前端传 `appid` 和 `code`，后端换取微信会话信息，按 `openId` 自动注册或查找用户，并返回小程序业务 token 与临时会话信息。
+- `GET`：GET /wxmini/login。
 
 ## 鉴权
 
-- 公开接口
+- 公开接口。
 
 ## 请求头
 
-- 无
+- 无。
 
 ## Path 参数
 
-- 无
+- 无。
 
-## Query 参数
+## GET 请求
 
-- `appid`：必填，小程序 AppID
-- `code`：必填，微信登录临时凭证
+### Query 参数
 
-## Body 示例
+- 无。
 
-- 无
+### Body 示例
 
-## 成功响应示例
+- 无。
+
+### 成功响应示例
 
 ```json
 {
@@ -43,15 +44,12 @@
 }
 ```
 
-## 失败场景或特殊说明
+### 失败场景或特殊说明
 
-- `code != 200` 时，`msg` 可能为 `empty jscode` 或 `can not find appid=[xxx] config`
-- 返回字段与 `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/bo/WxUserInfo.java` 一致，不返回 `unionId`
-- `phone` 为空表示用户尚未完成手机号实时验证。前端必须继续调用 `POST /wxmini/user/phone`，登录态才算补全
-- `userName` 为空时后端默认返回 `微信用户`
-- `userType` 为空时后端返回 `null`，表示未选择身份
+- 以当前 controller/service 的实际校验结果为准。
+- 登录成功后若 `phone` 仍为空，前端需要继续调用 `POST /wxmini/user/phone` 完成手机号补全。
+- `userType` 允许为空，表示当前用户尚未选择身份。
 
 ## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxLoginController.java`
-- `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/bo/WxUserInfo.java`

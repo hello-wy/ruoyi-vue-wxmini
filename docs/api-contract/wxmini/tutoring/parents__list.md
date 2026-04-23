@@ -2,22 +2,38 @@
 
 ## 用途
 
-分页查询有效家教单列表。
+- `GET`：GET /wxmini/tutoring/parents/list。
 
 ## 鉴权
 
-- 公开接口
+- 公开接口。
 
-## Query 参数
+## 请求头
 
-- `pageNum`：默认 1
-- `pageSize`：默认 10
-- `subject`：可选
-- `region`：可选
-- `methods`：可选
-- `grade`：可选
+- 无。
 
-## 成功响应示例
+## Path 参数
+
+- 无。
+
+## GET 请求
+
+### Query 参数
+
+- `pageNum`：若依标准分页页码。
+- `pageSize`：若依标准分页每页条数。
+- `1`：`long`，默认 `1`。
+- `10`：`long`，默认 `10`。
+- `subject`：`String`。
+- `region`：`String`。
+- `methods`：`Long`。
+- `grade`：`String`。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
 
 ```json
 {
@@ -26,13 +42,16 @@
   "total": 1,
   "rows": [
     {
-      "id": 1,
-      "status": 0
+      "id": 1
     }
   ]
 }
 ```
 
-## 实现来源
+### 失败场景或特殊说明
+
+- 以当前 controller/service 的实际校验结果为准。
+
+## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxTutoringController.java`

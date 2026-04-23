@@ -2,29 +2,46 @@
 
 ## 用途
 
-获取课程或讲座详情。
+- `GET`：获取课程/讲座详细信息（公开，附带讲师信息）。
 
 ## 鉴权
 
-- 公开接口
+- 公开接口。
+
+## 请求头
+
+- 无。
 
 ## Path 参数
 
-- `id`：必填，课程或讲座 ID
+- `id`：路径参数。
 
-## 成功响应示例
+## GET 请求
+
+### Query 参数
+
+- 无。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "id": 1,
-    "title": "课程标题"
+    "id": 1
   }
 }
 ```
 
-## 实现来源
+### 失败场景或特殊说明
+
+- 以当前 controller/service 的实际校验结果为准。
+
+## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxGrowupController.java`

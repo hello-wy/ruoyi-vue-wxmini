@@ -2,18 +2,33 @@
 
 ## 用途
 
-获取课程或讲座分页列表，公开访问。返回值是若依分页结构。
+- `GET`：获取课程/讲座列表（公开，附带讲师姓名）。
 
 ## 鉴权
 
-- 公开接口
+- 公开接口。
 
-## Query 参数
+## 请求头
 
-- 继承 `Lectures` 查询字段
-- 分页参数沿用若依：`pageNum`、`pageSize`
+- 无。
 
-## 成功响应示例
+## Path 参数
+
+- 无。
+
+## GET 请求
+
+### Query 参数
+
+- `pageNum`：若依标准分页页码。
+- `pageSize`：若依标准分页每页条数。
+- 其余筛选字段沿用 `Lectures` 对象。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
 
 ```json
 {
@@ -22,19 +37,16 @@
   "total": 1,
   "rows": [
     {
-      "id": 1,
-      "title": "课程标题",
-      "questionnaire": []
+      "id": 1
     }
   ]
 }
 ```
 
-## 特殊说明
+### 失败场景或特殊说明
 
-- 当前实现会为列表第一项补充最近问卷数据。
-- 文档未声明的筛选字段，应以 `Lectures` 实体和 controller 当前实现为准。
+- 以当前 controller/service 的实际校验结果为准。
 
-## 实现来源
+## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxGrowupController.java`

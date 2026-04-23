@@ -1,17 +1,50 @@
 # POST /wxmini/profile/user-type/init
 
 ## 用途
-首次设置当前登录用户身份，仅允许选择家长(`0`)或学生(`1`)。
+
+- `POST`：首次设置当前登录用户身份。
 
 ## 鉴权
-- 需要 `Wx-Authorization: Bearer <token>`
 
-## 请求体
+- 需要 `Wx-Authorization: Bearer <token>`。
+
+## 请求头
+
+- `Wx-Authorization: Bearer <token>`
+
+## Path 参数
+
+- 无。
+
+## POST 请求
+
+### Query 参数
+
+- 无。
+
+### Body 示例
+
 ```json
 {
-  "userType": 0
+  "userType": 2
 }
 ```
 
-## 字段说明
-- `userType`: number，`0`=家长，`1`=学生；普通切换入口不允许传 `2`
+### 成功响应示例
+
+```json
+{
+  "code": 200,
+  "msg": "操作成功"
+}
+```
+
+### 失败场景或特殊说明
+
+- 未登录或 token 无效时，请求会失败。
+- `userType` 为空时：`msg = 请选择用户身份`。
+- 当前服务实现允许初始化为 `0=家长`、`1=学生`、`2=商家`、`3=阿姨`。
+
+## 实现来源文件
+
+- `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxUserProfileController.java`

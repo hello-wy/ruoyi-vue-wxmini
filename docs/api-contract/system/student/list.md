@@ -1,22 +1,41 @@
 # GET /system/student/list
 
 ## 用途
-查询管理后台学员分页列表，支持按 `wx_user_profile.real_name` 搜索。
+
+- `GET`：查询学员分页列表。
 
 ## 鉴权
-- 需要 `Authorization: Bearer <token>`
-- 需要具备权限标识：`system:student:list`
 
-## 请求参数
-- `pageNum`: 页码
-- `pageSize`: 每页条数
-- `realName`: 学员姓名关键字，匹配 `wx_user_profile.real_name`
+- 需要 `Authorization: Bearer <token>`。
+- 需要具备权限标识：`@ss.hasPermi('system:student:list')`。
 
-## 成功响应示例
+## 请求头
+
+- `Authorization: Bearer <token>`
+
+## Path 参数
+
+- 无。
+
+## GET 请求
+
+### Query 参数
+
+- `pageNum`：若依标准分页页码。
+- `pageSize`：若依标准分页每页条数。
+- 其余筛选字段沿用 `StudentQueryBo` 对象。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
+
 ```json
 {
   "code": 200,
   "msg": "查询成功",
+  "total": 1,
   "rows": [
     {
       "id": 1,
@@ -26,7 +45,15 @@
       "userType": 1,
       "userTypeLabel": "学生"
     }
-  ],
-  "total": 1
+  ]
 }
 ```
+
+### 失败场景或特殊说明
+
+- 未登录或 token 无效时，请求会失败。
+- 无权限时，请求会被拦截。
+
+## 实现来源文件
+
+- `ruoyi-admin/src/main/java/com/ruoyi/web/controller/bussiness/StudentController.java`

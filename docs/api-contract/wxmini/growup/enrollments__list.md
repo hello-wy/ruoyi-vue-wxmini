@@ -2,17 +2,32 @@
 
 ## 用途
 
-获取当前登录小程序用户的学籍列表。
+- `GET`：获取当前登录用户的个人学籍列表（需登录）。
 
 ## 鉴权
 
-- 需要 `Wx-Authorization: Bearer <token>`
+- 需要 `Wx-Authorization: Bearer <token>`。
 
-## Query 参数
+## 请求头
 
-- 分页参数沿用若依：`pageNum`、`pageSize`
+- `Wx-Authorization: Bearer <token>`
 
-## 成功响应示例
+## Path 参数
+
+- 无。
+
+## GET 请求
+
+### Query 参数
+
+- `pageNum`：若依标准分页页码。
+- `pageSize`：若依标准分页每页条数。
+
+### Body 示例
+
+- 无。
+
+### 成功响应示例
 
 ```json
 {
@@ -21,17 +36,16 @@
   "total": 1,
   "rows": [
     {
-      "lectureId": 1,
-      "remain": 10
+      "id": 1
     }
   ]
 }
 ```
 
-## 特殊说明
+### 失败场景或特殊说明
 
-- 若当前 token 对应用户不存在，返回空列表，不抛错。
+- 未登录或 token 无效时，请求会失败。
 
-## 实现来源
+## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxGrowupController.java`
