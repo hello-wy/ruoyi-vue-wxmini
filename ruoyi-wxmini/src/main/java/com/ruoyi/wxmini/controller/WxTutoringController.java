@@ -12,13 +12,16 @@ import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import com.ruoyi.wxmini.vo.WxTutorDetailVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -79,9 +82,27 @@ public class WxTutoringController extends BaseController {
         filter.setSubjects(subject);
         filter.setAreas(region);
         filter.setMethods(methods);
+        filter.setDegree(grade);
         startPage();
         List<Tutors> list = tutorsService.selectCertifiedTutorsList(filter);
         return getDataTable(list);
+    }
+
+    /**
+     * 教员详情（公开接口，仅返回小程序详情页需要的公开字段）
+     */
+    @ApiOperation("教员详情（公开）")
+    @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @Anonymous
+    @GetMapping("/tutors/{id}")
+    public AjaxResult tutorDetail(@PathVariable("id") Long id) {
+        Tutors tutors = tutorsService.selectTutorsById(id);
+        if (tutors == null || tutors.getIsCertified() == null || !tutors.getIsCertified().equals(1L)) {
+            return AjaxResult.error("教员不存在");
+        }
+        WxTutorDetailVo detailVo = new WxTutorDetailVo();
+        BeanUtils.copyProperties(tutors, detailVo);
+        return AjaxResult.success(detailVo);
     }
 
     /**
