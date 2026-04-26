@@ -69,6 +69,17 @@ public class UserInfoServiceImpl implements IUserInfoService {
     }
 
     @Override
+    public int updateRealnameInfo(String userId, String realName, String idCard) {
+        UserInfo userInfo = userInfoMapper.selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return 0;
+        }
+        userInfo.setRealName(realName);
+        userInfo.setIdCard(idCard);
+        return updateUserInfo(userInfo);
+    }
+
+    @Override
     public UserInfo selectUserInfoByOpenId(String openId) {
         return userInfoMapper.selectUserInfoByOpenId(openId);
     }

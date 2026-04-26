@@ -56,6 +56,18 @@ public class UserInfo extends BaseEntity {
     @Excel(name = "用户头像")
     private String avatarUrl;
 
+    /**
+     * 真实姓名
+     */
+    @Excel(name = "真实姓名")
+    private String realName;
+
+    /**
+     * 身份证号码
+     */
+    @Excel(name = "身份证号码")
+    private String idCard;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -118,5 +130,21 @@ public class UserInfo extends BaseEntity {
 
     public String getAvatarUrl() {
         return avatarUrl;
+    }
+
+    public String getRealName() {
+        return realName;
+    }
+
+    public void setRealName(String realName) {
+        this.realName = realName;
+    }
+
+    public String getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(String idCard) {
+        this.idCard = idCard;
     }
 }

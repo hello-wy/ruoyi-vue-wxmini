@@ -42,7 +42,19 @@
   "total": 1,
   "rows": [
     {
-      "id": 1
+      "id": 1,
+      "identity": 0,
+      "status": 1,
+      "realName": "张老师",
+      "school": "南京大学",
+      "major": "数学与应用数学",
+      "subjects": "8,10",
+      "areas": "320115,320114",
+      "methods": 1,
+      "degree": 1,
+      "city": "江宁区",
+      "certificateList": "教师资格证,英语六级",
+      "certificates": "https://example.com/cert.jpg"
     }
   ]
 }

@@ -35,7 +35,7 @@ export function updateTutors(data) {
   })
 }
 
-// 审核教员认证状态
+// 审核大学生/教员状态
 export function reviewTutors(data) {
   return request({
     url: '/system/tutors/review',

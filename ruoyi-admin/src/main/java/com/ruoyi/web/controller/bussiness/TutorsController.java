@@ -7,7 +7,6 @@ import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +27,6 @@ import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 
-/**
- * 大学生/教员Controller
- * 
- * @author ruoyi
- * @date 2026-03-05
- */
 @Api(tags = "大学生/教员管理")
 @RestController
 @RequestMapping("/system/tutors")
@@ -42,9 +35,6 @@ public class TutorsController extends BaseController
     @Autowired
     private ITutorsService tutorsService;
 
-    /**
-     * 查询大学生/教员列表
-     */
     @ApiOperation("查询大学生/教员列表")
     @PreAuthorize("@ss.hasPermi('system:tutors:list')")
     @GetMapping("/list")
@@ -55,9 +45,6 @@ public class TutorsController extends BaseController
         return getDataTable(list);
     }
 
-    /**
-     * 导出大学生/教员列表
-     */
     @ApiOperation("导出大学生/教员列表")
     @PreAuthorize("@ss.hasPermi('system:tutors:export')")
     @Log(title = "大学生/教员", businessType = BusinessType.EXPORT)
@@ -69,9 +56,6 @@ public class TutorsController extends BaseController
         util.exportExcel(response, list, "大学生/教员数据");
     }
 
-    /**
-     * 获取大学生/教员详细信息
-     */
     @ApiOperation("获取大学生/教员详细信息")
     @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @Anonymous
@@ -81,9 +65,6 @@ public class TutorsController extends BaseController
         return success(tutorsService.selectTutorsById(id));
     }
 
-    /**
-     * 新增大学生/教员
-     */
     @ApiOperation("新增大学生/教员（自动生成雪花ID）")
     @PreAuthorize("@ss.hasPermi('system:tutors:add')")
     @Log(title = "大学生/教员", businessType = BusinessType.INSERT)
@@ -96,9 +77,6 @@ public class TutorsController extends BaseController
         return AjaxResult.success("操作成功", snowflakeId);
     }
 
-    /**
-     * 修改大学生/教员
-     */
     @ApiOperation("修改大学生/教员信息")
     @PreAuthorize("@ss.hasPermi('system:tutors:edit')")
     @Log(title = "大学生/教员", businessType = BusinessType.UPDATE)
@@ -108,39 +86,33 @@ public class TutorsController extends BaseController
         return toAjax(tutorsService.updateTutors(tutors));
     }
 
-    /**
-     * 审核教员（修改 isCertified：0-待审核 / 1-已通过 / 2-已拒绝）
-     */
-    @ApiOperation("审核教员认证状态（0-待审核 1-已通过 2-已拒绝）")
+    @ApiOperation("审核教员状态（0-待审核 1-已通过 2-已拒绝）")
     @PreAuthorize("@ss.hasPermi('system:tutors:review')")
     @Log(title = "大学生/教员审核", businessType = BusinessType.UPDATE)
     @PutMapping("/review")
     public AjaxResult review(@RequestBody Tutors tutors)
     {
-        if (tutors == null || tutors.getId() == null || tutors.getIsCertified() == null)
+        if (tutors == null || tutors.getId() == null || tutors.getStatus() == null)
         {
             return AjaxResult.error("参数不能为空");
         }
-        Long isCertified = tutors.getIsCertified();
-        if (!isCertified.equals(0L) && !isCertified.equals(1L) && !isCertified.equals(2L))
+        Long status = tutors.getStatus();
+        if (!status.equals(0L) && !status.equals(1L) && !status.equals(2L))
         {
-            return AjaxResult.error("isCertified 参数非法，只允许 0/1/2");
+            return AjaxResult.error("status 参数非法，只允许 0/1/2");
         }
         Tutors update = new Tutors();
         update.setId(tutors.getId());
-        update.setIsCertified(isCertified);
+        update.setStatus(status);
         int rows = tutorsService.updateTutors(update);
         return rows > 0 ? AjaxResult.success("审核操作成功") : AjaxResult.error("操作失败，记录不存在");
     }
 
-    /**
-     * 删除大学生/教员
-     */
     @ApiOperation("删除大学生/教员")
     @ApiImplicitParam(name = "ids", value = "教员ID数组", required = true, dataType = "Long[]", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:tutors:remove')")
     @Log(title = "大学生/教员", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(tutorsService.deleteTutorsByIds(ids));

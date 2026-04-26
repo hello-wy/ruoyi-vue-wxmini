@@ -26,11 +26,11 @@ class TutorsControllerTest {
     private TutorsController controller;
 
     @Test
-    void reviewShouldUpdateOnlyCertificationStatus() {
+    void reviewShouldUpdateOnlyStatus() {
         Tutors request = new Tutors();
         request.setId(100L);
-        request.setIsCertified(1L);
-        request.setTitle("不应更新的标题");
+        request.setStatus(1L);
+        request.setIdentity(2L);
         when(tutorsService.updateTutors(any(Tutors.class))).thenReturn(1);
 
         AjaxResult result = controller.review(request);
@@ -40,20 +40,20 @@ class TutorsControllerTest {
         verify(tutorsService).updateTutors(captor.capture());
         Tutors update = captor.getValue();
         assertEquals(100L, update.getId());
-        assertEquals(1L, update.getIsCertified());
-        assertEquals(null, update.getTitle());
+        assertEquals(1L, update.getStatus());
+        assertEquals(null, update.getIdentity());
     }
 
     @Test
-    void reviewShouldRejectInvalidCertificationStatus() {
+    void reviewShouldRejectInvalidStatus() {
         Tutors request = new Tutors();
         request.setId(100L);
-        request.setIsCertified(3L);
+        request.setStatus(3L);
 
         AjaxResult result = controller.review(request);
 
         assertEquals(500, result.get(AjaxResult.CODE_TAG));
-        assertEquals("isCertified 参数非法，只允许 0/1/2", result.get(AjaxResult.MSG_TAG));
+        assertEquals("status 参数非法，只允许 0/1/2", result.get(AjaxResult.MSG_TAG));
         verify(tutorsService, never()).updateTutors(any(Tutors.class));
     }
 }

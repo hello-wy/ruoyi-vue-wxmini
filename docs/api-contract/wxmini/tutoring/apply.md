@@ -2,7 +2,7 @@
 
 ## 用途
 
-- `POST`：申请成为教员（isCertified 默认 0 待审核，需登录）。
+- `POST`：申请成为教员（status 默认 0 待审核，需登录）。
 
 ## 鉴权
 
@@ -29,11 +29,13 @@
   "realName": "张三",
   "school": "南京大学",
   "major": "数学",
-  "subjects": "数学,物理",
-  "areas": "鼓楼区",
+  "identity": 0,
+  "city": "江宁区",
+  "subjects": "8,10",
+  "areas": "320115,320114",
   "methods": 1,
   "degree": 1,
-  "certificate": "教师资格证",
+  "certificateList": "教师资格证,英语六级",
   "certificates": "https://example.com/cert.jpg"
 }
 ```
@@ -43,7 +45,8 @@
 ```json
 {
   "code": 200,
-  "msg": "操作成功"
+  "msg": "申请成功，请等待审核",
+  "data": 1234567890123456789
 }
 ```
 

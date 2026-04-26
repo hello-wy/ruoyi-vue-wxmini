@@ -1,5 +1,6 @@
 package com.ruoyi.wxmini.controller;
 
+import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
@@ -11,14 +12,20 @@ import com.ruoyi.wxmini.util.WxMiniUserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,9 +49,24 @@ class WxTutoringControllerTest {
     }
 
     @Test
+    void listTutorsShouldBeAnonymous() throws Exception {
+        Method method = WxTutoringController.class.getMethod(
+                "listTutors",
+                long.class,
+                long.class,
+                String.class,
+                String.class,
+                Long.class,
+                Long.class
+        );
+
+        assertNotNull(method.getAnnotation(Anonymous.class));
+    }
+
+    @Test
     void myTutorShouldReturn200WhenTutorMissing() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
-        when(tutorsService.selectTutorsByUid(123L)).thenReturn(null);
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(null);
         AjaxResult result = controller.myTutor();
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
     }
@@ -52,11 +74,59 @@ class WxTutoringControllerTest {
     @Test
     void myTutorShouldReturn200WhenTutorFound() {
         Tutors tutor = new Tutors();
-        tutor.setUid(123L);
+        tutor.setUid(USER_ID);
         WxMiniUserContext.setCurrentUserId(USER_ID);
-        when(tutorsService.selectTutorsByUid(123L)).thenReturn(tutor);
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(tutor);
         AjaxResult result = controller.myTutor();
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void applyTutorShouldPersistRealnameToUserInfoInsteadOfTutors() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        request.setSchool("南大");
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(null);
+        when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(1);
+        when(tutorsService.insertTutors(any(Tutors.class))).thenAnswer(invocation -> {
+            Tutors tutor = invocation.getArgument(0);
+            tutor.setId(1001L);
+            return 1;
+        });
+
+        AjaxResult result = controller.applyTutor(request);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals("申请成功，请等待审核", result.get(AjaxResult.MSG_TAG));
+        assertEquals(1001L, result.get(AjaxResult.DATA_TAG));
+        verify(userInfoService).updateRealnameInfo(USER_ID, "张三", "110105199001011234");
+        ArgumentCaptor<Tutors> captor = ArgumentCaptor.forClass(Tutors.class);
+        verify(tutorsService).insertTutors(captor.capture());
+        Tutors saved = captor.getValue();
+        assertEquals(USER_ID, saved.getUid());
+        assertEquals(0L, saved.getStatus());
+        assertEquals(1001L, saved.getId());
+        assertNull(saved.getRealName());
+        assertNull(saved.getIdCard());
+        assertEquals("南大", saved.getSchool());
+    }
+
+    @Test
+    void applyTutorShouldReturnErrorWhenUserInfoMissing() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(null);
+        when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(0);
+
+        AjaxResult result = controller.applyTutor(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("用户不存在", result.get(AjaxResult.MSG_TAG));
+        verify(tutorsService, never()).insertTutors(any(Tutors.class));
     }
 
     @Test

@@ -13,6 +13,8 @@
         <result property="openId" column="open_id"/>
         <result property="unionId" column="union_id"/>
         <result property="avatarUrl" column="avatar_url"/>
+        <result property="realName" column="real_name"/>
+        <result property="idCard" column="id_card"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -26,6 +28,8 @@
                open_id,
                union_id,
                avatar_url,
+               real_name,
+               id_card,
                create_time,
                update_time
         from user_info
@@ -59,6 +63,8 @@
             <if test="openId != null">open_id,</if>
             <if test="unionId != null">union_id,</if>
             <if test="avatarUrl != null">avatar_url,</if>
+            <if test="realName != null and realName != ''">real_name,</if>
+            <if test="idCard != null and idCard != ''">id_card,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -70,6 +76,8 @@
             <if test="openId != null">#{openId},</if>
             <if test="unionId != null">#{unionId},</if>
             <if test="avatarUrl != null">#{avatarUrl},</if>
+            <if test="realName != null and realName != ''">#{realName},</if>
+            <if test="idCard != null and idCard != ''">#{idCard},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -85,6 +93,8 @@
             <if test="openId != null">open_id = #{openId},</if>
             <if test="unionId != null">union_id = #{unionId},</if>
             <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>

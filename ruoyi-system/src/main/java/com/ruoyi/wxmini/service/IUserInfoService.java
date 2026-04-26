@@ -36,6 +36,8 @@ public interface IUserInfoService {
      */
     public int updateUserInfo(UserInfo userInfo);
 
+    int updateRealnameInfo(String userId, String realName, String idCard);
+
     UserInfo selectUserInfoByOpenId(String openId);
 
     UserInfo selectUserInfoByUserId(String userId);
