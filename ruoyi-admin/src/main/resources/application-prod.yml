@@ -1,3 +1,6 @@
+ruoyi:
+  profile: /home/zhiyujia/upload
+
 # 数据源配置
 spring:
   datasource:

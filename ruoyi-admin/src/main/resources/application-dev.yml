@@ -1,3 +1,6 @@
+ruoyi:
+    profile: /Users/wuyang/Documents/site/zhiyujia/ruoyi-vue-wxmini/uploadPath
+
 # 数据源配置
 spring:
     datasource:
