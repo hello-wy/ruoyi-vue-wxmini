@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,11 +88,11 @@ public class WxCommonController {
 
             Path avatarDir = Paths.get(RuoYiConfig.getProfile(), "avatar");
             Files.createDirectories(avatarDir);
-            deleteOldFiles(avatarDir, userId, extension);
+            deleteOldFiles(avatarDir, userId, null);
 
-            String fileName = userId + "." + extension;
+            String fileName = userId + ".png";
             Path target = avatarDir.resolve(fileName);
-            file.transferTo(target.toFile());
+            writeAvatarAsPng(file, target);
 
             String resourcePath = "/profile/avatar/" + fileName;
             int rows = userInfoService.updateAvatarUrlByUserId(userId, resourcePath);
@@ -103,8 +107,23 @@ public class WxCommonController {
             ajax.put("newFileName", fileName);
             ajax.put("originalFilename", file.getOriginalFilename());
             return ajax;
+        } catch (IllegalArgumentException e) {
+            return AjaxResult.error(e.getMessage());
         } catch (Exception e) {
             return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    private void writeAvatarAsPng(MultipartFile file, Path target) throws Exception {
+        BufferedImage image;
+        try (InputStream inputStream = file.getInputStream()) {
+            image = ImageIO.read(inputStream);
+        }
+        if (image == null) {
+            throw new IllegalArgumentException("图片内容无效");
+        }
+        try (OutputStream outputStream = Files.newOutputStream(target)) {
+            ImageIO.write(image, "png", outputStream);
         }
     }
 

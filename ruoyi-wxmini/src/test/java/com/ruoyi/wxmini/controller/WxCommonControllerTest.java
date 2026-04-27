@@ -16,6 +16,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,10 +92,11 @@ class WxCommonControllerTest {
     }
 
     @Test
-    void uploadAvatarShouldSaveAsUserIdUpdateAvatarUrlAndDeleteOlderExtensionFile() throws Exception {
+    void uploadAvatarShouldTranscodeJpgToPngUpdateAvatarUrlAndDeleteOlderExtensionFiles() throws Exception {
         Path avatarDir = tempDir.resolve("avatar");
         Files.createDirectories(avatarDir);
-        Files.write(avatarDir.resolve("321.jpg"), "old".getBytes(StandardCharsets.UTF_8));
+        Files.write(avatarDir.resolve("321.jpeg"), "older-jpeg".getBytes(StandardCharsets.UTF_8));
+        Files.write(avatarDir.resolve("321.png"), "older-png".getBytes(StandardCharsets.UTF_8));
         when(userInfoService.updateAvatarUrlByUserId("321", "/profile/avatar/321.png")).thenReturn(1);
 
         MockHttpServletRequest request = buildRequest("/wxmini/common/uploadAvatar");
@@ -99,20 +104,23 @@ class WxCommonControllerTest {
 
         MockMultipartFile file = new MockMultipartFile(
             "file",
-            "avatar.png",
-            "image/png",
-            "new-avatar".getBytes(StandardCharsets.UTF_8)
+            "avatar.jpg",
+            "image/jpeg",
+            createImageBytes("jpg")
         );
 
         AjaxResult result = controller.uploadAvatar(file);
 
+        Path savedFile = avatarDir.resolve("321.png");
         assertEquals(200, result.get("code"));
         assertEquals("http://localhost:8080/profile/avatar/321.png", result.get("url"));
         assertEquals("/profile/avatar/321.png", result.get("fileName"));
         assertEquals("321.png", result.get("newFileName"));
-        assertEquals("avatar.png", result.get("originalFilename"));
-        assertTrue(Files.exists(avatarDir.resolve("321.png")));
+        assertEquals("avatar.jpg", result.get("originalFilename"));
+        assertTrue(Files.exists(savedFile));
         assertFalse(Files.exists(avatarDir.resolve("321.jpg")));
+        assertFalse(Files.exists(avatarDir.resolve("321.jpeg")));
+        assertEquals("png", readImageFormat(savedFile).toLowerCase());
         verify(userInfoService).updateAvatarUrlByUserId("321", "/profile/avatar/321.png");
     }
 
@@ -127,9 +135,9 @@ class WxCommonControllerTest {
 
         MockMultipartFile file = new MockMultipartFile(
             "file",
-            "avatar.png",
-            "image/png",
-            "new-avatar".getBytes(StandardCharsets.UTF_8)
+            "avatar.jpg",
+            "image/jpeg",
+            createImageBytes("jpg")
         );
 
         AjaxResult result = controller.uploadAvatar(file);
@@ -137,6 +145,21 @@ class WxCommonControllerTest {
         assertEquals(500, result.get("code"));
         assertEquals("用户不存在", result.get("msg"));
         assertFalse(Files.exists(avatarDir.resolve("321.png")));
+    }
+
+    @Test
+    void uploadAvatarShouldRejectUnreadableImageContent() {
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "avatar.jpg",
+            "image/jpeg",
+            "not-an-image".getBytes(StandardCharsets.UTF_8)
+        );
+
+        AjaxResult result = controller.uploadAvatar(file);
+
+        assertEquals(500, result.get("code"));
+        assertEquals("图片内容无效", result.get("msg"));
     }
 
     @Test
@@ -168,6 +191,23 @@ class WxCommonControllerTest {
 
         assertEquals(500, result.get("code"));
         assertEquals("请先登录", result.get("msg"));
+    }
+
+    private byte[] createImageBytes(String format) throws Exception {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        image.setRGB(0, 0, 0x112233);
+        image.setRGB(1, 0, 0x445566);
+        image.setRGB(0, 1, 0x778899);
+        image.setRGB(1, 1, 0xAABBCC);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ImageIO.write(image, format, output);
+        return output.toByteArray();
+    }
+
+    private String readImageFormat(Path path) throws Exception {
+        try (ByteArrayInputStream input = new ByteArrayInputStream(Files.readAllBytes(path))) {
+            return ImageIO.getImageReaders(ImageIO.createImageInputStream(input)).next().getFormatName();
+        }
     }
 
     private MockHttpServletRequest buildRequest(String requestUri) {
