@@ -31,7 +31,7 @@ public class Parents extends BaseEntity
 
     /** 微信用户ID */
     @Excel(name = "微信用户ID")
-    private Long wechatUid;
+    private String wechatUid;
 
     /** 平台用户ID */
     @Excel(name = "平台用户ID")
@@ -113,12 +113,12 @@ public class Parents extends BaseEntity
         return id;
     }
 
-    public void setWechatUid(Long wechatUid)
+    public void setWechatUid(String wechatUid)
     {
         this.wechatUid = wechatUid;
     }
 
-    public Long getWechatUid()
+    public String getWechatUid()
     {
         return wechatUid;
     }

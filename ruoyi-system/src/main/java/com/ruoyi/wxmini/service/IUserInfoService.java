@@ -38,6 +38,8 @@ public interface IUserInfoService {
 
     int updateRealnameInfo(String userId, String realName, String idCard);
 
+    int updateAvatarUrlByUserId(String userId, String avatarUrl);
+
     UserInfo selectUserInfoByOpenId(String openId);
 
     UserInfo selectUserInfoByUserId(String userId);

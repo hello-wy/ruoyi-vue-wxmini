@@ -163,7 +163,7 @@ public class WxTutoringController extends BaseController {
         }
         long snowflakeId = SnowflakeIdWorker.nextIdDefault();
         parents.setId(snowflakeId);
-        parents.setWechatUid(Long.valueOf(userId));
+        parents.setWechatUid(userId);
         parentsService.insertParents(parents);
         return AjaxResult.success("操作成功", snowflakeId);
     }
@@ -179,7 +179,7 @@ public class WxTutoringController extends BaseController {
         if (userInfo == null) {
             return AjaxResult.error("用户不存在");
         }
-        List<Parents> list = parentsService.selectParentsByWechatUid(Long.valueOf(userId));
+        List<Parents> list = parentsService.selectParentsByWechatUid(userId);
         return AjaxResult.success(list);
     }
 }

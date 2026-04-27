@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 class WxTutoringControllerTest {
 
     private static final String USER_ID = "123";
+    private static final String WECHAT_USER_ID = "6723e06a-5f1d-4479-9b59-b8df275dea40";
 
     @Mock
     private ITutorsService tutorsService;
@@ -130,26 +131,32 @@ class WxTutoringControllerTest {
     }
 
     @Test
-    void addParentsShouldReturn200AfterCall() {
+    void addParentsShouldReturn200ForWechatUserIdString() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
-        WxMiniUserContext.setCurrentUserId(USER_ID);
-        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.insertParents(any(Parents.class))).thenReturn(0);
+
         AjaxResult result = controller.addParents(new Parents());
+
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
+        verify(parentsService).insertParents(captor.capture());
+        assertEquals(WECHAT_USER_ID, captor.getValue().getWechatUid());
     }
 
     @Test
-    void myParentsShouldReturn200WhenUserExists() {
+    void myParentsShouldReturn200WhenWechatUserIdIsString() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
-        Parents parent = new Parents();
-        parent.setWechatUid(123L);
-        WxMiniUserContext.setCurrentUserId(USER_ID);
-        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
-        when(parentsService.selectParentsByWechatUid(123L)).thenReturn(Collections.singletonList(parent));
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsByWechatUid(WECHAT_USER_ID)).thenReturn(Collections.singletonList(new Parents()));
+
         AjaxResult result = controller.myParents();
+
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        verify(parentsService).selectParentsByWechatUid(WECHAT_USER_ID);
     }
 }

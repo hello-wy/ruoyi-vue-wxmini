@@ -80,6 +80,16 @@ public class UserInfoServiceImpl implements IUserInfoService {
     }
 
     @Override
+    public int updateAvatarUrlByUserId(String userId, String avatarUrl) {
+        UserInfo userInfo = userInfoMapper.selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return 0;
+        }
+        userInfo.setAvatarUrl(avatarUrl);
+        return updateUserInfo(userInfo);
+    }
+
+    @Override
     public UserInfo selectUserInfoByOpenId(String openId) {
         return userInfoMapper.selectUserInfoByOpenId(openId);
     }

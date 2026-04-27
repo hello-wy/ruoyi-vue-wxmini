@@ -73,5 +73,5 @@ public interface IParentsService
      * @param wechatUid 微信用户ID
      * @return 家教单列表
      */
-    List<Parents> selectParentsByWechatUid(Long wechatUid);
+    List<Parents> selectParentsByWechatUid(String wechatUid);
 }
