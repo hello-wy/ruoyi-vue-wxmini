@@ -6,7 +6,9 @@ import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
+import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +42,8 @@ class WxTutoringControllerTest {
     private IParentsService parentsService;
     @Mock
     private IUserInfoService userInfoService;
+    @Mock
+    private IBabyInfoService babyInfoService;
 
     @InjectMocks
     private WxTutoringController controller;
@@ -131,19 +135,59 @@ class WxTutoringControllerTest {
     }
 
     @Test
+    void addParentsShouldReturnErrorWhenBabyIdMissing() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+
+        AjaxResult result = controller.addParents(new Parents());
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请选择服务萌娃", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
+    void addParentsShouldReturnErrorWhenBabyDoesNotBelongToCurrentUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        Parents request = new Parents();
+        request.setBabyId(99L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(99L, WECHAT_USER_ID)).thenReturn(null);
+
+        AjaxResult result = controller.addParents(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("萌娃信息不存在或无权使用", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
     void addParentsShouldReturn200ForWechatUserIdString() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
+        userInfo.setUserType(0);
+        BabyInfo babyInfo = new BabyInfo();
+        babyInfo.setId(7L);
+        Parents request = new Parents();
+        request.setBabyId(7L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
         when(parentsService.insertParents(any(Parents.class))).thenReturn(0);
 
-        AjaxResult result = controller.addParents(new Parents());
+        AjaxResult result = controller.addParents(request);
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
         verify(parentsService).insertParents(captor.capture());
         assertEquals(WECHAT_USER_ID, captor.getValue().getWechatUid());
+        assertEquals(7L, captor.getValue().getBabyId());
     }
 
     @Test

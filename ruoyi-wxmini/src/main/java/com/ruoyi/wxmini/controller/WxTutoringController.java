@@ -9,7 +9,9 @@ import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
+import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import com.ruoyi.wxmini.vo.WxTutorDetailVo;
@@ -45,6 +47,9 @@ public class WxTutoringController extends BaseController {
 
     @Resource
     private IUserInfoService userInfoService;
+
+    @Resource
+    private IBabyInfoService babyInfoService;
 
     @ApiOperation("分页查询已通过教员列表（公开，支持科目/区域/授课方式/学历筛选）")
     @ApiImplicitParams({
@@ -160,6 +165,16 @@ public class WxTutoringController extends BaseController {
         UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
         if (userInfo == null) {
             return AjaxResult.error("用户不存在");
+        }
+        if (userInfo.getUserType() == null || userInfo.getUserType() != 0) {
+            return AjaxResult.error("请先切换为家长身份");
+        }
+        if (parents.getBabyId() == null) {
+            return AjaxResult.error("请选择服务萌娃");
+        }
+        BabyInfo babyInfo = babyInfoService.selectBabyInfoByIdAndUserId(parents.getBabyId(), userId);
+        if (babyInfo == null) {
+            return AjaxResult.error("萌娃信息不存在或无权使用");
         }
         long snowflakeId = SnowflakeIdWorker.nextIdDefault();
         parents.setId(snowflakeId);
