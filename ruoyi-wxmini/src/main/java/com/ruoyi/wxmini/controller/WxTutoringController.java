@@ -22,9 +22,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,12 +55,12 @@ public class WxTutoringController extends BaseController {
 
     @ApiOperation("分页查询已通过教员列表（公开，支持科目/区域/授课方式/学历筛选）")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "pageSize", value = "每页数量，默认5", dataType = "long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "methods", value = "授课方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "grade", value = "学历筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class)
+            @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "pageSize", value = "每页数量，默认5", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "methods", value = "授课方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "grade", value = "学历筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class)
     })
     @Anonymous
     @GetMapping("/tutors/list")
@@ -161,12 +163,12 @@ public class WxTutoringController extends BaseController {
 
     @ApiOperation("分页查询有效家教单列表（公开，支持科目/区域/辅导方式/年级筛选）")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "pageSize", value = "每页数量，默认10", dataType = "long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "methods", value = "辅导方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
-        @ApiImplicitParam(name = "grade", value = "年级筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class)
+            @ApiImplicitParam(name = "pageNum", value = "页码，默认1", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "pageSize", value = "每页数量，默认10", dataType = "long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "subject", value = "科目筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "region", value = "区域筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "methods", value = "辅导方式筛选（精确）", dataType = "Long", paramType = "query", dataTypeClass = Long.class),
+            @ApiImplicitParam(name = "grade", value = "年级筛选（模糊）", dataType = "String", paramType = "query", dataTypeClass = String.class)
     })
     @Anonymous
     @GetMapping("/parents/list")
@@ -185,6 +187,13 @@ public class WxTutoringController extends BaseController {
         startPage();
         List<Parents> list = parentsService.selectActiveParentsList(filter);
         return getDataTable(list);
+    }
+
+    @ApiOperation("家教单详情（公开）")
+    @Anonymous
+    @GetMapping("/parents/{id}")
+    public AjaxResult getParentDetail(@PathVariable("id") Long id) {
+        return AjaxResult.success(parentsService.selectParentsById(id));
     }
 
     @ApiOperation("发布家教单（需登录）")
@@ -228,6 +237,59 @@ public class WxTutoringController extends BaseController {
         }
         List<Parents> list = parentsService.selectParentsByWechatUid(userId);
         return AjaxResult.success(list);
+    }
+
+    @ApiOperation("修改当前登录用户发布的家教单（需登录）")
+    @PutMapping("/parents/{id}")
+    public AjaxResult updateMyParent(@PathVariable("id") Long id, @RequestBody Parents parents) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        AjaxResult guard = validateParentOwner(userId, parents.getBabyId(), id);
+        if (guard != null) {
+            return guard;
+        }
+        Parents existing = parentsService.selectParentsById(id);
+        parents.setId(existing.getId());
+        parents.setWechatUid(existing.getWechatUid());
+        parents.setSystemUid(existing.getSystemUid());
+        int rows = parentsService.updateParents(parents);
+        return rows > 0 ? AjaxResult.success("操作成功") : AjaxResult.error("更新失败");
+    }
+
+    @ApiOperation("删除当前登录用户发布的家教单（需登录）")
+    @DeleteMapping("/parents/{id}")
+    public AjaxResult deleteMyParent(@PathVariable("id") Long id) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        AjaxResult guard = validateParentOwner(userId, null, id);
+        if (guard != null) {
+            return guard;
+        }
+        int rows = parentsService.deleteParentsById(id);
+        return rows > 0 ? AjaxResult.success("删除成功") : AjaxResult.error("删除失败");
+    }
+
+    private AjaxResult validateParentOwner(String userId, Long babyId, Long demandId) {
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
+        }
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return AjaxResult.error("用户不存在");
+        }
+        Parents existing = parentsService.selectParentsById(demandId);
+        if (existing == null) {
+            return AjaxResult.error("需求不存在");
+        }
+        if (!StringUtils.equals(existing.getWechatUid(), userId)) {
+            return AjaxResult.error("无权操作该需求");
+        }
+        if (babyId == null) {
+            return null;
+        }
+        BabyInfo babyInfo = babyInfoService.selectBabyInfoByIdAndUserId(babyId, userId);
+        if (babyInfo == null) {
+            return AjaxResult.error("萌娃信息不存在或无权使用");
+        }
+        return null;
     }
 
     private AjaxResult validateTutorCurrentGrade(Tutors tutors) {

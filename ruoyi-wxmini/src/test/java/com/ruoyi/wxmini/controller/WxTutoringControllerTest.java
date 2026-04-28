@@ -221,6 +221,110 @@ class WxTutoringControllerTest {
     }
 
     @Test
+    void getParentDetailShouldReturnParentWhenFound() {
+        Parents parent = new Parents();
+        parent.setId(9L);
+        when(parentsService.selectParentsById(9L)).thenReturn(parent);
+
+        AjaxResult result = controller.getParentDetail(9L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(parent, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void updateMyParentShouldRejectDemandOwnedByAnotherUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        Parents existing = new Parents();
+        existing.setId(9L);
+        existing.setWechatUid("other-user");
+        Parents request = new Parents();
+        request.setBabyId(7L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsById(9L)).thenReturn(existing);
+
+        AjaxResult result = controller.updateMyParent(9L, request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("无权操作该需求", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).updateParents(any(Parents.class));
+    }
+
+    @Test
+    void updateMyParentShouldPersistOwnedDemand() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        Parents existing = new Parents();
+        existing.setId(9L);
+        existing.setWechatUid(WECHAT_USER_ID);
+        existing.setSystemUid(3L);
+        Parents request = new Parents();
+        request.setBabyId(7L);
+        request.setName("数学辅导");
+        request.setMethods(1L);
+        BabyInfo babyInfo = new BabyInfo();
+        babyInfo.setId(7L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsById(9L)).thenReturn(existing);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(parentsService.updateParents(any(Parents.class))).thenReturn(1);
+
+        AjaxResult result = controller.updateMyParent(9L, request);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals("操作成功", result.get(AjaxResult.MSG_TAG));
+        ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
+        verify(parentsService).updateParents(captor.capture());
+        Parents saved = captor.getValue();
+        assertEquals(9L, saved.getId());
+        assertEquals(WECHAT_USER_ID, saved.getWechatUid());
+        assertEquals(3L, saved.getSystemUid());
+        assertEquals(7L, saved.getBabyId());
+        assertEquals("数学辅导", saved.getName());
+        assertEquals(1L, saved.getMethods());
+    }
+
+    @Test
+    void deleteMyParentShouldRejectDemandOwnedByAnotherUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        Parents existing = new Parents();
+        existing.setId(9L);
+        existing.setWechatUid("other-user");
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsById(9L)).thenReturn(existing);
+
+        AjaxResult result = controller.deleteMyParent(9L);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("无权操作该需求", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).deleteParentsById(9L);
+    }
+
+    @Test
+    void deleteMyParentShouldDeleteOwnedDemand() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        Parents existing = new Parents();
+        existing.setId(9L);
+        existing.setWechatUid(WECHAT_USER_ID);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsById(9L)).thenReturn(existing);
+        when(parentsService.deleteParentsById(9L)).thenReturn(1);
+
+        AjaxResult result = controller.deleteMyParent(9L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals("删除成功", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService).deleteParentsById(9L);
+    }
+
+    @Test
     void addParentsShouldReturnErrorWhenBabyIdMissing() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);

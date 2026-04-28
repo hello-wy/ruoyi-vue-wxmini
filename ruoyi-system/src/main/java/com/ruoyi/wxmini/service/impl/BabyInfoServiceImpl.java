@@ -47,7 +47,9 @@ public class BabyInfoServiceImpl implements IBabyInfoService {
 
     @Override
     public int deleteBabyInfoByIdAndUserId(Long id, String userId) {
-        long refCount = parentsMapper.selectCount(new LambdaQueryWrapper<Parents>().eq(Parents::getBabyId, id));
+        long refCount = parentsMapper.selectCount(new LambdaQueryWrapper<Parents>()
+                .eq(Parents::getBabyId, id)
+                .eq(Parents::getStatus, 0L));
         if (refCount > 0) {
             throw new ServiceException("该萌娃已关联家教需求，暂不能删除");
         }
