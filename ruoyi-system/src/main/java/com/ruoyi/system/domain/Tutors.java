@@ -51,6 +51,9 @@ public class Tutors extends BaseEntity
     @Excel(name = "学历")
     private Long degree;
 
+    @Excel(name = "当前年级")
+    private String currentGrade;
+
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date createDate;
@@ -194,6 +197,16 @@ public class Tutors extends BaseEntity
         return degree;
     }
 
+    public void setCurrentGrade(String currentGrade)
+    {
+        this.currentGrade = currentGrade;
+    }
+
+    public String getCurrentGrade()
+    {
+        return currentGrade;
+    }
+
     public void setCreateDate(Date createDate)
     {
         this.createDate = createDate;
@@ -279,6 +292,7 @@ public class Tutors extends BaseEntity
             .append("major", getMajor())
             .append("school", getSchool())
             .append("degree", getDegree())
+            .append("currentGrade", getCurrentGrade())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .append("realName", getRealName())

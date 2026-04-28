@@ -17,6 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="major" column="major" />
         <result property="school" column="school" />
         <result property="degree" column="degree" />
+        <result property="currentGrade" column="current_grade" />
         <result property="createDate" column="create_date" />
         <result property="updateDate" column="update_date" />
         <result property="realName" column="real_name" />
@@ -39,6 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                t.major,
                t.school,
                t.degree,
+               t.current_grade,
                t.create_date,
                t.update_date,
                ui.real_name,
@@ -94,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="major != null and major != ''">major,</if>
             <if test="school != null and school != ''">school,</if>
             <if test="degree != null">degree,</if>
+            <if test="currentGrade != null and currentGrade != ''">current_grade,</if>
             <if test="createDate != null">create_date,</if>
             <if test="updateDate != null">update_date,</if>
             <if test="selfJudge != null">self_judge,</if>
@@ -113,6 +116,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="major != null and major != ''">#{major},</if>
             <if test="school != null and school != ''">#{school},</if>
             <if test="degree != null">#{degree},</if>
+            <if test="currentGrade != null and currentGrade != ''">#{currentGrade},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="updateDate != null">#{updateDate},</if>
             <if test="selfJudge != null">#{selfJudge},</if>
@@ -135,6 +139,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="major != null and major != ''">major = #{major},</if>
             <if test="school != null and school != ''">school = #{school},</if>
             <if test="degree != null">degree = #{degree},</if>
+            <if test="currentGrade != null">current_grade = #{currentGrade},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="updateDate != null">update_date = #{updateDate},</if>
             <if test="selfJudge != null">self_judge = #{selfJudge},</if>

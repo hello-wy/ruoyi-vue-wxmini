@@ -93,6 +93,7 @@ class WxTutoringControllerTest {
         request.setRealName("张三");
         request.setIdCard("110105199001011234");
         request.setSchool("南大");
+        request.setIdentity(1L);
         when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(null);
         when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(1);
         when(tutorsService.insertTutors(any(Tutors.class))).thenAnswer(invocation -> {
@@ -116,6 +117,43 @@ class WxTutoringControllerTest {
         assertNull(saved.getRealName());
         assertNull(saved.getIdCard());
         assertEquals("南大", saved.getSchool());
+    }
+
+    @Test
+    void applyTutorShouldRejectUniversityTutorWithoutCurrentGrade() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        request.setIdentity(0L);
+        request.setSchool("南京大学");
+        request.setMajor("数学");
+        request.setDegree(1L);
+
+        AjaxResult result = controller.applyTutor(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请选择当前年级", result.get(AjaxResult.MSG_TAG));
+        verify(tutorsService, never()).insertTutors(any(Tutors.class));
+    }
+
+    @Test
+    void applyTutorShouldClearCurrentGradeForNonUniversityTutor() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        request.setIdentity(1L);
+        request.setCurrentGrade("大三");
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(null);
+        when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(1);
+        when(tutorsService.insertTutors(any(Tutors.class))).thenReturn(1);
+
+        controller.applyTutor(request);
+
+        ArgumentCaptor<Tutors> captor = ArgumentCaptor.forClass(Tutors.class);
+        verify(tutorsService).insertTutors(captor.capture());
+        assertNull(captor.getValue().getCurrentGrade());
     }
 
     @Test
@@ -144,6 +182,7 @@ class WxTutoringControllerTest {
         request.setRealName("张三");
         request.setIdCard("110105199001011234");
         request.setSchool("南京大学");
+        request.setIdentity(1L);
         when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(existing);
         when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(1);
         when(tutorsService.updateTutors(any(Tutors.class))).thenReturn(1);
@@ -161,6 +200,24 @@ class WxTutoringControllerTest {
         assertNull(saved.getRealName());
         assertNull(saved.getIdCard());
         assertEquals("南京大学", saved.getSchool());
+    }
+
+    @Test
+    void updateMyTutorShouldRejectUniversityTutorWithoutCurrentGrade() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors existing = new Tutors();
+        existing.setId(1001L);
+        existing.setUid(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        request.setIdentity(0L);
+
+        AjaxResult result = controller.updateMyTutor(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请选择当前年级", result.get(AjaxResult.MSG_TAG));
+        verify(tutorsService, never()).updateTutors(any(Tutors.class));
     }
 
     @Test

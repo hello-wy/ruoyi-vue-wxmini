@@ -96,6 +96,10 @@ public class WxTutoringController extends BaseController {
     @ApiOperation("申请成为教员（status 默认 0 待审核，需登录）")
     @PostMapping("/apply")
     public AjaxResult applyTutor(@RequestBody Tutors tutors) {
+        AjaxResult currentGradeValidation = validateTutorCurrentGrade(tutors);
+        if (currentGradeValidation != null) {
+            return currentGradeValidation;
+        }
         String userId = WxMiniUserContext.getCurrentUserId();
         if (StringUtils.isBlank(userId)) {
             return AjaxResult.error("请先登录");
@@ -119,6 +123,10 @@ public class WxTutoringController extends BaseController {
     @ApiOperation("更新当前登录用户的教员资料（重新提交审核，需登录）")
     @PostMapping("/mine/update")
     public AjaxResult updateMyTutor(@RequestBody Tutors tutors) {
+        AjaxResult currentGradeValidation = validateTutorCurrentGrade(tutors);
+        if (currentGradeValidation != null) {
+            return currentGradeValidation;
+        }
         String userId = WxMiniUserContext.getCurrentUserId();
         if (StringUtils.isBlank(userId)) {
             return AjaxResult.error("请先登录");
@@ -220,5 +228,20 @@ public class WxTutoringController extends BaseController {
         }
         List<Parents> list = parentsService.selectParentsByWechatUid(userId);
         return AjaxResult.success(list);
+    }
+
+    private AjaxResult validateTutorCurrentGrade(Tutors tutors) {
+        if (tutors == null) {
+            return AjaxResult.error("参数错误");
+        }
+        if (Long.valueOf(0L).equals(tutors.getIdentity())) {
+            if (StringUtils.isBlank(tutors.getCurrentGrade())) {
+                return AjaxResult.error("请选择当前年级");
+            }
+            tutors.setCurrentGrade(tutors.getCurrentGrade().trim());
+            return null;
+        }
+        tutors.setCurrentGrade(null);
+        return null;
     }
 }

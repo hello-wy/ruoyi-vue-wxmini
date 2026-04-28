@@ -15,6 +15,7 @@ public class WxTutorDetailVo {
     private String major;
     private String school;
     private Long degree;
+    private String currentGrade;
     private String selfJudge;
     private String certificateList;
     private String certificates;
