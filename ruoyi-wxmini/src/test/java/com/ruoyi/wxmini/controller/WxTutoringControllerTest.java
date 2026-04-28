@@ -381,14 +381,13 @@ class WxTutoringControllerTest {
     }
 
     @Test
-    void myParentsShouldReturn200WhenWechatUserIdIsString() {
+    void myParentsShouldReturn200WhenIdParamIsPassed() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
-        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.selectParentsByWechatUid(WECHAT_USER_ID)).thenReturn(Collections.singletonList(new Parents()));
 
-        AjaxResult result = controller.myParents();
+        AjaxResult result = controller.myParents(WECHAT_USER_ID);
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         verify(parentsService).selectParentsByWechatUid(WECHAT_USER_ID);

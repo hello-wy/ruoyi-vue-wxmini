@@ -2,15 +2,15 @@
 
 ## 用途
 
-- `GET`：查看当前登录用户发布的家教单（需登录）。
+- `GET`：按传入用户 ID 查询该用户发布的家教单。
 
 ## 鉴权
 
-- 需要 `Wx-Authorization: Bearer <token>`。
+- 当前实现未强制依赖 `Wx-Authorization`。
 
 ## 请求头
 
-- `Wx-Authorization: Bearer <token>`
+- 无强制要求。
 
 ## Path 参数
 
@@ -20,7 +20,7 @@
 
 ### Query 参数
 
-- 无。
+- `id: string`，用户 ID，必填。
 
 ### Body 示例
 
@@ -32,18 +32,19 @@
 {
   "code": 200,
   "msg": "操作成功",
-  "data": {
-    "id": 1
-  }
+  "data": [
+    {
+      "id": 1,
+      "wechatUid": "user-123"
+    }
+  ]
 }
 ```
 
 ### 失败场景或特殊说明
 
-- 未登录或 token 无效时，请求会失败。
-- 未登录：`msg = 请先登录`。
+- 未传 `id`：`msg = 用户ID不能为空`。
 - 用户不存在：`msg = 用户不存在`。
-- 按 controller 业务语义该接口需要登录，但当前 `WxMiniJwtFilter.checkIsExcludeUri` 将 `/wxmini/tutoring/**` 整体排除在 JWT 解析之外；若不修正过滤器，`WxMiniUserContext` 不会被写入。
 
 ## 实现来源文件
 
