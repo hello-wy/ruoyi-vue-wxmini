@@ -135,6 +135,35 @@ class WxTutoringControllerTest {
     }
 
     @Test
+    void updateMyTutorShouldResetStatusToPendingReview() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        Tutors existing = new Tutors();
+        existing.setId(1001L);
+        existing.setUid(USER_ID);
+        Tutors request = new Tutors();
+        request.setRealName("张三");
+        request.setIdCard("110105199001011234");
+        request.setSchool("南京大学");
+        when(tutorsService.selectTutorsByUid(USER_ID)).thenReturn(existing);
+        when(userInfoService.updateRealnameInfo(USER_ID, "张三", "110105199001011234")).thenReturn(1);
+        when(tutorsService.updateTutors(any(Tutors.class))).thenReturn(1);
+
+        AjaxResult result = controller.updateMyTutor(request);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals("资料已更新，请等待审核", result.get(AjaxResult.MSG_TAG));
+        ArgumentCaptor<Tutors> captor = ArgumentCaptor.forClass(Tutors.class);
+        verify(tutorsService).updateTutors(captor.capture());
+        Tutors saved = captor.getValue();
+        assertEquals(1001L, saved.getId());
+        assertEquals(USER_ID, saved.getUid());
+        assertEquals(0L, saved.getStatus());
+        assertNull(saved.getRealName());
+        assertNull(saved.getIdCard());
+        assertEquals("南京大学", saved.getSchool());
+    }
+
+    @Test
     void addParentsShouldReturnErrorWhenBabyIdMissing() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);

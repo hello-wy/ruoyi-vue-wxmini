@@ -116,6 +116,30 @@ public class WxTutoringController extends BaseController {
         return rows > 0 ? AjaxResult.success("申请成功，请等待审核", tutors.getId()) : AjaxResult.error("申请失败");
     }
 
+    @ApiOperation("更新当前登录用户的教员资料（重新提交审核，需登录）")
+    @PostMapping("/mine/update")
+    public AjaxResult updateMyTutor(@RequestBody Tutors tutors) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
+        }
+        Tutors existing = tutorsService.selectTutorsByUid(userId);
+        if (existing == null) {
+            return AjaxResult.error("请先提交申请");
+        }
+        int updated = userInfoService.updateRealnameInfo(userId, tutors.getRealName(), tutors.getIdCard());
+        if (updated <= 0) {
+            return AjaxResult.error("用户不存在");
+        }
+        tutors.setId(existing.getId());
+        tutors.setUid(userId);
+        tutors.setStatus(0L);
+        tutors.setRealName(null);
+        tutors.setIdCard(null);
+        int rows = tutorsService.updateTutors(tutors);
+        return rows > 0 ? AjaxResult.success("资料已更新，请等待审核") : AjaxResult.error("更新失败");
+    }
+
     @ApiOperation("查看当前登录用户的教员信息（需登录）")
     @GetMapping("/mine")
     public AjaxResult myTutor() {
