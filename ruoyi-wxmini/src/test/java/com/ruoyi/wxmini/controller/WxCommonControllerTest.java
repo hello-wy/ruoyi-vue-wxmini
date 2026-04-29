@@ -125,6 +125,32 @@ class WxCommonControllerTest {
     }
 
     @Test
+    void uploadAvatarShouldUseForwardedHttpsUrlWhenProxyHeadersExist() throws Exception {
+        Path avatarDir = tempDir.resolve("avatar");
+        Files.createDirectories(avatarDir);
+        when(userInfoService.updateAvatarUrlByUserId("321", "/profile/avatar/321.png")).thenReturn(1);
+
+        MockHttpServletRequest request = buildRequest("/wxmini/common/uploadAvatar");
+        request.setServerName("zhiyujia.xyz");
+        request.addHeader("X-Forwarded-Proto", "https");
+        request.addHeader("X-Forwarded-Host", "zhiyujia.xyz");
+        request.addHeader("X-Forwarded-Port", "443");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "avatar.jpg",
+            "image/jpeg",
+            createImageBytes("jpg")
+        );
+
+        AjaxResult result = controller.uploadAvatar(file);
+
+        assertEquals(200, result.get("code"));
+        assertEquals("https://zhiyujia.xyz/profile/avatar/321.png", result.get("url"));
+    }
+
+    @Test
     void uploadAvatarShouldDeleteUploadedFileWhenUserDoesNotExist() throws Exception {
         Path avatarDir = tempDir.resolve("avatar");
         Files.createDirectories(avatarDir);

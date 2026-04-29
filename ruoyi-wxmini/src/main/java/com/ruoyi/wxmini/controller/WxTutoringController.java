@@ -237,16 +237,10 @@ public class WxTutoringController extends BaseController {
         return AjaxResult.success("操作成功", snowflakeId);
     }
 
-    @ApiOperation("查看当前登录用户发布的家教单列表（需登录）")
+    @ApiOperation("查看当前登录用户发布的家教单（需登录）")
     @GetMapping("/parents/mine")
     public AjaxResult myParents() {
-        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        String userId = WxMiniUserContext.getCurrentUserId(attrs == null ? null : attrs.getRequest());
-        Object requestAttrUserId = attrs == null ? null : attrs.getRequest().getAttribute(WxMiniUserContext.REQUEST_ATTR_CURRENT_USER_ID);
-        log.info("/parents/mine thread={}, threadLocalUserId={}, requestAttrUserId={}",
-                Thread.currentThread().getName(),
-                WxMiniUserContext.getCurrentUserId(),
-                requestAttrUserId);
+        String userId = WxMiniUserContext.getCurrentUserId();
         if (StringUtils.isBlank(userId)) {
             return AjaxResult.error("请先登录");
         }
