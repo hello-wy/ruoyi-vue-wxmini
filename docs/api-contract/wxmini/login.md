@@ -36,6 +36,7 @@
     "apiToken": "jwt-token",
     "sessionKey": "session-key",
     "openId": "openid",
+    "userId": "user-123",
     "userName": "微信用户",
     "userType": null,
     "phone": null,

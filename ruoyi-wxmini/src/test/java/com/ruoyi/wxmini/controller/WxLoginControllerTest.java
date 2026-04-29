@@ -60,6 +60,7 @@ class WxLoginControllerTest {
         assertEquals("jwt-token", data.getApiToken());
         assertEquals(SESSION_KEY, data.getSessionKey());
         assertEquals(OPEN_ID, data.getOpenId());
+        assertEquals("user-123", data.getUserId());
         assertEquals("测试用户", data.getUserName());
         assertEquals(1, data.getUserType());
         assertEquals(PHONE, data.getPhone());

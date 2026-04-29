@@ -14,6 +14,7 @@ public class WxUserInfo {
 
     private String sessionKey;
     private String openId;
+    private String userId;
 
     private String userName;
     /**
@@ -28,6 +29,7 @@ public class WxUserInfo {
     public void wapper(WxMaJscode2SessionResult wxSession, UserInfo userInfo) {
         this.sessionKey = wxSession.getSessionKey();
         this.openId = wxSession.getOpenid();
+        this.userId = userInfo.getUserId();
 
         this.userName = userInfo.getUserName();
         this.userType = userInfo.getUserType();

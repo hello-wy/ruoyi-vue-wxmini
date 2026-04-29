@@ -224,18 +224,18 @@ public class WxTutoringController extends BaseController {
         return AjaxResult.success("操作成功", snowflakeId);
     }
 
-    @ApiOperation("查看指定用户发布的家教单")
-    @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
+    @ApiOperation("查看当前登录用户发布的家教单（需登录）")
     @GetMapping("/parents/mine")
-    public AjaxResult myParents(@RequestParam("id") String id) {
-        if (StringUtils.isBlank(id)) {
-            return AjaxResult.error("用户ID不能为空");
+    public AjaxResult myParents() {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
         }
-        UserInfo userInfo = userInfoService.selectUserInfoByUserId(id);
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
         if (userInfo == null) {
             return AjaxResult.error("用户不存在");
         }
-        List<Parents> list = parentsService.selectParentsByWechatUid(id);
+        List<Parents> list = parentsService.selectParentsByWechatUid(userId);
         return AjaxResult.success(list);
     }
 
