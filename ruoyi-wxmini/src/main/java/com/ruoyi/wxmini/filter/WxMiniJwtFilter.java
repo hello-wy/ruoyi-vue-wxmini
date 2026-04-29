@@ -67,6 +67,8 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
                         return;
                     }
                     WxMiniUserContext.setCurrentUserId(userId);
+                    // request 级别兜底：避免极端情况下 ThreadLocal 上下文在后续读取不到
+                    request.setAttribute(WxMiniUserContext.REQUEST_ATTR_CURRENT_USER_ID, userId);
                 } catch (Exception e) {
                     String message = e.getMessage();
                     log.error(message, e);

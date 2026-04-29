@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.wxmini.mapper.UserServiceAddressMapper">
+
+    <resultMap id="UserServiceAddressResult" type="UserServiceAddress">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="contactName" column="contact_name"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="region" column="region"/>
+        <result property="location" column="location"/>
+        <result property="geo" column="geo"/>
+        <result property="addressDetail" column="address_detail"/>
+        <result property="doorplate" column="doorplate"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectUserServiceAddressVo">
+        select id,
+               user_id,
+               contact_name,
+               contact_phone,
+               region,
+               location,
+               geo,
+               address_detail,
+               doorplate,
+               is_default,
+               remark,
+               create_time,
+               update_time
+        from user_service_address
+    </sql>
+
+    <select id="selectUserServiceAddressListByUserId" resultMap="UserServiceAddressResult">
+        <include refid="selectUserServiceAddressVo"/>
+        where user_id = #{userId}
+        order by is_default desc, update_time desc, id desc
+    </select>
+
+    <select id="selectUserServiceAddressByIdAndUserId" resultMap="UserServiceAddressResult">
+        <include refid="selectUserServiceAddressVo"/>
+        where id = #{id}
+          and user_id = #{userId}
+    </select>
+
+    <select id="selectDefaultAddressByUserId" resultMap="UserServiceAddressResult">
+        <include refid="selectUserServiceAddressVo"/>
+        where user_id = #{userId}
+          and is_default = 1
+        order by update_time desc, id desc
+        limit 1
+    </select>
+
+    <insert id="insertUserServiceAddress" parameterType="UserServiceAddress">
+        insert into user_service_address (
+            id,
+            user_id,
+            contact_name,
+            contact_phone,
+            region,
+            location,
+            geo,
+            address_detail,
+            doorplate,
+            is_default,
+            remark,
+            create_time,
+            update_time
+        ) values (
+            #{id},
+            #{userId},
+            #{contactName},
+            #{contactPhone},
+            #{region},
+            #{location},
+            #{geo},
+            #{addressDetail},
+            #{doorplate},
+            #{isDefault},
+            #{remark},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <update id="updateUserServiceAddress" parameterType="UserServiceAddress">
+        update user_service_address
+        set contact_name = #{contactName},
+            contact_phone = #{contactPhone},
+            region = #{region},
+            location = #{location},
+            geo = #{geo},
+            address_detail = #{addressDetail},
+            doorplate = #{doorplate},
+            is_default = #{isDefault},
+            remark = #{remark},
+            update_time = #{updateTime}
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <update id="clearDefaultByUserId">
+        update user_service_address
+        set is_default = 0,
+            update_time = now()
+        where user_id = #{userId}
+          and is_default = 1
+    </update>
+
+    <update id="setDefaultByIdAndUserId">
+        update user_service_address
+        set is_default = 1,
+            update_time = now()
+        where id = #{id}
+          and user_id = #{userId}
+    </update>
+
+    <delete id="deleteUserServiceAddressByIdAndUserId">
+        delete from user_service_address
+        where id = #{id}
+          and user_id = #{userId}
+    </delete>
+</mapper>

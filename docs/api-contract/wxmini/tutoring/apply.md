@@ -2,7 +2,7 @@
 
 ## 用途
 
-- `POST`：申请成为教员（status 默认 0 待审核，需登录）。
+- `POST`：申请成为教员（`status` 默认 `0` 待审核，需登录）。
 
 ## 鉴权
 
@@ -30,6 +30,7 @@
   "school": "南京大学",
   "major": "数学",
   "identity": 0,
+  "currentGrade": "大三",
   "city": "江宁区",
   "subjects": "8,10",
   "areas": "320115,320114",
@@ -52,10 +53,11 @@
 
 ### 失败场景或特殊说明
 
-- 未登录或 token 无效时，请求会失败。
 - 未登录：`msg = 请先登录`。
+- 用户不存在：`msg = 用户不存在`。
 - 重复申请：`msg = 您已提交过申请，请勿重复提交`。
-- 按 controller 业务语义该接口需要登录，但当前 `WxMiniJwtFilter.checkIsExcludeUri` 将 `/wxmini/tutoring/**` 整体排除在 JWT 解析之外；若不修正过滤器，`WxMiniUserContext` 不会被写入。
+- 当 `identity = 0` 时，必须传 `currentGrade`，否则：`msg = 请选择当前年级`。
+- 创建时会同步更新当前用户实名信息，成功后写入教员记录并将状态重置为待审核。
 
 ## 实现来源文件
 

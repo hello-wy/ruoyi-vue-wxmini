@@ -33,16 +33,17 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "id": 1
+    "id": 1,
+    "uid": "wx-user-123",
+    "status": 1
   }
 }
 ```
 
 ### 失败场景或特殊说明
 
-- 未登录或 token 无效时，请求会失败。
 - 未登录：`msg = 请先登录`。
-- 按 controller 业务语义该接口需要登录，但当前 `WxMiniJwtFilter.checkIsExcludeUri` 将 `/wxmini/tutoring/**` 整体排除在 JWT 解析之外；若不修正过滤器，`WxMiniUserContext` 不会被写入。
+- 当前用户尚未提交教员申请时，`data` 可能为 `null`。
 
 ## 实现来源文件
 

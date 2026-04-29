@@ -8,8 +8,10 @@ import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.domain.UserServiceAddress;
 import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import com.ruoyi.wxmini.service.IUserServiceAddressService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +47,8 @@ class WxTutoringControllerTest {
     private IUserInfoService userInfoService;
     @Mock
     private IBabyInfoService babyInfoService;
+    @Mock
+    private IUserServiceAddressService userServiceAddressService;
 
     @InjectMocks
     private WxTutoringController controller;
@@ -236,11 +241,11 @@ class WxTutoringControllerTest {
     void updateMyParentShouldRejectDemandOwnedByAnotherUser() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
+        userInfo.setUserType(0);
         Parents existing = new Parents();
         existing.setId(9L);
         existing.setWechatUid("other-user");
-        Parents request = new Parents();
-        request.setBabyId(7L);
+        Parents request = buildValidParentsPayload();
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.selectParentsById(9L)).thenReturn(existing);
@@ -254,22 +259,18 @@ class WxTutoringControllerTest {
 
     @Test
     void updateMyParentShouldPersistOwnedDemand() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId(1L);
+        UserInfo userInfo = buildParentUser();
         Parents existing = new Parents();
         existing.setId(9L);
         existing.setWechatUid(WECHAT_USER_ID);
         existing.setSystemUid(3L);
-        Parents request = new Parents();
-        request.setBabyId(7L);
-        request.setName("数学辅导");
-        request.setMethods(1L);
-        BabyInfo babyInfo = new BabyInfo();
-        babyInfo.setId(7L);
+        existing.setStatus(0L);
+        Parents request = buildValidParentsPayload();
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.selectParentsById(9L)).thenReturn(existing);
-        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(8L, WECHAT_USER_ID)).thenReturn(new BabyInfo());
+        when(userServiceAddressService.selectAddressByIdAndUserId(9L, WECHAT_USER_ID)).thenReturn(buildAddress());
         when(parentsService.updateParents(any(Parents.class))).thenReturn(1);
 
         AjaxResult result = controller.updateMyParent(9L, request);
@@ -282,9 +283,10 @@ class WxTutoringControllerTest {
         assertEquals(9L, saved.getId());
         assertEquals(WECHAT_USER_ID, saved.getWechatUid());
         assertEquals(3L, saved.getSystemUid());
-        assertEquals(7L, saved.getBabyId());
-        assertEquals("数学辅导", saved.getName());
+        assertEquals(8L, saved.getBabyId());
+        assertEquals("周末陪学", saved.getName());
         assertEquals(1L, saved.getMethods());
+        assertEquals("2026-05-01,2026-05-03", saved.getServiceDates());
     }
 
     @Test
@@ -329,10 +331,13 @@ class WxTutoringControllerTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
         userInfo.setUserType(0);
+        Parents request = buildValidParentsPayload();
+        request.setBabyId(null);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
 
-        AjaxResult result = controller.addParents(new Parents());
+        AjaxResult result = controller.addParents(request);
 
         assertEquals(500, result.get(AjaxResult.CODE_TAG));
         assertEquals("请选择服务萌娃", result.get(AjaxResult.MSG_TAG));
@@ -344,11 +349,11 @@ class WxTutoringControllerTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
         userInfo.setUserType(0);
-        Parents request = new Parents();
-        request.setBabyId(99L);
+        Parents request = buildValidParentsPayload();
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
-        when(babyInfoService.selectBabyInfoByIdAndUserId(99L, WECHAT_USER_ID)).thenReturn(null);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(8L, WECHAT_USER_ID)).thenReturn(null);
 
         AjaxResult result = controller.addParents(request);
 
@@ -359,16 +364,13 @@ class WxTutoringControllerTest {
 
     @Test
     void addParentsShouldReturn200ForWechatUserIdString() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId(1L);
-        userInfo.setUserType(0);
-        BabyInfo babyInfo = new BabyInfo();
-        babyInfo.setId(7L);
-        Parents request = new Parents();
-        request.setBabyId(7L);
+        UserInfo userInfo = buildParentUser();
+        Parents request = buildValidParentsPayload();
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
-        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(8L, WECHAT_USER_ID)).thenReturn(new BabyInfo());
+        when(userServiceAddressService.selectAddressByIdAndUserId(9L, WECHAT_USER_ID)).thenReturn(buildAddress());
         when(parentsService.insertParents(any(Parents.class))).thenReturn(0);
 
         AjaxResult result = controller.addParents(request);
@@ -377,7 +379,7 @@ class WxTutoringControllerTest {
         ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
         verify(parentsService).insertParents(captor.capture());
         assertEquals(WECHAT_USER_ID, captor.getValue().getWechatUid());
-        assertEquals(7L, captor.getValue().getBabyId());
+        assertEquals(8L, captor.getValue().getBabyId());
     }
 
     @Test
@@ -392,5 +394,82 @@ class WxTutoringControllerTest {
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         verify(parentsService).selectParentsByWechatUid(WECHAT_USER_ID);
+    }
+
+    @Test
+    void addParentsShouldRejectSecondDemandForSameWechatUser() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(buildParentUser());
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(new Parents());
+
+        AjaxResult result = controller.addParents(buildValidParentsPayload());
+
+        assertEquals("你已发布需求，请前往详情编辑", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
+    void getMyParentDetailShouldReturnSingleDemand() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        Parents parents = new Parents();
+        parents.setId(12L);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(parents);
+
+        AjaxResult result = controller.getMyParentDetail();
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(parents, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void addParentsShouldDeriveCompatibilityFieldsFromServiceTimes() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(buildParentUser());
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(8L, WECHAT_USER_ID)).thenReturn(new BabyInfo());
+        when(userServiceAddressService.selectAddressByIdAndUserId(9L, WECHAT_USER_ID)).thenReturn(buildAddress());
+
+        Parents payload = buildValidParentsPayload();
+        controller.addParents(payload);
+
+        assertEquals("2026-05-01,2026-05-03", payload.getServiceDates());
+        assertEquals("5,7", payload.getDayOfWeek());
+        assertEquals("鼓楼区龙江新城市广场 2栋 1201", payload.getLocation());
+        assertEquals("08:00", payload.getStartTime().toString());
+        assertEquals("10:00", payload.getEndTime().toString());
+    }
+
+    private UserInfo buildParentUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(101L);
+        userInfo.setUserType(0);
+        return userInfo;
+    }
+
+    private UserServiceAddress buildAddress() {
+        UserServiceAddress address = new UserServiceAddress();
+        address.setId(9L);
+        address.setLocation("鼓楼区龙江新城市广场");
+        address.setAddressDetail("2栋");
+        address.setDoorplate("1201");
+        address.setGeo("118.7901,32.0601");
+        address.setRegion("江苏省 南京市 鼓楼区");
+        return address;
+    }
+
+    private Parents buildValidParentsPayload() {
+        Parents parents = new Parents();
+        parents.setBabyId(8L);
+        parents.setAddressId(9L);
+        parents.setName("周末陪学");
+        parents.setPhone("13800138000");
+        parents.setGrade("五年级");
+        parents.setSubject("数学");
+        parents.setMethods(1L);
+        parents.setDemandItems("2,3");
+        parents.setGenderRequirement(0);
+        parents.setHourlyBudget(new BigDecimal("60.00"));
+        parents.setServiceTimes("[{\"serviceDate\":\"2026-05-01\",\"startTime\":\"08:00\",\"endTime\":\"10:00\"},{\"serviceDate\":\"2026-05-03\",\"startTime\":\"14:00\",\"endTime\":\"16:00\"}]");
+        return parents;
     }
 }

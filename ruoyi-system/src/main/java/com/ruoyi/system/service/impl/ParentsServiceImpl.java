@@ -11,19 +11,19 @@ import com.ruoyi.system.service.IParentsService;
 
 /**
  * 家教订单Service业务层处理
- * 
+ *
  * @author ruoyi
  * @date 2026-03-04
  */
 @Service
-public class ParentsServiceImpl implements IParentsService 
+public class ParentsServiceImpl implements IParentsService
 {
     @Autowired
     private ParentsMapper parentsMapper;
 
     /**
      * 查询家教订单
-     * 
+     *
      * @param id 家教订单主键
      * @return 家教订单
      */
@@ -35,7 +35,7 @@ public class ParentsServiceImpl implements IParentsService
 
     /**
      * 查询家教订单列表
-     * 
+     *
      * @param parents 家教订单
      * @return 家教订单
      */
@@ -47,7 +47,7 @@ public class ParentsServiceImpl implements IParentsService
 
     /**
      * 新增家教订单
-     * 
+     *
      * @param parents 家教订单
      * @return 结果
      */
@@ -59,7 +59,7 @@ public class ParentsServiceImpl implements IParentsService
 
     /**
      * 修改家教订单
-     * 
+     *
      * @param parents 家教订单
      * @return 结果
      */
@@ -71,7 +71,7 @@ public class ParentsServiceImpl implements IParentsService
 
     /**
      * 批量删除家教订单
-     * 
+     *
      * @param ids 需要删除的家教订单主键
      * @return 结果
      */
@@ -83,7 +83,7 @@ public class ParentsServiceImpl implements IParentsService
 
     /**
      * 删除家教订单信息
-     * 
+     *
      * @param id 家教订单主键
      * @return 结果
      */
@@ -96,21 +96,16 @@ public class ParentsServiceImpl implements IParentsService
     @Override
     public List<Parents> selectActiveParentsList(Parents parents) {
         LambdaQueryWrapper<Parents> wrapper = new LambdaQueryWrapper<>();
-        // 只查询有效订单（status = 0）
         wrapper.eq(Parents::getStatus, 0L);
-        // 可选筛选：科目
         if (StringUtils.isNotBlank(parents.getSubject())) {
             wrapper.like(Parents::getSubject, parents.getSubject());
         }
-        // 可选筛选：区域
         if (StringUtils.isNotBlank(parents.getRegion())) {
             wrapper.like(Parents::getRegion, parents.getRegion());
         }
-        // 可选筛选：辅导方式
         if (parents.getMethods() != null) {
             wrapper.eq(Parents::getMethods, parents.getMethods());
         }
-        // 可选筛选：年级
         if (StringUtils.isNotBlank(parents.getGrade())) {
             wrapper.like(Parents::getGrade, parents.getGrade());
         }
@@ -122,5 +117,15 @@ public class ParentsServiceImpl implements IParentsService
         LambdaQueryWrapper<Parents> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Parents::getWechatUid, wechatUid);
         return parentsMapper.selectList(wrapper);
+    }
+
+    @Override
+    public Parents selectSingleParentByWechatUid(String wechatUid) {
+        return parentsMapper.selectSingleParentByWechatUid(wechatUid);
+    }
+
+    @Override
+    public long countParentsByWechatUid(String wechatUid) {
+        return parentsMapper.countParentsByWechatUid(wechatUid);
     }
 }

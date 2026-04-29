@@ -5,15 +5,15 @@ import com.ruoyi.system.domain.Parents;
 
 /**
  * 家教订单Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-03-04
  */
-public interface IParentsService 
+public interface IParentsService
 {
     /**
      * 查询家教订单
-     * 
+     *
      * @param id 家教订单主键
      * @return 家教订单
      */
@@ -21,7 +21,7 @@ public interface IParentsService
 
     /**
      * 查询家教订单列表
-     * 
+     *
      * @param parents 家教订单
      * @return 家教订单集合
      */
@@ -29,7 +29,7 @@ public interface IParentsService
 
     /**
      * 新增家教订单
-     * 
+     *
      * @param parents 家教订单
      * @return 结果
      */
@@ -37,7 +37,7 @@ public interface IParentsService
 
     /**
      * 修改家教订单
-     * 
+     *
      * @param parents 家教订单
      * @return 结果
      */
@@ -45,7 +45,7 @@ public interface IParentsService
 
     /**
      * 批量删除家教订单
-     * 
+     *
      * @param ids 需要删除的家教订单主键集合
      * @return 结果
      */
@@ -53,7 +53,7 @@ public interface IParentsService
 
     /**
      * 删除家教订单信息
-     * 
+     *
      * @param id 家教订单主键
      * @return 结果
      */
@@ -74,4 +74,20 @@ public interface IParentsService
      * @return 家教单列表
      */
     List<Parents> selectParentsByWechatUid(String wechatUid);
+
+    /**
+     * 根据微信用户ID查询当前单条需求
+     *
+     * @param wechatUid 微信用户ID
+     * @return 家教单
+     */
+    Parents selectSingleParentByWechatUid(String wechatUid);
+
+    /**
+     * 根据微信用户ID统计需求数
+     *
+     * @param wechatUid 微信用户ID
+     * @return 数量
+     */
+    long countParentsByWechatUid(String wechatUid);
 }

@@ -8,6 +8,11 @@ package com.ruoyi.wxmini.util;
  */
 public class WxMiniUserContext {
 
+    /**
+     * request attribute key（用于兜底传递 currentUserId）
+     */
+    public static final String REQUEST_ATTR_CURRENT_USER_ID = "wxmini.currentUserId";
+
     private static final ThreadLocal<String> currentUser = new ThreadLocal<>();
 
     /**
@@ -22,6 +27,21 @@ public class WxMiniUserContext {
      */
     public static String getCurrentUserId() {
         return currentUser.get();
+    }
+
+    /**
+     * 获取当前用户ID（推荐：controller 层可传入 request 兜底读取，避免 ThreadLocal 在极端情况下取不到）
+     */
+    public static String getCurrentUserId(javax.servlet.http.HttpServletRequest request) {
+        String userId = getCurrentUserId();
+        if (userId != null) {
+            return userId;
+        }
+        if (request == null) {
+            return null;
+        }
+        Object attr = request.getAttribute(REQUEST_ATTR_CURRENT_USER_ID);
+        return attr == null ? null : attr.toString();
     }
 
     /**
