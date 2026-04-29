@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Primary;
  * @author weijiayu
  */
 @Configuration
-@EnableConfigurationProperties(WxPayProperties.class)
+@EnableConfigurationProperties({WxPayProperties.class, AliyunCloudauthProperties.class})
 public class WxPayConfiguration {
 
     private final WxPayProperties properties;

@@ -11,6 +11,13 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 
+aliyun:
+  cloudauth:
+    accessKeyId: LTAI5t9F3pgh3ymDeHQc5UsS
+    accessKeySecret: UrCbBeKcLrpyXctTCU4QXtKlzXDE19
+    regionId: cn-hangzhou
+    endpoint: cloudauth.aliyuncs.com
+
 file-storage:
   type: local
   oss:
@@ -21,7 +28,6 @@ file-storage:
     bucketDomain:
     basePath:
 
-# 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
   port: 8080

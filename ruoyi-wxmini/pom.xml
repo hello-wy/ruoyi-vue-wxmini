@@ -66,16 +66,21 @@
         </dependency>
 
         <!-- 阿里云实人认证 SDK -->
-<!--        <dependency>-->
-<!--            <groupId>com.aliyun</groupId>-->
-<!--            <artifactId>cloudauth20190307</artifactId>-->
-<!--            <version>3.9.0</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aliyun</groupId>-->
-<!--            <artifactId>tea-openapi</artifactId>-->
-<!--            <version>0.3.7</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>cloudauth20190307</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>credentials-java</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea-openapi</artifactId>
+            <version>0.3.8</version>
+        </dependency>
     </dependencies>
 
 </project>

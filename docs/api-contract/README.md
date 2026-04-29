@@ -118,6 +118,7 @@
 - `wxmini/tutoring/parents.md`
 - `wxmini/tutoring/parents__list.md`
 - `wxmini/tutoring/parents__mine.md`
+- `wxmini/tutoring/real-verify__verify.md`
 - `wxmini/tutoring/tutors__list.md`
 - `wxmini/tutoring/tutors__{id}.md`
 - `wxmini/user/info.md`

@@ -9,11 +9,12 @@ import com.ruoyi.system.service.ITutorsService;
 import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
 import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.domain.UserServiceAddress;
 import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import com.ruoyi.wxmini.service.IUserServiceAddressService;
 import com.ruoyi.wxmini.service.IWxRealVerifyService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
-import com.ruoyi.wxmini.vo.WxRealVerifyAuthParamsVo;
 import com.ruoyi.wxmini.vo.WxRealVerifyResultVo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,6 +49,8 @@ class WxTutoringControllerTest {
     private IUserInfoService userInfoService;
     @Mock
     private IBabyInfoService babyInfoService;
+    @Mock
+    private IUserServiceAddressService userServiceAddressService;
     @Mock
     private IWxRealVerifyService wxRealVerifyService;
 
@@ -242,11 +245,11 @@ class WxTutoringControllerTest {
     void updateMyParentShouldRejectDemandOwnedByAnotherUser() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
+        userInfo.setUserType(0);
         Parents existing = new Parents();
         existing.setId(9L);
         existing.setWechatUid("other-user");
-        Parents request = new Parents();
-        request.setBabyId(7L);
+        Parents request = buildValidParentRequest(7L, 11L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.selectParentsById(9L)).thenReturn(existing);
@@ -262,20 +265,23 @@ class WxTutoringControllerTest {
     void updateMyParentShouldPersistOwnedDemand() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
+        userInfo.setUserType(0);
         Parents existing = new Parents();
         existing.setId(9L);
         existing.setWechatUid(WECHAT_USER_ID);
         existing.setSystemUid(3L);
-        Parents request = new Parents();
-        request.setBabyId(7L);
+        existing.setStatus(1L);
+        Parents request = buildValidParentRequest(7L, 11L);
         request.setName("数学辅导");
         request.setMethods(1L);
         BabyInfo babyInfo = new BabyInfo();
         babyInfo.setId(7L);
+        UserServiceAddress address = buildAddress(11L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(parentsService.selectParentsById(9L)).thenReturn(existing);
         when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(userServiceAddressService.selectAddressByIdAndUserId(11L, WECHAT_USER_ID)).thenReturn(address);
         when(parentsService.updateParents(any(Parents.class))).thenReturn(1);
 
         AjaxResult result = controller.updateMyParent(9L, request);
@@ -291,6 +297,10 @@ class WxTutoringControllerTest {
         assertEquals(7L, saved.getBabyId());
         assertEquals("数学辅导", saved.getName());
         assertEquals(1L, saved.getMethods());
+        assertEquals(11L, saved.getAddressId());
+        assertEquals("南京市江宁区", saved.getRegion());
+        assertEquals("百家湖 88号 1单元", saved.getLocation());
+        assertEquals("120.1,31.9", saved.getGeo());
     }
 
     @Test
@@ -335,10 +345,11 @@ class WxTutoringControllerTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
         userInfo.setUserType(0);
+        Parents request = buildValidParentRequest(null, 11L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
 
-        AjaxResult result = controller.addParents(new Parents());
+        AjaxResult result = controller.addParents(request);
 
         assertEquals(500, result.get(AjaxResult.CODE_TAG));
         assertEquals("请选择服务萌娃", result.get(AjaxResult.MSG_TAG));
@@ -350,8 +361,7 @@ class WxTutoringControllerTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
         userInfo.setUserType(0);
-        Parents request = new Parents();
-        request.setBabyId(99L);
+        Parents request = buildValidParentRequest(99L, 11L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(babyInfoService.selectBabyInfoByIdAndUserId(99L, WECHAT_USER_ID)).thenReturn(null);
@@ -370,11 +380,13 @@ class WxTutoringControllerTest {
         userInfo.setUserType(0);
         BabyInfo babyInfo = new BabyInfo();
         babyInfo.setId(7L);
-        Parents request = new Parents();
-        request.setBabyId(7L);
+        UserServiceAddress address = buildAddress(11L);
+        Parents request = buildValidParentRequest(7L, 11L);
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
         when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(userServiceAddressService.selectAddressByIdAndUserId(11L, WECHAT_USER_ID)).thenReturn(address);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
         when(parentsService.insertParents(any(Parents.class))).thenReturn(0);
 
         AjaxResult result = controller.addParents(request);
@@ -382,30 +394,19 @@ class WxTutoringControllerTest {
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
         verify(parentsService).insertParents(captor.capture());
-        assertEquals(WECHAT_USER_ID, captor.getValue().getWechatUid());
-        assertEquals(7L, captor.getValue().getBabyId());
-    }
-
-    @Test
-    void realVerifyAuthParamsShouldReturnSuccessPayload() {
-        WxMiniUserContext.setCurrentUserId(USER_ID);
-        WxRealVerifyAuthParamsVo payload = new WxRealVerifyAuthParamsVo();
-        payload.setTargetAppId("wx88736d7d39e2eda6");
-        payload.setPath("pages/oauth/authindex");
-        payload.setExtraData(Collections.singletonMap("sign", "ABC"));
-        when(wxRealVerifyService.buildAuthParams(USER_ID)).thenReturn(payload);
-
-        AjaxResult result = controller.getRealVerifyAuthParams();
-
-        assertEquals(200, result.get(AjaxResult.CODE_TAG));
-        assertEquals(payload, result.get(AjaxResult.DATA_TAG));
+        Parents saved = captor.getValue();
+        assertEquals(WECHAT_USER_ID, saved.getWechatUid());
+        assertEquals(7L, saved.getBabyId());
+        assertEquals(11L, saved.getAddressId());
+        assertEquals("南京市江宁区", saved.getRegion());
+        assertEquals("百家湖 88号 1单元", saved.getLocation());
+        assertEquals("120.1,31.9", saved.getGeo());
     }
 
     @Test
     void realVerifyShouldReturnVerifyResult() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
         WxRealVerifyRequestBo body = new WxRealVerifyRequestBo();
-        body.setAuthCode("code-1");
         body.setRealName("张三");
         body.setIdCard("110105199001011234");
         WxRealVerifyResultVo payload = new WxRealVerifyResultVo();
@@ -418,4 +419,30 @@ class WxTutoringControllerTest {
         assertEquals(payload, result.get(AjaxResult.DATA_TAG));
     }
 
+    private Parents buildValidParentRequest(Long babyId, Long addressId) {
+        Parents request = new Parents();
+        request.setBabyId(babyId);
+        request.setAddressId(addressId);
+        request.setName("数学辅导");
+        request.setPhone("13800138000");
+        request.setGrade("三年级");
+        request.setSubject("数学");
+        request.setServiceTimes("[{\"serviceDate\":\"2026-05-01\",\"startTime\":\"09:00\",\"endTime\":\"11:00\"}]");
+        request.setMethods(1L);
+        request.setDemandItems("作业辅导");
+        request.setGenderRequirement(0);
+        request.setHourlyBudget(new BigDecimal("150"));
+        return request;
+    }
+
+    private UserServiceAddress buildAddress(Long id) {
+        UserServiceAddress address = new UserServiceAddress();
+        address.setId(id);
+        address.setRegion("南京市江宁区");
+        address.setLocation("百家湖");
+        address.setAddressDetail("88号");
+        address.setDoorplate("1单元");
+        address.setGeo("120.1,31.9");
+        return address;
+    }
 }

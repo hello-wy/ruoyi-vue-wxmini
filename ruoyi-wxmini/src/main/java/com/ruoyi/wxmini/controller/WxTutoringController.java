@@ -12,13 +12,16 @@ import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
+import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
 import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.UserServiceAddress;
 import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IUserServiceAddressService;
+import com.ruoyi.wxmini.service.IWxRealVerifyService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import com.ruoyi.wxmini.vo.WxRealVerifyResultVo;
 import com.ruoyi.wxmini.vo.WxTutorDetailVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -69,6 +72,9 @@ public class WxTutoringController extends BaseController {
 
     @Resource
     private IUserServiceAddressService userServiceAddressService;
+
+    @Resource
+    private IWxRealVerifyService wxRealVerifyService;
 
     @ApiOperation("分页查询已通过教员列表（公开，支持科目/区域/授课方式/学历筛选）")
     @ApiImplicitParams({
@@ -176,6 +182,17 @@ public class WxTutoringController extends BaseController {
         }
         Tutors tutors = tutorsService.selectTutorsByUid(userId);
         return AjaxResult.success(tutors);
+    }
+
+    @ApiOperation("实名认证二要素核验（需登录）")
+    @PostMapping("/real-verify/verify")
+    public AjaxResult verifyRealName(@RequestBody WxRealVerifyRequestBo body) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
+        }
+        WxRealVerifyResultVo result = wxRealVerifyService.verify(userId, body);
+        return AjaxResult.success(result);
     }
 
     @ApiOperation("分页查询有效家教单列表（公开，支持科目/区域/辅导方式/年级筛选）")
