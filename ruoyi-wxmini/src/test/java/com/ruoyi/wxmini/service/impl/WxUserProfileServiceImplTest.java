@@ -77,6 +77,20 @@ class WxUserProfileServiceImplTest {
     }
 
     @Test
+    void getCurrentUserProfileShouldKeepRealnameAuthFlag() {
+        WxUserProfileVo profile = new WxUserProfileVo();
+        profile.setUserInfoId(1L);
+        profile.setUserName("张三");
+        profile.setUserType(1);
+        profile.setIsRealnameAuth(1);
+        when(wxUserProfileMapper.selectProfileDetailByUserId(USER_ID)).thenReturn(profile);
+
+        WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
+
+        assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
+    }
+
+    @Test
     void getCurrentUserProfileShouldReturnAuntPrimaryActionAndLabel() {
         WxUserProfileVo profile = new WxUserProfileVo();
         profile.setUserInfoId(1L);

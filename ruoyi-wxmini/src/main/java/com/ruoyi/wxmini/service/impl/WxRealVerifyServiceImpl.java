@@ -11,6 +11,7 @@ import com.aliyun.teaopenapi.models.Config;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
 import com.ruoyi.wxmini.config.AliyunCloudauthProperties;
+import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IWxRealVerifyService;
 import com.ruoyi.wxmini.vo.WxRealVerifyResultVo;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class WxRealVerifyServiceImpl implements IWxRealVerifyService {
     private static final String FAILED_MESSAGE = "实名认证失败，请稍后重试";
 
     private final AliyunCloudauthProperties aliyunCloudauthProperties;
+    private final IUserInfoService userInfoService;
 
     @Override
     public WxRealVerifyResultVo verify(String userId, WxRealVerifyRequestBo request) {
@@ -50,7 +52,14 @@ public class WxRealVerifyServiceImpl implements IWxRealVerifyService {
                     .setParamType("normal")
                     .setUserName(realName)
                     .setIdentifyNum(idCard));
-            return toResult(response == null ? null : response.getBody());
+            WxRealVerifyResultVo result = toResult(response == null ? null : response.getBody());
+            if (Boolean.TRUE.equals(result.getMatched())) {
+                int updated = userInfoService.updateRealnameInfo(userId, realName, idCard);
+                if (updated <= 0) {
+                    throw new ServiceException("用户不存在");
+                }
+            }
+            return result;
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {

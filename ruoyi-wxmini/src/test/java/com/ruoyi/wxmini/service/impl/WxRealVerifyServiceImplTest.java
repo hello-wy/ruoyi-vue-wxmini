@@ -1,10 +1,12 @@
 package com.ruoyi.wxmini.service.impl;
 
+import com.aliyun.cloudauth20190307.Client;
 import com.aliyun.cloudauth20190307.models.Id2MetaVerifyResponse;
 import com.aliyun.cloudauth20190307.models.Id2MetaVerifyResponseBody;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
 import com.ruoyi.wxmini.config.AliyunCloudauthProperties;
+import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.vo.WxRealVerifyResultVo;
 import org.junit.jupiter.api.Test;
 
@@ -12,14 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class WxRealVerifyServiceImplTest {
 
     private final AliyunCloudauthProperties properties = new AliyunCloudauthProperties();
 
     @Test
-    void verifyShouldReturnMatchedWhenBizCodeIsOne() {
-        TestableWxRealVerifyService service = new TestableWxRealVerifyService(properties, buildResponse("200", "1"));
+    void verifyShouldReturnMatchedWhenBizCodeIsOne() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        when(userInfoService.updateRealnameInfo("wx-user", "吴扬", "320123200106174211")).thenReturn(1);
+        WxRealVerifyServiceImpl service = createService(userInfoService, buildResponse("200", "1"));
         WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
         request.setRealName("吴扬");
         request.setIdCard("320123200106174211");
@@ -28,11 +39,13 @@ class WxRealVerifyServiceImplTest {
 
         assertTrue(result.getMatched());
         assertEquals("", result.getReason());
+        verify(userInfoService).updateRealnameInfo("wx-user", "吴扬", "320123200106174211");
     }
 
     @Test
-    void verifyShouldReturnNotMatchedWhenBizCodeIsTwo() {
-        TestableWxRealVerifyService service = new TestableWxRealVerifyService(properties, buildResponse("200", "2"));
+    void verifyShouldReturnNotMatchedWhenBizCodeIsTwo() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        WxRealVerifyServiceImpl service = createService(userInfoService, buildResponse("200", "2"));
         WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
         request.setRealName("张三");
         request.setIdCard("110105199001011234");
@@ -41,11 +54,13 @@ class WxRealVerifyServiceImplTest {
 
         assertFalse(result.getMatched());
         assertEquals("姓名或身份证信息不匹配，请重新填写", result.getReason());
+        verify(userInfoService, never()).updateRealnameInfo(any(), any(), any());
     }
 
     @Test
-    void verifyShouldThrowWhenRemoteCallFails() {
-        TestableWxRealVerifyService service = new TestableWxRealVerifyService(properties, buildResponse("500", null));
+    void verifyShouldThrowWhenRemoteCallFails() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        WxRealVerifyServiceImpl service = createService(userInfoService, buildResponse("500", null));
         WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
         request.setRealName("张三");
         request.setIdCard("110105199001011234");
@@ -56,8 +71,24 @@ class WxRealVerifyServiceImplTest {
     }
 
     @Test
+    void verifyShouldThrowWhenUserInfoMissingAfterMatched() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        when(userInfoService.updateRealnameInfo("wx-user", "吴扬", "320123200106174211")).thenReturn(0);
+        WxRealVerifyServiceImpl service = createService(userInfoService, buildResponse("200", "1"));
+        WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
+        request.setRealName("吴扬");
+        request.setIdCard("320123200106174211");
+
+        ServiceException error = assertThrows(ServiceException.class, () -> service.verify("wx-user", request));
+
+        assertEquals("用户不存在", error.getMessage());
+        verify(userInfoService).updateRealnameInfo("wx-user", "吴扬", "320123200106174211");
+    }
+
+    @Test
     void verifyShouldThrowWhenRealNameBlank() {
-        TestableWxRealVerifyService service = new TestableWxRealVerifyService(properties, buildResponse("200", "1"));
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        WxRealVerifyServiceImpl service = new WxRealVerifyServiceImpl(properties, userInfoService);
         WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
         request.setRealName(" ");
         request.setIdCard("110105199001011234");
@@ -69,7 +100,8 @@ class WxRealVerifyServiceImplTest {
 
     @Test
     void verifyShouldThrowWhenIdCardInvalid() {
-        TestableWxRealVerifyService service = new TestableWxRealVerifyService(properties, buildResponse("200", "1"));
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        WxRealVerifyServiceImpl service = new WxRealVerifyServiceImpl(properties, userInfoService);
         WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
         request.setRealName("张三");
         request.setIdCard("123");
@@ -77,6 +109,14 @@ class WxRealVerifyServiceImplTest {
         ServiceException error = assertThrows(ServiceException.class, () -> service.verify("wx-user", request));
 
         assertEquals("请填写正确的18位身份证号", error.getMessage());
+    }
+
+    private WxRealVerifyServiceImpl createService(IUserInfoService userInfoService, Id2MetaVerifyResponse response) throws Exception {
+        Client client = mock(Client.class);
+        when(client.id2MetaVerify(any())).thenReturn(response);
+        WxRealVerifyServiceImpl service = org.mockito.Mockito.spy(new WxRealVerifyServiceImpl(properties, userInfoService));
+        doReturn(client).when(service).buildClient();
+        return service;
     }
 
     private Id2MetaVerifyResponse buildResponse(String code, String bizCode) {
@@ -90,36 +130,5 @@ class WxRealVerifyServiceImplTest {
         Id2MetaVerifyResponse response = new Id2MetaVerifyResponse();
         response.setBody(body);
         return response;
-    }
-
-    private static class TestableWxRealVerifyService extends WxRealVerifyServiceImpl {
-
-        private final Id2MetaVerifyResponse response;
-
-        private TestableWxRealVerifyService(AliyunCloudauthProperties properties, Id2MetaVerifyResponse response) {
-            super(properties);
-            this.response = response;
-        }
-
-        @Override
-        public WxRealVerifyResultVo verify(String userId, WxRealVerifyRequestBo request) {
-            if (request == null) {
-                throw new ServiceException("参数错误");
-            }
-            if (request.getRealName() == null || request.getRealName().trim().isEmpty()) {
-                throw new ServiceException("请填写真实姓名");
-            }
-            String idCard = request.getIdCard() == null ? "" : request.getIdCard().trim();
-            if (!idCard.matches("^\\d{17}[\\dXx]$")) {
-                throw new ServiceException("请填写正确的18位身份证号");
-            }
-            try {
-                return super.toResult(this.response.getBody());
-            } catch (ServiceException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new ServiceException("实名认证失败，请稍后重试");
-            }
-        }
     }
 }

@@ -20,6 +20,7 @@
         <result property="workYears" column="work_years"/>
         <result property="personalIntro" column="personal_intro"/>
         <result property="verified" column="verified"/>
+        <result property="isRealnameAuth" column="is_realname_auth"/>
         <result property="userType" column="user_type"/>
     </resultMap>
 
@@ -60,6 +61,7 @@
                ui.user_name,
                ui.user_type,
                ui.phone,
+               ui.is_realname_auth,
                up.real_name,
                up.nick_name,
                up.gender,

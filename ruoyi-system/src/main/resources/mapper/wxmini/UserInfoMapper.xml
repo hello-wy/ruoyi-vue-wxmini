@@ -15,6 +15,7 @@
         <result property="avatarUrl" column="avatar_url"/>
         <result property="realName" column="real_name"/>
         <result property="idCard" column="id_card"/>
+        <result property="isRealnameAuth" column="is_realname_auth"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -30,6 +31,7 @@
                avatar_url,
                real_name,
                id_card,
+               is_realname_auth,
                create_time,
                update_time
         from user_info
@@ -65,6 +67,7 @@
             <if test="avatarUrl != null">avatar_url,</if>
             <if test="realName != null and realName != ''">real_name,</if>
             <if test="idCard != null and idCard != ''">id_card,</if>
+            <if test="isRealnameAuth != null">is_realname_auth,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -78,6 +81,7 @@
             <if test="avatarUrl != null">#{avatarUrl},</if>
             <if test="realName != null and realName != ''">#{realName},</if>
             <if test="idCard != null and idCard != ''">#{idCard},</if>
+            <if test="isRealnameAuth != null">#{isRealnameAuth},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -95,6 +99,7 @@
             <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
             <if test="realName != null and realName != ''">real_name = #{realName},</if>
             <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
+            <if test="isRealnameAuth != null">is_realname_auth = #{isRealnameAuth},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>

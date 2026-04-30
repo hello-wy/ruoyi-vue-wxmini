@@ -34,6 +34,8 @@ public class WxUserProfileVo {
 
     private Boolean verified;
 
+    private Integer isRealnameAuth;
+
     private Integer userType;
 
     private String userTypeLabel;
@@ -162,6 +164,14 @@ public class WxUserProfileVo {
 
     public void setVerified(Boolean verified) {
         this.verified = verified;
+    }
+
+    public Integer getIsRealnameAuth() {
+        return isRealnameAuth;
+    }
+
+    public void setIsRealnameAuth(Integer isRealnameAuth) {
+        this.isRealnameAuth = isRealnameAuth;
     }
 
     public Integer getUserType() {

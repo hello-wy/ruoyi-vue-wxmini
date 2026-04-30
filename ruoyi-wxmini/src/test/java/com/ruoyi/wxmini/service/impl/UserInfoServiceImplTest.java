@@ -28,7 +28,7 @@ class UserInfoServiceImplTest {
     private UserInfoServiceImpl service;
 
     @Test
-    void updateRealnameInfoShouldPersistNameAndIdCardByUserId() {
+    void updateRealnameInfoShouldPersistNameIdCardAndAuthFlagByUserId() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(1L);
         userInfo.setUserId("123");
@@ -41,6 +41,7 @@ class UserInfoServiceImplTest {
         assertEquals(1, rows);
         assertEquals("张三", userInfo.getRealName());
         assertEquals("110105199001011234", userInfo.getIdCard());
+        assertEquals(Integer.valueOf(1), userInfo.getIsRealnameAuth());
         verify(userInfoMapper).updateUserInfo(userInfo);
     }
 

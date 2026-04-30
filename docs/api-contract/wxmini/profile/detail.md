@@ -37,6 +37,9 @@
     "displayName": "张三",
     "userName": "张三",
     "phone": "13800138000",
+    "realName": "张三",
+    "verified": true,
+    "isRealnameAuth": 1,
     "userType": 2,
     "userTypeLabel": "商家",
     "canSwitchUserType": true,
@@ -49,6 +52,7 @@
 ### 失败场景或特殊说明
 
 - 未登录或 token 无效时，请求会失败。
+- `isRealnameAuth` 取自 `user_info.is_realname_auth`，`1` 表示已完成实名认证，`0` 或空表示未完成。
 - 当前实现会返回 `switchableUserTypes = [0, 1, 2, 3]`。
 
 ## 实现来源文件

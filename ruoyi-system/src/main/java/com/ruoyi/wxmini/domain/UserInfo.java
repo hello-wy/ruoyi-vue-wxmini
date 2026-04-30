@@ -68,6 +68,12 @@ public class UserInfo extends BaseEntity {
     @Excel(name = "身份证号码")
     private String idCard;
 
+    /**
+     * 是否已实名认证：0-未认证，1-已认证
+     */
+    @Excel(name = "是否已实名认证")
+    private Integer isRealnameAuth;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -146,5 +152,13 @@ public class UserInfo extends BaseEntity {
 
     public void setIdCard(String idCard) {
         this.idCard = idCard;
+    }
+
+    public Integer getIsRealnameAuth() {
+        return isRealnameAuth;
+    }
+
+    public void setIsRealnameAuth(Integer isRealnameAuth) {
+        this.isRealnameAuth = isRealnameAuth;
     }
 }

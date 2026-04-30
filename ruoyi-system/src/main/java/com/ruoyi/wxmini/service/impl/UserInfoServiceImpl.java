@@ -27,6 +27,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
     private UserInfoMapper userInfoMapper;
 
     private static final String REDIS_KEY_WX_USER = "wx_user:";
+    private static final Integer REALNAME_AUTH_VERIFIED = 1;
 
     /**
      * 查询用户信息列表
@@ -76,6 +77,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
         }
         userInfo.setRealName(realName);
         userInfo.setIdCard(idCard);
+        userInfo.setIsRealnameAuth(REALNAME_AUTH_VERIFIED);
         return updateUserInfo(userInfo);
     }
 
