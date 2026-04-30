@@ -3,10 +3,10 @@ package com.ruoyi.wxmini.filter;
 import com.ruoyi.wxmini.config.WxMiniAnonymousUrlProvider;
 import com.ruoyi.wxmini.service.IWxMiniJwtService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.annotation.Resource;
@@ -15,7 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * 微信小程序后台api接口校验过滤器
@@ -24,10 +23,9 @@ import java.util.List;
  * @date 2025/4/22 23:48
  */
 @Component
-@Slf4j
 public class WxMiniJwtFilter extends OncePerRequestFilter {
 
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private static final Logger log = LoggerFactory.getLogger(WxMiniJwtFilter.class);
 
     @Resource
     private IWxMiniJwtService jwtService;
@@ -40,12 +38,7 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String path = request.getRequestURI();
-            if (!this.checkIsExcludeUri(path) && path.startsWith("/wxmini")) {
-                /**
-                 * 避免和若依框架默认的认证请求头key名Authorization冲突
-                 * @see com.ruoyi.framework.config.SecurityConfig#filterChain
-                 * @see com.ruoyi.framework.security.filter.JwtAuthenticationTokenFilter#doFilterInternal
-                 */
+            if (!this.checkIsExcludeUri(request.getMethod(), path) && path.startsWith("/wxmini")) {
                 String token = request.getHeader("Wx-Authorization");
                 if (token == null || !token.startsWith("Bearer ")) {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -67,7 +60,6 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
                         return;
                     }
                     WxMiniUserContext.setCurrentUserId(userId);
-                    // request 级别兜底：避免极端情况下 ThreadLocal 上下文在后续读取不到
                     request.setAttribute(WxMiniUserContext.REQUEST_ATTR_CURRENT_USER_ID, userId);
                 } catch (Exception e) {
                     String message = e.getMessage();
@@ -83,7 +75,7 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean checkIsExcludeUri(String path) {
+    private boolean checkIsExcludeUri(String method, String path) {
         if (path.startsWith("/wxmini/login")
                 || path.startsWith("/wxmini/portal")
                 || path.startsWith("/wxmini/pay/notify")
@@ -92,11 +84,6 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
             return true;
         }
 
-        List<String> urls = anonymousUrlProvider == null ? null : anonymousUrlProvider.getUrls();
-        if (urls == null) {
-            return false;
-        }
-
-        return urls.stream().anyMatch(url -> pathMatcher.match(url, path));
+        return anonymousUrlProvider != null && anonymousUrlProvider.matches(method, path);
     }
 }

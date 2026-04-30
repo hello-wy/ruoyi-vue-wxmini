@@ -11,10 +11,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +29,7 @@ class WxMiniJwtFilterTest {
 
     @Test
     void shouldAllowAnonymousTutoringTutorListWithoutToken() throws Exception {
-        when(anonymousUrlProvider.getUrls()).thenReturn(Collections.singletonList("/wxmini/tutoring/tutors/list"));
+        when(anonymousUrlProvider.matches("GET", "/wxmini/tutoring/tutors/list")).thenReturn(true);
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/wxmini/tutoring/tutors/list");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain chain = new MockFilterChain();
@@ -40,7 +37,34 @@ class WxMiniJwtFilterTest {
         filter.doFilter(request, response, chain);
 
         assertEquals(200, response.getStatus());
-        assertNull(response.getContentAsString());
+        assertEquals("", response.getContentAsString());
+        verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void shouldRejectDeleteWithoutTokenWhenOnlyGetRouteIsAnonymous() throws Exception {
+        when(anonymousUrlProvider.matches("DELETE", "/wxmini/tutoring/parents/1")).thenReturn(false);
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/wxmini/tutoring/parents/1");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(401, response.getStatus());
+        assertEquals("Missing or invalid token", response.getContentAsString());
+        verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void shouldAllowPortalPostWithoutToken() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/wxmini/portal/demo-appid");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(200, response.getStatus());
+        assertEquals("", response.getContentAsString());
         verifyNoInteractions(jwtService);
     }
 }
