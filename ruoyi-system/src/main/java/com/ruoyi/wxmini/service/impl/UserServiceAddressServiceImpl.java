@@ -81,12 +81,12 @@ public class UserServiceAddressServiceImpl implements IUserServiceAddressService
 
     @Override
     public int deleteUserServiceAddressByIdAndUserId(Long id, String userId) {
-        long refCount = parentsMapper.selectCount(new LambdaQueryWrapper<Parents>()
-                .eq(Parents::getAddressId, id)
-                .eq(Parents::getStatus, 0L));
-        if (refCount > 0) {
-            throw new ServiceException("该地址已关联家教需求，暂不能删除");
-        }
+//        long refCount = parentsMapper.selectCount(new LambdaQueryWrapper<Parents>()
+//                .eq(Parents::getAddressId, id)
+//                .eq(Parents::getStatus, 0L));
+//        if (refCount > 0) {
+//            throw new ServiceException("该地址已关联家教需求，暂不能删除");
+//        }
         return userServiceAddressMapper.deleteUserServiceAddressByIdAndUserId(id, userId);
     }
 }
