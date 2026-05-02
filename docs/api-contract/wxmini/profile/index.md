@@ -37,7 +37,9 @@
   "companyPosition": "运营",
   "industry": "教育",
   "workYears": "5年",
-  "personalIntro": "擅长家校沟通"
+  "personalIntro": "擅长家校沟通",
+  "availableTime": "周末全天",
+  "workExperience": "有家教与助教经验"
 }
 ```
 
@@ -53,6 +55,7 @@
 ### 失败场景或特殊说明
 
 - 未登录或 token 无效时，请求会失败。
+- 本次新增支持保存 `availableTime` 与 `workExperience` 字段。
 
 ## 实现来源文件
 

@@ -5,8 +5,10 @@ import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.wxmini.bo.WxJobPayrollCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
+import com.ruoyi.wxmini.service.IWxJobPayrollPayService;
 import com.ruoyi.wxmini.service.IWxJobSignupPayService;
 import com.ruoyi.wxmini.service.IWxSalonPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
@@ -34,6 +36,8 @@ public class WxPayController {
     private IWxSalonPayService wxSalonPayService;
     @Resource
     private IWxJobSignupPayService wxJobSignupPayService;
+    @Resource
+    private IWxJobPayrollPayService wxJobPayrollPayService;
 
     @ApiOperation("查询当前用户沙龙订单列表（需登录）")
     @GetMapping("/salon/orders/my")
@@ -109,6 +113,30 @@ public class WxPayController {
         }
     }
 
+    @ApiOperation("创建兼职工资支付订单，返回 JSAPI 支付参数（需登录）")
+    @PostMapping("/payroll/orders/create")
+    public AjaxResult createPayrollOrder(@RequestBody @Validated WxJobPayrollCreateOrderBo bo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxJobPayrollPayService.createPayrollOrder(userId, bo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查询兼职工资支付订单状态（需登录）")
+    @GetMapping("/payroll/orders/{orderNo}")
+    public AjaxResult queryPayrollOrder(@PathVariable("orderNo") String orderNo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxJobPayrollPayService.queryPayrollOrder(userId, orderNo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @ApiOperation("微信沙龙支付结果异步回调通知（由微信服务器调用）")
     @PostMapping("/salon/notify")
     public String payNotify(HttpServletRequest request, HttpServletResponse response) {
@@ -156,6 +184,33 @@ public class WxPayController {
             }
             String requestId = request.getHeader("Request-ID");
             boolean handled = wxJobSignupPayService.handleJobPaidCallback(result, requestId);
+            return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        }
+    }
+
+    @ApiOperation("微信兼职工资支付结果异步回调通知（由微信服务器调用）")
+    @PostMapping("/payroll/notify")
+    public String payrollPayNotify(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String notifyData = IoUtil.readUtf8(inputStream);
+            SignatureHeader signatureHeader = SignatureHeader.builder()
+                    .serial(request.getHeader("Wechatpay-Serial"))
+                    .signature(request.getHeader("Wechatpay-Signature"))
+                    .nonce(request.getHeader("Wechatpay-Nonce"))
+                    .timeStamp(request.getHeader("Wechatpay-Timestamp"))
+                    .build();
+            WxPayNotifyV3Result result = this.wxPayService.parseOrderNotifyV3Result(notifyData, signatureHeader);
+            String tradeState = result.getResult().getTradeState();
+            boolean isPaySuccess = "SUCCESS".equals(tradeState);
+            if (!isPaySuccess) {
+                return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+            }
+            String requestId = request.getHeader("Request-ID");
+            boolean handled = wxJobPayrollPayService.handlePayrollPaidCallback(result, requestId);
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);

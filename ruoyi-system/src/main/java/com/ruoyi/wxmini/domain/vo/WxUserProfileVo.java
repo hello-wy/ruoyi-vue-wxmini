@@ -32,6 +32,10 @@ public class WxUserProfileVo {
 
     private String personalIntro;
 
+    private String availableTime;
+
+    private String workExperience;
+
     private Boolean verified;
 
     private Integer isRealnameAuth;
@@ -156,6 +160,22 @@ public class WxUserProfileVo {
 
     public void setPersonalIntro(String personalIntro) {
         this.personalIntro = personalIntro;
+    }
+
+    public String getAvailableTime() {
+        return availableTime;
+    }
+
+    public void setAvailableTime(String availableTime) {
+        this.availableTime = availableTime;
+    }
+
+    public String getWorkExperience() {
+        return workExperience;
+    }
+
+    public void setWorkExperience(String workExperience) {
+        this.workExperience = workExperience;
     }
 
     public Boolean getVerified() {

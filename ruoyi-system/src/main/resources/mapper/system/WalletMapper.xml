@@ -4,7 +4,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.WalletMapper">
 
-    <!-- ============ user_wallet ============ -->
     <resultMap type="com.ruoyi.system.domain.UserWallet" id="WalletResult">
         <result property="id"             column="id"              />
         <result property="uid"            column="uid"             />
@@ -16,11 +15,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"     column="update_time"     />
     </resultMap>
 
+    <resultMap type="com.ruoyi.system.domain.WalletTransaction" id="WalletTransactionResult">
+        <result property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="bizType" column="biz_type"/>
+        <result property="bizId" column="biz_id"/>
+        <result property="direction" column="direction"/>
+        <result property="amount" column="amount"/>
+        <result property="balanceAfter" column="balance_after"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
     <select id="selectWalletByUid" parameterType="Long" resultMap="WalletResult">
         select id, uid, balance, frozen, total_earned, total_withdrawn,
                create_time, update_time
         from user_wallet
         where uid = #{uid}
+    </select>
+
+    <select id="selectWalletByUidForUpdate" parameterType="Long" resultMap="WalletResult">
+        select id, uid, balance, frozen, total_earned, total_withdrawn,
+               create_time, update_time
+        from user_wallet
+        where uid = #{uid}
+        for update
     </select>
 
     <insert id="insertWallet" parameterType="com.ruoyi.system.domain.UserWallet" useGeneratedKeys="true" keyProperty="id">
@@ -40,7 +59,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where uid = #{uid}
     </update>
 
-    <!-- ============ wallet_withdraw ============ -->
     <resultMap type="com.ruoyi.system.domain.WalletWithdraw" id="WithdrawResult">
         <result property="id"           column="id"             />
         <result property="uid"          column="uid"            />
@@ -80,5 +98,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </set>
         where id = #{id}
     </update>
+
+    <insert id="insertTransaction" parameterType="com.ruoyi.system.domain.WalletTransaction">
+        insert into wallet_transaction (id, uid, biz_type, biz_id, direction, amount, balance_after, remark, create_time)
+        values (#{id}, #{uid}, #{bizType}, #{bizId}, #{direction}, #{amount}, #{balanceAfter}, #{remark}, #{createTime})
+    </insert>
+
+    <select id="selectTransactionListByUid" resultMap="WalletTransactionResult">
+        select id, uid, biz_type, biz_id, direction, amount, balance_after, remark, create_time
+        from wallet_transaction
+        where uid = #{uid}
+        order by create_time desc, id desc
+        limit 100
+    </select>
 
 </mapper>

@@ -3,12 +3,16 @@ package com.ruoyi.wxmini.controller;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.wxmini.bo.WxJobPayrollCreateOrderBo;
+import com.ruoyi.wxmini.bo.WxPayrollEmployeeBo;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
+import com.ruoyi.wxmini.service.IWxJobPayrollPayService;
 import com.ruoyi.wxmini.service.IWxJobSignupPayService;
 import com.ruoyi.wxmini.service.IWxSalonPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
-import com.ruoyi.wxmini.vo.WxSalonPayOrderDetailVo;
+import com.ruoyi.wxmini.vo.WxJobPayrollOrderDetailVo;
 import com.ruoyi.wxmini.vo.WxPayParamVo;
+import com.ruoyi.wxmini.vo.WxSalonPayOrderDetailVo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +24,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,6 +42,8 @@ class WxPayControllerTest {
     private IWxSalonPayService wxSalonPayService;
     @Mock
     private IWxJobSignupPayService wxJobSignupPayService;
+    @Mock
+    private IWxJobPayrollPayService wxJobPayrollPayService;
 
     @InjectMocks
     private WxPayController controller;
@@ -73,12 +80,50 @@ class WxPayControllerTest {
     }
 
     @Test
+    void createPayrollOrderShouldReturn200WhenServiceReturnsData() throws Exception {
+        WxMiniUserContext.setCurrentUserId("merchant-1");
+        when(wxJobPayrollPayService.createPayrollOrder(anyString(), any())).thenReturn(new WxPayParamVo());
+
+        WxJobPayrollCreateOrderBo bo = new WxJobPayrollCreateOrderBo();
+        bo.setJobId(10L);
+        WxPayrollEmployeeBo employee = new WxPayrollEmployeeBo();
+        employee.setEmployeeUserId(20L);
+        employee.setHours("8");
+        employee.setHourlyRate("25");
+        bo.setEmployees(Arrays.asList(employee));
+        AjaxResult result = controller.createPayrollOrder(bo);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void queryPayrollOrderShouldReturn200WhenServiceReturnsData() {
+        WxMiniUserContext.setCurrentUserId("merchant-1");
+        WxJobPayrollOrderDetailVo detailVo = new WxJobPayrollOrderDetailVo();
+        detailVo.setOrderNo("PAYROLL-1");
+        when(wxJobPayrollPayService.queryPayrollOrder("merchant-1", "PAYROLL-1")).thenReturn(detailVo);
+
+        AjaxResult result = controller.queryPayrollOrder("PAYROLL-1");
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
     void payNotifyShouldReturnFailXmlWhenParsingFails() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         when(request.getInputStream()).thenReturn(new SimpleServletInputStream("{}"));
         when(wxPayService.parseOrderNotifyV3Result(anyString(), any())).thenThrow(new RuntimeException("boom"));
         String result = controller.payNotify(request, response);
+        assertEquals("<xml><return_code><![CDATA[FAIL]]></return_code></xml>", result);
+    }
+
+    @Test
+    void payrollPayNotifyShouldReturnFailXmlWhenParsingFails() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        when(request.getInputStream()).thenReturn(new SimpleServletInputStream("{}"));
+        when(wxPayService.parseOrderNotifyV3Result(anyString(), any())).thenThrow(new RuntimeException("boom"));
+        String result = controller.payrollPayNotify(request, response);
         assertEquals("<xml><return_code><![CDATA[FAIL]]></return_code></xml>", result);
     }
 

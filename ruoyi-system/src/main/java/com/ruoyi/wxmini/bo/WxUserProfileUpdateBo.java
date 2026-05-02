@@ -26,6 +26,10 @@ public class WxUserProfileUpdateBo {
 
     private String personalIntro;
 
+    private String availableTime;
+
+    private String workExperience;
+
     public String getUserName() {
         return userName;
     }
@@ -120,5 +124,21 @@ public class WxUserProfileUpdateBo {
 
     public void setPersonalIntro(String personalIntro) {
         this.personalIntro = personalIntro;
+    }
+
+    public String getAvailableTime() {
+        return availableTime;
+    }
+
+    public void setAvailableTime(String availableTime) {
+        this.availableTime = availableTime;
+    }
+
+    public String getWorkExperience() {
+        return workExperience;
+    }
+
+    public void setWorkExperience(String workExperience) {
+        this.workExperience = workExperience;
     }
 }
