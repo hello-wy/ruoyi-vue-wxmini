@@ -104,15 +104,38 @@ class WxDailyJobControllerTest {
     }
 
     @Test
+    void createShouldRejectWhenMerchantNotRealnameVerified() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(9L);
+        userInfo.setUserId("123");
+        userInfo.setUserType(2);
+        userInfo.setIsRealnameAuth(0);
+        WxMiniUserContext.setCurrentUserId("123");
+        when(userInfoService.selectUserInfoByUserId("123")).thenReturn(userInfo);
+
+        AjaxResult result = controller.create(buildValidDailyJobs());
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请先完成实人认证后再发布招聘", result.get(AjaxResult.MSG_TAG));
+    }
+
+    @Test
     void createShouldReturn200WhenMerchantPublishes() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(9L);
         userInfo.setUserId("123");
         userInfo.setUserType(2);
+        userInfo.setIsRealnameAuth(1);
         WxMiniUserContext.setCurrentUserId("123");
         when(userInfoService.selectUserInfoByUserId("123")).thenReturn(userInfo);
         when(dailyJobsService.insertDailyJobs(any(DailyJobs.class))).thenReturn(1);
 
+        AjaxResult result = controller.create(buildValidDailyJobs());
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    private DailyJobs buildValidDailyJobs() {
         DailyJobs dailyJobs = new DailyJobs();
         dailyJobs.setTitle("招聘数学老师");
         dailyJobs.setCategory(0L);
@@ -124,9 +147,6 @@ class WxDailyJobControllerTest {
         dailyJobs.setPhone("13800138000");
         dailyJobs.setDescription("负责初中数学辅导");
         dailyJobs.setSignupLimit(10);
-
-        AjaxResult result = controller.create(dailyJobs);
-
-        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        return dailyJobs;
     }
 }

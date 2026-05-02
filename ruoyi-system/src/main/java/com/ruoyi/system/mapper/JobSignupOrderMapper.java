@@ -1,6 +1,8 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
+import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,6 +13,12 @@ public interface JobSignupOrderMapper {
     List<JobSignupOrder> selectJobSignupOrderList(JobSignupOrder order);
 
     List<JobSignupOrder> selectMyJobSignupOrders(@Param("userId") String userId);
+
+    List<JobScheduleRecordVo> selectMyPaidJobSchedules(@Param("userId") String userId, @Param("paidStatus") Integer paidStatus);
+
+    List<JobSignupUserRecordVo> selectPaidSignupUsersByJobId(@Param("jobId") Long jobId,
+                                                             @Param("paidStatus") Integer paidStatus,
+                                                             @Param("keyword") String keyword);
 
     JobSignupOrder selectLatestPaidOrder(@Param("userId") String userId, @Param("jobId") Long jobId);
 

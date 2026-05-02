@@ -20,6 +20,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <resultMap id="JobScheduleRecordResult" type="com.ruoyi.system.domain.vo.JobScheduleRecordVo">
+        <result property="orderNo" column="order_no"/>
+        <result property="jobId" column="job_id"/>
+        <result property="title" column="title"/>
+        <result property="workDate" column="work_date"/>
+        <result property="workTime" column="work_time"/>
+        <result property="location" column="location"/>
+        <result property="salaryDay" column="salary_day"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <resultMap id="JobSignupUserRecordResult" type="com.ruoyi.system.domain.vo.JobSignupUserRecordVo">
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="displayName" column="display_name"/>
+        <result property="phoneMasked" column="phone_masked"/>
+    </resultMap>
+
     <sql id="selectJobSignupOrderVo">
         select id, order_no, user_id, job_id, amount, status, wechat_transaction_id, refund_no, pay_time, refund_time, request_id, create_time, update_time
         from job_signup_order
@@ -45,6 +63,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectJobSignupOrderVo"/>
         where user_id = #{userId}
         order by create_time desc, id desc
+    </select>
+
+    <select id="selectMyPaidJobSchedules" resultMap="JobScheduleRecordResult">
+        select jso.order_no,
+               dj.id as job_id,
+               dj.title,
+               dj.work_date,
+               dj.work_time,
+               dj.location,
+               dj.salary_day,
+               jso.status
+        from job_signup_order jso
+                 inner join daily_jobs dj on dj.id = jso.job_id
+        where jso.user_id = #{userId}
+          and jso.status = #{paidStatus}
+        order by dj.work_date asc, dj.id desc
+    </select>
+
+    <select id="selectPaidSignupUsersByJobId" resultMap="JobSignupUserRecordResult">
+        select distinct ui.id as user_info_id,
+                        ui.user_id,
+                        case
+                            when up.real_name is not null and up.real_name != '' then up.real_name
+                            when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                            else ui.user_name
+                        end as display_name,
+                        case
+                            when ui.phone is null or ui.phone = '' then ''
+                            when char_length(ui.phone) &lt; 7 then ui.phone
+                            else concat(left(ui.phone, 3), '****', right(ui.phone, 4))
+                        end as phone_masked
+        from job_signup_order jso
+                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join wx_user_profile up on up.uid = ui.id
+        where jso.job_id = #{jobId}
+          and jso.status = #{paidStatus}
+          <if test="keyword != null and keyword != ''">
+              and (
+                ui.user_name like concat('%', #{keyword}, '%')
+                or ui.phone like concat('%', #{keyword}, '%')
+                or up.real_name like concat('%', #{keyword}, '%')
+                or up.nick_name like concat('%', #{keyword}, '%')
+              )
+          </if>
+        order by ui.id desc
     </select>
 
     <select id="selectLatestPaidOrder" resultMap="JobSignupOrderResult">

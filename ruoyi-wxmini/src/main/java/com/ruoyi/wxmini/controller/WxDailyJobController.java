@@ -77,6 +77,9 @@ public class WxDailyJobController extends BaseController {
         if (!USER_TYPE_MERCHANT.equals(userInfo.getUserType())) {
             return AjaxResult.error("仅商家可以发布招聘");
         }
+        if (!Integer.valueOf(1).equals(userInfo.getIsRealnameAuth())) {
+            return AjaxResult.error("请先完成实人认证后再发布招聘");
+        }
         String errorMessage = validateCreateRequest(dailyJobs);
         if (errorMessage != null) {
             return AjaxResult.error(errorMessage);

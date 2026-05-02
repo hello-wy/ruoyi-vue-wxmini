@@ -76,6 +76,8 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         profile.setIndustry(bo.getIndustry());
         profile.setWorkYears(bo.getWorkYears());
         profile.setPersonalIntro(bo.getPersonalIntro());
+        profile.setAvailableTime(bo.getAvailableTime());
+        profile.setWorkExperience(bo.getWorkExperience());
         profile.setUpdateTime(DateUtils.getNowDate());
 
         if (isNew) {

@@ -1,7 +1,10 @@
 package com.ruoyi.wxmini.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.domain.WxUserProfile;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
 import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import com.ruoyi.wxmini.service.IUserInfoService;
@@ -15,6 +18,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,6 +108,31 @@ class WxUserProfileServiceImplTest {
         assertEquals("阿姨", result.getUserTypeLabel());
         assertEquals("/pages/mine/info/index", result.getPrimaryAction());
         assertEquals(Integer.valueOf(48), result.getAge());
+    }
+
+    @Test
+    void updateCurrentUserProfileShouldPersistParttimeFields() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserId(USER_ID);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(userInfoService.updateUserInfo(userInfo)).thenReturn(1);
+
+        WxUserProfile existing = new WxUserProfile();
+        existing.setUserInfoId(1L);
+        when(wxUserProfileMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(existing);
+        when(wxUserProfileMapper.updateById(any(WxUserProfile.class))).thenReturn(1);
+
+        WxUserProfileUpdateBo bo = new WxUserProfileUpdateBo();
+        bo.setRealName("张三");
+        bo.setAge(20);
+        bo.setPersonalIntro("可兼职周末活动");
+        bo.setAvailableTime("周末白天");
+        bo.setWorkExperience("做过地推和助教");
+
+        int rows = service.updateCurrentUserProfile(USER_ID, bo);
+
+        assertEquals(1, rows);
     }
 
     @Test

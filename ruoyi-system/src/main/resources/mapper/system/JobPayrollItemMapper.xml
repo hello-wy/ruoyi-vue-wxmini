@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JobPayrollItemMapper">
+
+    <resultMap id="JobPayrollItemResult" type="com.ruoyi.system.domain.JobPayrollItem">
+        <result property="id" column="id"/>
+        <result property="batchId" column="batch_id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="employeeUid" column="employee_uid"/>
+        <result property="employeeUserId" column="employee_user_id"/>
+        <result property="hours" column="hours"/>
+        <result property="hourlyRate" column="hourly_rate"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectJobPayrollItemsByBatchId" parameterType="Long" resultMap="JobPayrollItemResult">
+        select id, batch_id, job_id, employee_uid, employee_user_id, hours, hourly_rate, amount, status, create_time, update_time
+        from job_payroll_item
+        where batch_id = #{batchId}
+        order by id asc
+    </select>
+
+    <insert id="batchInsertJobPayrollItems">
+        insert into job_payroll_item (
+            id, batch_id, job_id, employee_uid, employee_user_id, hours, hourly_rate, amount, status, create_time, update_time
+        ) values
+        <foreach collection="items" item="item" separator=",">
+            (
+                #{item.id}, #{item.batchId}, #{item.jobId}, #{item.employeeUid}, #{item.employeeUserId}, #{item.hours}, #{item.hourlyRate}, #{item.amount}, #{item.status}, #{item.createTime}, #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateJobPayrollItem" parameterType="com.ruoyi.system.domain.JobPayrollItem">
+        update job_payroll_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="batchId != null">batch_id = #{batchId},</if>
+            <if test="jobId != null">job_id = #{jobId},</if>
+            <if test="employeeUid != null">employee_uid = #{employeeUid},</if>
+            <if test="employeeUserId != null">employee_user_id = #{employeeUserId},</if>
+            <if test="hours != null">hours = #{hours},</if>
+            <if test="hourlyRate != null">hourly_rate = #{hourlyRate},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>

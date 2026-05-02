@@ -32,6 +32,9 @@ public class WxUserProfile extends BaseEntity {
 
     private String personalIntro;
 
+    private String availableTime;
+
+    private String workExperience;
 
     public Long getUserInfoId() {
         return userInfoId;
@@ -119,5 +122,21 @@ public class WxUserProfile extends BaseEntity {
 
     public void setPersonalIntro(String personalIntro) {
         this.personalIntro = personalIntro;
+    }
+
+    public String getAvailableTime() {
+        return availableTime;
+    }
+
+    public void setAvailableTime(String availableTime) {
+        this.availableTime = availableTime;
+    }
+
+    public String getWorkExperience() {
+        return workExperience;
+    }
+
+    public void setWorkExperience(String workExperience) {
+        this.workExperience = workExperience;
     }
 }

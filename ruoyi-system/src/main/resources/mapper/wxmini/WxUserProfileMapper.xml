@@ -19,6 +19,8 @@
         <result property="industry" column="industry"/>
         <result property="workYears" column="work_years"/>
         <result property="personalIntro" column="personal_intro"/>
+        <result property="availableTime" column="available_time"/>
+        <result property="workExperience" column="work_experience"/>
         <result property="verified" column="verified"/>
         <result property="isRealnameAuth" column="is_realname_auth"/>
         <result property="userType" column="user_type"/>
@@ -72,6 +74,8 @@
                up.industry,
                up.work_years,
                up.personal_intro,
+               up.available_time,
+               up.work_experience,
                case
                    when up.real_name is not null and up.real_name != '' then 1
                    else 0

@@ -44,7 +44,11 @@
     "userTypeLabel": "商家",
     "canSwitchUserType": true,
     "primaryAction": "/pages/jobs/apply",
-    "switchableUserTypes": [0, 1, 2, 3]
+    "switchableUserTypes": [0, 1, 2, 3],
+    "age": 24,
+    "personalIntro": "认真负责",
+    "availableTime": "周末全天",
+    "workExperience": "做过活动协助与地推兼职"
   }
 }
 ```

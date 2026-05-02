@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.JobPayrollBatchMapper">
+
+    <resultMap id="JobPayrollBatchResult" type="com.ruoyi.system.domain.JobPayrollBatch">
+        <result property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="jobId" column="job_id"/>
+        <result property="merchantUid" column="merchant_uid"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="wechatTransactionId" column="wechat_transaction_id"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="requestId" column="request_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectJobPayrollBatchVo">
+        select id, order_no, job_id, merchant_uid, total_amount, status, wechat_transaction_id, pay_time, request_id, create_time, update_time
+        from job_payroll_batch
+    </sql>
+
+    <select id="selectJobPayrollBatchByOrderNo" parameterType="String" resultMap="JobPayrollBatchResult">
+        <include refid="selectJobPayrollBatchVo"/>
+        where order_no = #{orderNo}
+    </select>
+
+    <select id="selectJobPayrollBatchByOrderNoForUpdate" parameterType="String" resultMap="JobPayrollBatchResult">
+        <include refid="selectJobPayrollBatchVo"/>
+        where order_no = #{orderNo}
+        for update
+    </select>
+
+    <insert id="insertJobPayrollBatch" parameterType="com.ruoyi.system.domain.JobPayrollBatch">
+        insert into job_payroll_batch (
+            id, order_no, job_id, merchant_uid, total_amount, status,
+            wechat_transaction_id, pay_time, request_id, create_time, update_time
+        ) values (
+            #{id}, #{orderNo}, #{jobId}, #{merchantUid}, #{totalAmount}, #{status},
+            #{wechatTransactionId}, #{payTime}, #{requestId}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="updateJobPayrollBatch" parameterType="com.ruoyi.system.domain.JobPayrollBatch">
+        update job_payroll_batch
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="jobId != null">job_id = #{jobId},</if>
+            <if test="merchantUid != null">merchant_uid = #{merchantUid},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="wechatTransactionId != null">wechat_transaction_id = #{wechatTransactionId},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="requestId != null">request_id = #{requestId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>
