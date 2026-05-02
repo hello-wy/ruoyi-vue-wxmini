@@ -66,6 +66,13 @@
         />
       </el-form-item>
       <el-form-item label="联系人姓名" prop="contacts">
+        <el-input
+          v-model="queryParams.contacts"
+          placeholder="请输入联系人姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="联系电话" prop="phone">
         <el-input
           v-model="queryParams.phone"
@@ -206,6 +213,8 @@
           <el-input v-model="form.publisherUid" placeholder="请输入发布者用户ID" />
         </el-form-item>
         <el-form-item label="联系人姓名" prop="contacts">
+          <el-input v-model="form.contacts" placeholder="请输入联系人姓名" />
+        </el-form-item>
         <el-form-item label="联系电话" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入联系电话" />
         </el-form-item>

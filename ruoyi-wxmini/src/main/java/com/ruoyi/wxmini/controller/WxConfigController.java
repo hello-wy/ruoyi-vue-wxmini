@@ -51,6 +51,8 @@ public class WxConfigController extends BaseController {
         data.put("content", defaultIfBlank(content, "请联系平台了解代理合作详情。"));
         data.put("qrcodeUrl", qrcodeUrl);
         data.put("contact", contact);
+        data.put("phone", configService.selectConfigByKey("wxmini.merchant.agent.phone"));
+        data.put("scanTip", configService.selectConfigByKey("wxmini.merchant.agent.scanTip"));
         data.put("tips", configService.selectConfigByKey("wxmini.merchant.agent.tips"));
         data.put("buttonText", defaultIfBlank(configService.selectConfigByKey("wxmini.merchant.agent.buttonText"), "我知道了"));
         return success(data);
