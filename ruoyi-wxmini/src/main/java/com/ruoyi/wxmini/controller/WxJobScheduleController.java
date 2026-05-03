@@ -33,6 +33,16 @@ public class WxJobScheduleController extends BaseController {
         return success(wxJobScheduleService.listMySchedules(userId));
     }
 
+    @ApiOperation("获取当前商家发布的兼职日结岗位")
+    @GetMapping("/mine/published")
+    public AjaxResult myPublishedJobs() {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        return success(wxJobScheduleService.listMerchantJobs(userId));
+    }
+
     @ApiOperation("获取岗位已报名用户池")
     @GetMapping("/{jobId}/signup-users")
     public AjaxResult signupUsers(@PathVariable("jobId") Long jobId,

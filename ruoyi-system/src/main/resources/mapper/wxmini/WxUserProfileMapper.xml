@@ -56,15 +56,15 @@
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
         select ui.id as uid,
                case
-                   when up.real_name is not null and up.real_name != '' then up.real_name
-                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
-                   else ui.user_name
+                   when ui.real_name is not null and ui.real_name != '' then ui.real_name
+                   when ui.phone is not null and length(ui.phone) = 11 then concat(substring(ui.phone, 1, 3), '****', substring(ui.phone, 8, 4))
+                   else ''
                end as display_name,
                ui.user_name,
                ui.user_type,
                ui.phone,
                ui.is_realname_auth,
-               up.real_name,
+               ui.real_name,
                up.nick_name,
                up.gender,
                up.age,
@@ -77,7 +77,7 @@
                up.available_time,
                up.work_experience,
                case
-                   when up.real_name is not null and up.real_name != '' then 1
+                   when ui.is_realname_auth = 1 then 1
                    else 0
                end as verified
         from user_info ui

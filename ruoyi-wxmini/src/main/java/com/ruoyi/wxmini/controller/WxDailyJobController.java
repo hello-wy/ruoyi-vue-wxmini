@@ -77,7 +77,7 @@ public class WxDailyJobController extends BaseController {
         if (!USER_TYPE_MERCHANT.equals(userInfo.getUserType())) {
             return AjaxResult.error("仅商家可以发布招聘");
         }
-        if (!Integer.valueOf(1).equals(userInfo.getIsRealnameAuth())) {
+        if (!isRealnameVerified(userInfo)) {
             return AjaxResult.error("请先完成实人认证后再发布招聘");
         }
         String errorMessage = validateCreateRequest(dailyJobs);
@@ -102,6 +102,10 @@ public class WxDailyJobController extends BaseController {
             return null;
         }
         return userInfoService.selectUserInfoByUserId(userId);
+    }
+
+    private boolean isRealnameVerified(UserInfo userInfo) {
+        return userInfo != null && Integer.valueOf(1).equals(userInfo.getIsRealnameAuth());
     }
 
     private String validateCreateRequest(DailyJobs dailyJobs) {

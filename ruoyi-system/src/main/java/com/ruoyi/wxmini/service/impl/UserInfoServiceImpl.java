@@ -100,16 +100,21 @@ public class UserInfoServiceImpl implements IUserInfoService {
     public UserInfo selectUserInfoByUserId(String userId) {
         Object t = redisCache.getCacheObject(this.getWxUserCacheKey(userId));
         if (t != null) {
-            return JSON.parseObject(t.toString(), UserInfo.class);
-        } else {
-            UserInfo userInfo = userInfoMapper.selectUserInfoByUserId(userId);
-            if (userInfo == null) {
-                return null;
+            String cachedJson = t.toString();
+            if (cachedJson.contains("\"isRealnameAuth\"")) {
+                return JSON.parseObject(cachedJson, UserInfo.class);
             }
-            redisCache.setCacheObject(this.getWxUserCacheKey(userId), JSON.toJSONString(userInfo));
-            return userInfo;
         }
+        return reloadUserInfoToCache(userId);
+    }
 
+    private UserInfo reloadUserInfoToCache(String userId) {
+        UserInfo userInfo = userInfoMapper.selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return null;
+        }
+        redisCache.setCacheObject(this.getWxUserCacheKey(userId), JSON.toJSONString(userInfo));
+        return userInfo;
     }
 
     private String getWxUserCacheKey(String userId) {

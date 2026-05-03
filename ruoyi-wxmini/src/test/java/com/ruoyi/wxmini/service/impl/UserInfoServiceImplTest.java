@@ -70,4 +70,21 @@ class UserInfoServiceImplTest {
 
         assertEquals(0, rows);
     }
+
+    @Test
+    void selectUserInfoByUserIdShouldRefreshCacheWhenCachedRealnameAuthIsMissing() {
+        String staleCache = "{\"id\":1,\"userId\":\"123\",\"userName\":\"微信用户\"}";
+        UserInfo dbUserInfo = new UserInfo();
+        dbUserInfo.setId(1L);
+        dbUserInfo.setUserId("123");
+        dbUserInfo.setUserName("微信用户");
+        dbUserInfo.setIsRealnameAuth(1);
+        when(redisCache.getCacheObject("wx_user:123")).thenReturn(staleCache);
+        when(userInfoMapper.selectUserInfoByUserId("123")).thenReturn(dbUserInfo);
+
+        UserInfo result = service.selectUserInfoByUserId("123");
+
+        assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
+        verify(redisCache).setCacheObject(eq("wx_user:123"), contains("\"isRealnameAuth\":1"));
+    }
 }

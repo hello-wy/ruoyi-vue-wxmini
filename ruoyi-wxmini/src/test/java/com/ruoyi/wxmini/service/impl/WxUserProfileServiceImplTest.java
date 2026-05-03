@@ -133,6 +133,31 @@ class WxUserProfileServiceImplTest {
         int rows = service.updateCurrentUserProfile(USER_ID, bo);
 
         assertEquals(1, rows);
+        assertEquals(null, userInfo.getUserName());
+    }
+
+    @Test
+    void updateCurrentUserProfileShouldNotChangeRealNameAfterAuth() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserId(USER_ID);
+        userInfo.setIsRealnameAuth(1);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(userInfoService.updateUserInfo(userInfo)).thenReturn(1);
+
+        WxUserProfile existing = new WxUserProfile();
+        existing.setUserInfoId(1L);
+        existing.setRealName("旧姓名");
+        when(wxUserProfileMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(existing);
+        when(wxUserProfileMapper.updateById(any(WxUserProfile.class))).thenReturn(1);
+
+        WxUserProfileUpdateBo bo = new WxUserProfileUpdateBo();
+        bo.setRealName("新姓名");
+
+        int rows = service.updateCurrentUserProfile(USER_ID, bo);
+
+        assertEquals(1, rows);
+        assertEquals("旧姓名", existing.getRealName());
     }
 
     @Test

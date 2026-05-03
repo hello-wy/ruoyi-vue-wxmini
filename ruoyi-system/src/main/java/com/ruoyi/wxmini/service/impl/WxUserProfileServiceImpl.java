@@ -22,6 +22,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     private static final Integer USER_TYPE_STUDENT = 1;
     private static final Integer USER_TYPE_MERCHANT = 2;
     private static final Integer USER_TYPE_AUNT = 3;
+    private static final Integer REALNAME_AUTHED = 1;
 
     @Resource
     private IUserInfoService userInfoService;
@@ -36,7 +37,7 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
             return null;
         }
         if (StringUtils.isBlank(profileVo.getDisplayName())) {
-            profileVo.setDisplayName(profileVo.getUserName());
+            profileVo.setDisplayName(maskPhone(profileVo.getPhone()));
         }
         profileVo.setUserTypeLabel(resolveUserTypeLabel(profileVo.getUserType()));
         profileVo.setPrimaryAction(resolvePrimaryAction(profileVo.getUserType()));
@@ -52,7 +53,6 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
             return 0;
         }
 
-        userInfo.setUserName(resolveName(bo));
         userInfo.setPhone(bo.getPhone());
         userInfoService.updateUserInfo(userInfo);
 
@@ -66,7 +66,9 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
             profile.setCreateTime(DateUtils.getNowDate());
         }
 
-        profile.setRealName(bo.getRealName());
+        if (!isRealnameAuthed(userInfo)) {
+            profile.setRealName(bo.getRealName());
+        }
         profile.setNickName(bo.getNickName());
         profile.setGender(bo.getGender());
         profile.setAge(bo.getAge());
@@ -148,13 +150,14 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         return "/pages/guide/index";
     }
 
-    private String resolveName(WxUserProfileUpdateBo bo) {
-        if (StringUtils.isNotBlank(bo.getRealName())) {
-            return bo.getRealName().trim();
+    private boolean isRealnameAuthed(UserInfo userInfo) {
+        return REALNAME_AUTHED.equals(userInfo.getIsRealnameAuth());
+    }
+
+    private String maskPhone(String phone) {
+        if (StringUtils.length(phone) != 11) {
+            return "";
         }
-        if (StringUtils.isNotBlank(bo.getNickName())) {
-            return bo.getNickName().trim();
-        }
-        return bo.getUserName();
+        return phone.substring(0, 3) + "****" + phone.substring(7);
     }
 }

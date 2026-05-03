@@ -57,6 +57,8 @@
 
 - 未登录或 token 无效时，请求会失败。
 - `isRealnameAuth` 取自 `user_info.is_realname_auth`，`1` 表示已完成实名认证，`0` 或空表示未完成。
+- `displayName` 优先取 `user_info.real_name`；没有实名姓名时返回手机号脱敏值（前 3 位 + `****` + 后 4 位），不再回退到 `user_name`。
+- `realName` 取自 `user_info.real_name`，即实名认证写入的真实姓名。
 - 当前实现会返回 `switchableUserTypes = [0, 1, 2, 3]`。
 
 ## 实现来源文件
