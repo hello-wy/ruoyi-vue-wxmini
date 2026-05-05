@@ -10,6 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="recordType"   column="record_type"   />
         <result property="lectureId"    column="lecture_id"    />
         <result property="salonId"      column="salon_id"      />
+        <result property="jobId"        column="job_id"        />
         <result property="signTime"     column="sign_time"     />
         <result property="signStatus"   column="sign_status"   />
         <result property="contactName"  column="contact_name"  />
@@ -19,7 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSignInRecordVo">
-        select id, uid, record_type, lecture_id, salon_id,
+        select id, uid, record_type, lecture_id, salon_id, job_id,
                sign_time, sign_status, contact_name, contact_phone,
                remark, device_info
         from sign_in_record
@@ -33,6 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="recordType != null">             and record_type = #{recordType}</if>
             <if test="lectureId != null">              and lecture_id = #{lectureId}</if>
             <if test="salonId != null">                and salon_id = #{salonId}</if>
+            <if test="jobId != null">                  and job_id = #{jobId}</if>
             <if test="signStatus != null">             and sign_status = #{signStatus}</if>
             <if test="deviceInfo != null and deviceInfo != ''"> and device_info = #{deviceInfo}</if>
         </where>
@@ -53,6 +55,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="recordType != null">record_type,</if>
             <if test="lectureId != null">lecture_id,</if>
             <if test="salonId != null">salon_id,</if>
+            <if test="jobId != null">job_id,</if>
             <if test="signTime != null">sign_time,</if>
             <if test="signStatus != null">sign_status,</if>
             <if test="contactName != null">contact_name,</if>
@@ -65,6 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="recordType != null">#{recordType},</if>
             <if test="lectureId != null">#{lectureId},</if>
             <if test="salonId != null">#{salonId},</if>
+            <if test="jobId != null">#{jobId},</if>
             <if test="signTime != null">#{signTime},</if>
             <if test="signStatus != null">#{signStatus},</if>
             <if test="contactName != null">#{contactName},</if>
@@ -82,6 +86,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="recordType != null">record_type = #{recordType},</if>
             <if test="lectureId != null">lecture_id = #{lectureId},</if>
             <if test="salonId != null">salon_id = #{salonId},</if>
+            <if test="jobId != null">job_id = #{jobId},</if>
             <if test="signTime != null">sign_time = #{signTime},</if>
             <if test="signStatus != null">sign_status = #{signStatus},</if>
             <if test="contactName != null">contact_name = #{contactName},</if>
@@ -200,6 +205,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE uid = #{uid}
           AND lecture_id = #{lectureId}
           AND record_type = 1
+    </select>
+
+    <!-- 检查用户是否已签到某兼职 -->
+    <select id="countJobSignIn" resultType="int">
+        SELECT COUNT(1)
+        FROM sign_in_record
+        WHERE uid = #{uid}
+          AND job_id = #{jobId}
+          AND record_type = 3
     </select>
 
 </mapper>

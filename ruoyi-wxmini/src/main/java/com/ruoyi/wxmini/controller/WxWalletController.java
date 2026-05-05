@@ -51,6 +51,7 @@ public class WxWalletController extends BaseController
     @PostMapping("/withdraw")
     public AjaxResult withdraw(@RequestBody Map<String, Object> body)
     {
+        String userId = resolveCurrentUserId();
         Long uid = resolveCurrentUid();
         Object amountObj = body.get("amount");
         if (amountObj == null)
@@ -66,8 +67,8 @@ public class WxWalletController extends BaseController
         {
             return error("金额格式不正确");
         }
-        String msg = walletService.applyWithdraw(uid, amount);
-        if (msg.startsWith("提现申请已提交"))
+        String msg = walletService.applyWithdraw(userId, uid, amount);
+        if (msg.startsWith("微信提现") || msg.startsWith("请稍后刷新查看结果"))
         {
             return success(msg);
         }
@@ -96,11 +97,15 @@ public class WxWalletController extends BaseController
         return success(list);
     }
 
-    private Long resolveCurrentUid() {
+    private String resolveCurrentUserId() {
         String userId = WxMiniUserContext.getCurrentUserId();
         if (StringUtils.isBlank(userId)) {
             throw new IllegalStateException("请先登录");
         }
-        return walletService.resolveCurrentUserUid(userId);
+        return userId;
+    }
+
+    private Long resolveCurrentUid() {
+        return walletService.resolveCurrentUserUid(resolveCurrentUserId());
     }
 }

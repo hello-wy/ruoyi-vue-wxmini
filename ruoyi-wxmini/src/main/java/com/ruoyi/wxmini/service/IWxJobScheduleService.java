@@ -12,4 +12,6 @@ public interface IWxJobScheduleService {
     List<WxMerchantJobVo> listMerchantJobs(String currentUserId);
 
     List<WxSignupUserVo> listSignupUsers(String currentUserId, Long jobId, String keyword);
+
+    void updateMerchantJobStatus(String currentUserId, Long jobId, Long targetStatus);
 }

@@ -93,4 +93,6 @@ public interface SignInRecordMapper
      * @return 记录数（>0 表示已签到）
      */
     int countLectureSignIn(Long uid, Long lectureId);
+
+    int countJobSignIn(Long uid, Long jobId);
 }

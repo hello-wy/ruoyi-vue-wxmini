@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.SalonPayOrder;
+import com.ruoyi.system.domain.vo.SalonRefundOrderVo;
 
 public interface ISalonPayOrderService {
     SalonPayOrder selectSalonPayOrderByOrderNo(String orderNo);
@@ -15,4 +16,6 @@ public interface ISalonPayOrderService {
     int insertSalonPayOrder(SalonPayOrder order);
 
     int updateSalonPayOrder(SalonPayOrder order);
+
+    List<SalonRefundOrderVo> selectPaidSalonOrders(Long salonId, String keyword);
 }

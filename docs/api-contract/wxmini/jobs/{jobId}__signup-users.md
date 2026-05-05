@@ -23,7 +23,9 @@
     {
       "userInfoId": 2001,
       "displayName": "张三",
-      "phoneMasked": "138****8000"
+      "phoneMasked": "138****8000",
+      "payrollPaid": true,
+      "payrollItemStatus": 1
     }
   ]
 }
@@ -34,6 +36,8 @@
 - 非商家身份访问会返回业务错误。
 - 非岗位发布商家访问会返回业务错误。
 - 仅返回该岗位已支付报名用户。
+- `payrollPaid = true` 表示该用户在当前岗位下已有工资入账记录，前端应展示为“已支付/不可重复加入批次”。
+- `payrollItemStatus = 1` 表示已发工资，`0` 表示未发工资。
 
 ## 实现来源文件
 

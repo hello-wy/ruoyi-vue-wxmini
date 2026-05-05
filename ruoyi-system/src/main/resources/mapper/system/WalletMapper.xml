@@ -60,41 +60,54 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <resultMap type="com.ruoyi.system.domain.WalletWithdraw" id="WithdrawResult">
-        <result property="id"           column="id"             />
-        <result property="uid"          column="uid"            />
-        <result property="amount"       column="amount"         />
-        <result property="status"       column="status"         />
-        <result property="remark"       column="remark"         />
+        <result property="id"           column="id" />
+        <result property="uid"          column="uid" />
+        <result property="amount"       column="amount" />
+        <result property="status"       column="status" />
+        <result property="remark"       column="remark" />
         <result property="wxTransferNo" column="wx_transfer_no" />
-        <result property="applyTime"    column="create_time"    />
+        <result property="outBatchNo"   column="out_batch_no" />
+        <result property="outDetailNo"  column="out_detail_no" />
+        <result property="wxDetailNo"   column="wx_detail_no" />
+        <result property="applyTime"    column="create_time" />
     </resultMap>
 
     <insert id="insertWithdraw" parameterType="com.ruoyi.system.domain.WalletWithdraw" useGeneratedKeys="true" keyProperty="id">
-        insert into wallet_withdraw (uid, amount, status)
-        values (#{uid}, #{amount}, #{status})
+        insert into wallet_withdraw (uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no)
+        values (#{uid}, #{amount}, #{status}, #{remark}, #{wxTransferNo}, #{outBatchNo}, #{outDetailNo}, #{wxDetailNo})
     </insert>
 
     <select id="selectWithdrawListByUid" resultMap="WithdrawResult">
-        select id, uid, amount, status, remark, wx_transfer_no, create_time
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
         from wallet_withdraw
         where uid = #{uid}
-        order by create_time desc
+        order by create_time desc, id desc
         limit 50
     </select>
 
     <select id="selectWithdrawById" parameterType="Long" resultMap="WithdrawResult">
-        select id, uid, amount, status, remark, wx_transfer_no, create_time
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
         from wallet_withdraw
         where id = #{id}
+    </select>
+
+    <select id="selectWithdrawByOutBatchNo" parameterType="String" resultMap="WithdrawResult">
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
+        from wallet_withdraw
+        where out_batch_no = #{outBatchNo}
+        limit 1
     </select>
 
     <update id="updateWithdrawStatus" parameterType="com.ruoyi.system.domain.WalletWithdraw">
         update wallet_withdraw
         <set>
-            status        = #{status},
-            remark        = #{remark},
+            status = #{status},
+            remark = #{remark},
             wx_transfer_no = #{wxTransferNo},
-            update_time   = now()
+            out_batch_no = #{outBatchNo},
+            out_detail_no = #{outDetailNo},
+            wx_detail_no = #{wxDetailNo},
+            update_time = now()
         </set>
         where id = #{id}
     </update>

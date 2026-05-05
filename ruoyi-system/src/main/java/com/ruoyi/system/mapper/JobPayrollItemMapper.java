@@ -11,4 +11,6 @@ public interface JobPayrollItemMapper {
     int batchInsertJobPayrollItems(@Param("items") List<JobPayrollItem> items);
 
     int updateJobPayrollItem(JobPayrollItem item);
+
+    List<Long> selectCreditedEmployeeIdsByJobId(Long jobId);
 }

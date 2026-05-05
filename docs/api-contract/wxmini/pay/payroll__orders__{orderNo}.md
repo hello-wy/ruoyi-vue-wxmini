@@ -15,7 +15,7 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "orderNo": "PAYROLL20260502123456",
+    "orderNo": "PR202605021234561714620000000",
     "jobId": 1001,
     "jobTitle": "活动协助兼职",
     "totalAmount": 200.00,

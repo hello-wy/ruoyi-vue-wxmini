@@ -91,4 +91,10 @@ public class SignInRecordServiceImpl implements ISignInRecordService
     {
         return signInRecordMapper.countLectureSignIn(uid, lectureId) > 0;
     }
+
+    @Override
+    public boolean isJobSignedIn(Long uid, Long jobId)
+    {
+        return signInRecordMapper.countJobSignIn(uid, jobId) > 0;
+    }
 }

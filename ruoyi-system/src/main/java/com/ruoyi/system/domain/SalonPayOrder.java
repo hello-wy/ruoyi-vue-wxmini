@@ -22,6 +22,9 @@ public class SalonPayOrder extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date payTime;
     private String requestId;
+    private String refundNo;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date refundTime;
 
     public Long getId() {
         return id;
@@ -101,5 +104,21 @@ public class SalonPayOrder extends BaseEntity {
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    public String getRefundNo() {
+        return refundNo;
+    }
+
+    public void setRefundNo(String refundNo) {
+        this.refundNo = refundNo;
+    }
+
+    public Date getRefundTime() {
+        return refundTime;
+    }
+
+    public void setRefundTime(Date refundTime) {
+        this.refundTime = refundTime;
     }
 }

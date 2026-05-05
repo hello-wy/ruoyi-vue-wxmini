@@ -12,7 +12,9 @@ public interface IWalletService
 
     Long resolveCurrentUserUid(String userId);
 
-    String applyWithdraw(Long uid, BigDecimal amount);
+    String applyWithdraw(String userId, Long uid, BigDecimal amount);
+
+    boolean syncWithdrawStatusByOutBatchNo(String outBatchNo);
 
     List<WalletWithdraw> getWithdrawRecords(Long uid);
 

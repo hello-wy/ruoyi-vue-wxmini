@@ -17,6 +17,11 @@ public class WxMerchantJobVo {
     private Integer signupLimit;
     private Integer paidSignupCount;
     private Boolean payrollReminder;
+    private String settlementStatus;
+    private String settlementStatusLabel;
+    private Boolean canSettle;
+    private Boolean canCancel;
+    private Boolean canResumeRecruiting;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -38,4 +43,14 @@ public class WxMerchantJobVo {
     public void setPaidSignupCount(Integer paidSignupCount) { this.paidSignupCount = paidSignupCount; }
     public Boolean getPayrollReminder() { return payrollReminder; }
     public void setPayrollReminder(Boolean payrollReminder) { this.payrollReminder = payrollReminder; }
+    public String getSettlementStatus() { return settlementStatus; }
+    public void setSettlementStatus(String settlementStatus) { this.settlementStatus = settlementStatus; }
+    public String getSettlementStatusLabel() { return settlementStatusLabel; }
+    public void setSettlementStatusLabel(String settlementStatusLabel) { this.settlementStatusLabel = settlementStatusLabel; }
+    public Boolean getCanSettle() { return canSettle; }
+    public void setCanSettle(Boolean canSettle) { this.canSettle = canSettle; }
+    public Boolean getCanCancel() { return canCancel; }
+    public void setCanCancel(Boolean canCancel) { this.canCancel = canCancel; }
+    public Boolean getCanResumeRecruiting() { return canResumeRecruiting; }
+    public void setCanResumeRecruiting(Boolean canResumeRecruiting) { this.canResumeRecruiting = canResumeRecruiting; }
 }

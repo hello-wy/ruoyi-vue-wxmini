@@ -62,7 +62,7 @@ class WxWalletControllerTest {
         body.put("amount", "50.00");
         WxMiniUserContext.setCurrentUserId("wx-user-1");
         when(walletService.resolveCurrentUserUid("wx-user-1")).thenReturn(10L);
-        when(walletService.applyWithdraw(10L, new BigDecimal("50.00"))).thenReturn("余额不足");
+        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00"))).thenReturn("可用余额不足");
 
         AjaxResult result = controller.withdraw(body);
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
@@ -74,7 +74,7 @@ class WxWalletControllerTest {
         body.put("amount", "50.00");
         WxMiniUserContext.setCurrentUserId("wx-user-1");
         when(walletService.resolveCurrentUserUid("wx-user-1")).thenReturn(10L);
-        when(walletService.applyWithdraw(10L, new BigDecimal("50.00"))).thenReturn("提现申请已提交，请等待审核");
+        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00"))).thenReturn("微信提现成功");
 
         AjaxResult result = controller.withdraw(body);
         assertEquals(200, result.get(AjaxResult.CODE_TAG));

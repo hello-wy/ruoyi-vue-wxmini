@@ -31,6 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectDailyJobsVo"/>
         <where>  
             <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="titleLike != null and titleLike != ''"> and title like concat('%', #{titleLike}, '%')</if>
             <if test="category != null "> and category = #{category}</if>
             <if test="salaryDay != null "> and salary_day = #{salaryDay}</if>
             <if test="workDate != null "> and work_date = #{workDate}</if>

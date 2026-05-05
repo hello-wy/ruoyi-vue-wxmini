@@ -24,6 +24,10 @@
 }
 ```
 
+## 说明
+
+- 当前微信提现改为直接打款到微信零钱，不再走长期“审核冻结”流程；`frozen` 常规情况下应保持为 `0.00`。
+
 ## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxWalletController.java`

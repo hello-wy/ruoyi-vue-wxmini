@@ -61,6 +61,10 @@
 - `system/profile/list.md`
 - `system/profile/{ids}.md`
 - `system/profile/{id}.md`
+- `system/refund/job__list.md`
+- `system/refund/job__{orderNo}.md`
+- `system/refund/salon__list.md`
+- `system/refund/salon__{orderNo}.md`
 - `system/questionnaire/export.md`
 - `system/questionnaire/getQuestionnaire__{lecturesId}.md`
 - `system/questionnaire/index.md`

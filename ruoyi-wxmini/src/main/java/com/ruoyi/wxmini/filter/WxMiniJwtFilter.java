@@ -80,7 +80,8 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
                 || path.startsWith("/wxmini/portal")
                 || path.startsWith("/wxmini/pay/notify")
                 || path.startsWith("/wxmini/pay/salon/notify")
-                || path.startsWith("/wxmini/pay/jobs/notify")) {
+                || path.startsWith("/wxmini/pay/jobs/notify")
+                || path.startsWith("/wxmini/pay/wallet/notify")) {
             return true;
         }
 

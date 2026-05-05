@@ -149,4 +149,44 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </trim>
         where id = #{id}
     </update>
+
+    <!-- 查询兼职已支付订单（联表含签到状态、用户信息、岗位信息，用于退款管理） -->
+    <resultMap id="JobRefundOrderResult" type="com.ruoyi.system.domain.vo.JobRefundOrderVo">
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="jobTitle" column="job_title"/>
+        <result property="userName" column="user_name"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="signedIn" column="signed_in"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="refundTime" column="refund_time"/>
+    </resultMap>
+
+    <select id="selectPaidOrdersWithSignIn" resultMap="JobRefundOrderResult">
+        SELECT jso.id                                             AS order_id,
+               jso.order_no,
+               jso.user_id,
+               jso.job_id,
+               dj.title                                           AS job_title,
+               COALESCE(up.real_name, up.nick_name, ui.user_name) AS user_name,
+               jso.amount,
+               jso.status,
+               CASE WHEN sir.id IS NOT NULL THEN TRUE ELSE FALSE END AS signed_in,
+               jso.pay_time,
+               jso.refund_time
+        FROM job_signup_order jso
+                 INNER JOIN daily_jobs dj ON dj.id = jso.job_id
+                 INNER JOIN user_info ui ON ui.user_id = jso.user_id
+                 LEFT JOIN wx_user_profile up ON up.uid = ui.id
+                 LEFT JOIN sign_in_record sir
+                           ON sir.uid = ui.id
+                               AND sir.job_id = jso.job_id
+                               AND sir.record_type = 3
+        WHERE jso.status IN (1, 3)
+          AND jso.job_id = #{jobId}
+        ORDER BY jso.pay_time DESC
+    </select>
 </mapper>

@@ -22,6 +22,8 @@ public interface WalletMapper
 
     WalletWithdraw selectWithdrawById(Long id);
 
+    WalletWithdraw selectWithdrawByOutBatchNo(@Param("outBatchNo") String outBatchNo);
+
     int updateWithdrawStatus(WalletWithdraw withdraw);
 
     int insertTransaction(WalletTransaction transaction);

@@ -57,4 +57,6 @@ public interface ISignInRecordService
      * @return true=已签到
      */
     boolean isLectureSignedIn(Long uid, Long lectureId);
+
+    boolean isJobSignedIn(Long uid, Long jobId);
 }

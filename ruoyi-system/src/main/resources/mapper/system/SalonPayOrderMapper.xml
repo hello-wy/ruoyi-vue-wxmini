@@ -15,12 +15,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="status" column="status"/>
         <result property="payTime" column="pay_time"/>
         <result property="requestId" column="request_id"/>
+        <result property="refundNo" column="refund_no"/>
+        <result property="refundTime" column="refund_time"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
     <sql id="selectSalonPayOrderVo">
-        select id, order_no, wechat_transaction_id, user_id, salon_id, amount, status, pay_time, request_id, create_time, update_time
+        select id, order_no, wechat_transaction_id, user_id, salon_id, amount, status, pay_time, request_id, refund_no, refund_time, create_time, update_time
         from salon_pay_order
     </sql>
 
@@ -106,8 +108,57 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="payTime != null">pay_time = #{payTime},</if>
             <if test="requestId != null and requestId != ''">request_id = #{requestId},</if>
+            <if test="refundNo != null">refund_no = #{refundNo},</if>
+            <if test="refundTime != null">refund_time = #{refundTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
         where id = #{id}
     </update>
+
+    <!-- 沙龙退款列表 VO 映射 -->
+    <resultMap id="SalonRefundOrderResult" type="com.ruoyi.system.domain.vo.SalonRefundOrderVo">
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="salonId" column="salon_id"/>
+        <result property="title" column="title"/>
+        <result property="userName" column="user_name"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="refundTime" column="refund_time"/>
+    </resultMap>
+
+    <!-- 查询已支付的沙龙订单列表（联表含沙龙标题、支付人姓名，用于退款管理） -->
+    <select id="selectPaidSalonOrders" resultMap="SalonRefundOrderResult">
+        SELECT spo.id                                             AS order_id,
+               spo.order_no,
+               spo.user_id,
+               spo.salon_id,
+               si.title                                           AS title,
+               ui.real_name                                       AS user_name,
+               spo.amount,
+               spo.status,
+               spo.pay_time,
+               spo.refund_time
+        FROM salon_pay_order spo
+                 LEFT JOIN salon_info si ON si.id = spo.salon_id
+                 LEFT JOIN user_info ui ON ui.user_id = spo.user_id
+                 LEFT JOIN wx_user_profile up ON up.uid = ui.id
+        WHERE spo.status IN ('PAID', 'REFUNDED')
+        <if test="salonId != null">
+            AND spo.salon_id = #{salonId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                ui.real_name = #{keyword}
+                OR (
+                    #{keyword} REGEXP '^[0-9A-Za-z]+$'
+                    AND (spo.order_no LIKE CONCAT('%', #{keyword}, '%')
+                         OR CAST(spo.order_no AS DECIMAL(30)) = CAST(#{keyword} AS DECIMAL(30)))
+                )
+            )
+        </if>
+        ORDER BY spo.create_time DESC
+    </select>
 </mapper>

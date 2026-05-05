@@ -25,17 +25,29 @@ public class WalletWithdraw extends BaseEntity
     @Excel(name = "提现金额")
     private BigDecimal amount;
 
-    /** 状态: 0-审核中, 1-已打款, 2-已拒绝 */
-    @Excel(name = "状态", readConverterExp = "0=审核中,1=已打款,2=已拒绝")
+    /** 状态: 0-打款中, 1-已打款, 2-打款失败 */
+    @Excel(name = "状态", readConverterExp = "0=打款中,1=已打款,2=打款失败")
     private Integer status;
 
-    /** 备注（拒绝原因等） */
+    /** 备注（失败原因等） */
     @Excel(name = "备注")
     private String remark;
 
-    /** 微信企业付款转账单号 */
-    @Excel(name = "微信转账单号")
+    /** 微信批次单号 */
+    @Excel(name = "微信批次单号")
     private String wxTransferNo;
+
+    /** 商户批次号 */
+    @Excel(name = "商户批次号")
+    private String outBatchNo;
+
+    /** 商户明细单号 */
+    @Excel(name = "商户明细单号")
+    private String outDetailNo;
+
+    /** 微信明细单号 */
+    @Excel(name = "微信明细单号")
+    private String wxDetailNo;
 
     /** 申请时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -53,6 +65,12 @@ public class WalletWithdraw extends BaseEntity
     public void setRemark(String remark)                { this.remark = remark; }
     public String getWxTransferNo()                     { return wxTransferNo; }
     public void setWxTransferNo(String wxTransferNo)    { this.wxTransferNo = wxTransferNo; }
+    public String getOutBatchNo()                       { return outBatchNo; }
+    public void setOutBatchNo(String outBatchNo)        { this.outBatchNo = outBatchNo; }
+    public String getOutDetailNo()                      { return outDetailNo; }
+    public void setOutDetailNo(String outDetailNo)      { this.outDetailNo = outDetailNo; }
+    public String getWxDetailNo()                       { return wxDetailNo; }
+    public void setWxDetailNo(String wxDetailNo)        { this.wxDetailNo = wxDetailNo; }
     public Date getApplyTime()                          { return applyTime; }
     public void setApplyTime(Date applyTime)            { this.applyTime = applyTime; }
 }

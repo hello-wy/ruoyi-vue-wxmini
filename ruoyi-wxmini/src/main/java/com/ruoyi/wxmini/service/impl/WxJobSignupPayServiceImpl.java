@@ -4,8 +4,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
-import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
-import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.utils.DateUtils;
@@ -29,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOrderDetailVo> implements IWxJobSignupPayService {
@@ -49,15 +47,13 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
     private IUserInfoService userInfoService;
     @Resource
     private WxPayService wxPayService;
+    @Resource
+    private WxJobSignupPayHelper payHelper;
 
     @Override
     public List<WxJobSignupOrderDetailVo> listMyOrders(String userId) {
         List<JobSignupOrder> orders = jobSignupOrderService.selectMyJobSignupOrders(userId);
-        List<WxJobSignupOrderDetailVo> result = new ArrayList<>();
-        for (JobSignupOrder order : orders) {
-            result.add(toDetailVo(order));
-        }
-        return result;
+        return orders.stream().map(this::toDetailVo).collect(Collectors.toList());
     }
 
     @Override
@@ -75,10 +71,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         }
         JobSignupOrder pendingOrder = jobSignupOrderService.selectLatestPendingOrder(userId, bo.getJobId());
         if (pendingOrder != null) {
-            try {
-                wxPayService.closeOrderV3(pendingOrder.getOrderNo());
-            } catch (Exception ignored) {
-            }
+            wxPayService.closeOrderV3(pendingOrder.getOrderNo());
             pendingOrder.setStatus(JobSignupOrderStatusEnum.CANCELED.getCode());
             jobSignupOrderService.updateJobSignupOrder(pendingOrder);
         }
@@ -91,9 +84,6 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         payVo.setJobTitle(job.getTitle());
         payVo.setAmount(JOB_SIGNUP_AMOUNT);
         payVo.setStatus(JobSignupOrderStatusEnum.PENDING.getCode());
-        HashMap<String, Object> tmp = new HashMap<>();
-        tmp.put("userId", userId);
-        tmp.put("openId", userInfo.getOpenId());
         payVo.setOrderNo(UUID.fastUUID().toString());
         return this.createOrder(userId, payVo);
     }
@@ -118,7 +108,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         if (JobSignupOrderStatusEnum.PAID.getCode() == order.getStatus()) {
             return true;
         }
-        Date successTime = parseSuccessTime(result.getResult().getSuccessTime());
+        Date successTime = payHelper.parseSuccessTime(result.getResult().getSuccessTime());
         if (successTime == null) {
             successTime = DateUtils.getNowDate();
         }
@@ -149,7 +139,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         }
         WxPayCreateOrderParam orderParam = new WxPayCreateOrderParam();
         orderParam.setOrderNo(ORDER_PREFIX + DateUtils.dateTimeNow("yyyyMMddHHmmss") + System.currentTimeMillis());
-        orderParam.setOrderDesc(payVo.getJobTitle());
+        orderParam.setOrderDesc(payHelper.buildOrderDesc(payVo.getJobTitle()));
         orderParam.setAmount(payVo.getAmount().multiply(new BigDecimal("100")).intValue());
         orderParam.setOpenId(userInfo.getOpenId());
         orderParam.setTimeExpire(DateUtil.format(DateUtil.offsetMinute(new Date(), 5), DatePattern.UTC_WITH_XXX_OFFSET_PATTERN));
@@ -216,9 +206,8 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         if (JobSignupOrderStatusEnum.PAID.getCode() == order.getStatus()) {
             return true;
         }
-        DailyJobs job = dailyJobsService.selectDailyJobsById(order.getJobId());
         DailyJobs lockedJob = dailyJobsService.selectDailyJobsByIdForUpdate(order.getJobId());
-        if (job == null || lockedJob == null || !JOB_STATUS_OPEN.equals(lockedJob.getStatus())) {
+        if (lockedJob == null || !JOB_STATUS_OPEN.equals(lockedJob.getStatus())) {
             return refundPaidOrder(order, transactionId, requestId, payTime, "岗位不可报名");
         }
         int paidCount = dailyJobsService.countPaidSignupOrders(order.getJobId(), JobSignupOrderStatusEnum.PAID.getCode());
@@ -248,17 +237,9 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         order.setPayTime(payTime == null ? DateUtils.getNowDate() : payTime);
         jobSignupOrderService.updateJobSignupOrder(order);
         try {
-            WxPayRefundV3Request request = new WxPayRefundV3Request();
-            request.setOutTradeNo(order.getOrderNo());
-            request.setOutRefundNo("REF" + order.getOrderNo());
-            request.setReason(reason);
-            WxPayRefundV3Request.Amount amount = new WxPayRefundV3Request.Amount();
-            amount.setRefund(order.getAmount().multiply(new BigDecimal("100")).intValue());
-            amount.setTotal(order.getAmount().multiply(new BigDecimal("100")).intValue());
-            amount.setCurrency("CNY");
-            request.setAmount(amount);
-            wxPayService.refundV3(request);
-        } catch (Exception ignored) {
+            wxPayService.refundV3(payHelper.buildRefundRequest(order, reason));
+        } catch (Exception e) {
+            throw new RuntimeException("微信退款失败", e);
         }
         order.setRefundNo("REF" + order.getOrderNo());
         order.setRefundTime(DateUtils.getNowDate());
@@ -279,7 +260,12 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
             return order;
         }
         try {
-            queryPayResultAndUpdOrderStatus(order.getOrderNo());
+            WxPayOrderQueryV3Result result = wxPayService.queryOrderV3(payHelper.buildOrderQuery(order.getOrderNo()));
+            if (!payHelper.isPaid(result)) {
+                return order;
+            }
+            Date payTime = payHelper.parseSuccessTime(result.getSuccessTime());
+            finalizePaidOrder(order, result.getTransactionId(), null, payTime);
         } catch (Exception e) {
             throw new RuntimeException("同步支付状态失败", e);
         }
@@ -288,16 +274,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
 
     private WxJobSignupOrderDetailVo toDetailVo(JobSignupOrder order) {
         DailyJobs job = dailyJobsService.selectDailyJobsById(order.getJobId());
-        WxJobSignupOrderDetailVo detailVo = new WxJobSignupOrderDetailVo();
-        detailVo.setOrderNo(order.getOrderNo());
-        detailVo.setJobId(order.getJobId());
-        detailVo.setJobTitle(job == null ? null : job.getTitle());
-        detailVo.setAmount(order.getAmount());
-        detailVo.setStatus(order.getStatus());
-        detailVo.setPayTime(order.getPayTime());
-        detailVo.setRefundTime(order.getRefundTime());
-        detailVo.setCreateTime(order.getCreateTime());
-        return detailVo;
+        return payHelper.toDetailVo(order, job);
     }
 
     @Override
@@ -307,11 +284,9 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
 
     private Date resolvePaidTime(String orderNo) {
         try {
-            WxPayOrderQueryV3Request request = new WxPayOrderQueryV3Request();
-            request.setOutTradeNo(orderNo);
-            WxPayOrderQueryV3Result result = wxPayService.queryOrderV3(request);
-            if (result != null && "SUCCESS".equals(result.getTradeState())) {
-                Date successTime = parseSuccessTime(result.getSuccessTime());
+            WxPayOrderQueryV3Result result = wxPayService.queryOrderV3(payHelper.buildOrderQuery(orderNo));
+            if (payHelper.isPaid(result)) {
+                Date successTime = payHelper.parseSuccessTime(result.getSuccessTime());
                 if (successTime != null) {
                     return successTime;
                 }
@@ -321,10 +296,4 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         return DateUtils.getNowDate();
     }
 
-    private Date parseSuccessTime(String successTime) {
-        if (successTime == null || successTime.isEmpty()) {
-            return null;
-        }
-        return DateUtil.parse(successTime, DatePattern.UTC_WITH_XXX_OFFSET_PATTERN);
-    }
 }

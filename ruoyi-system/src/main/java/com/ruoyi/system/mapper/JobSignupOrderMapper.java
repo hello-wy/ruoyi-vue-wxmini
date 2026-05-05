@@ -1,6 +1,7 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import org.apache.ibatis.annotations.Param;
@@ -27,4 +28,6 @@ public interface JobSignupOrderMapper {
     int insertJobSignupOrder(JobSignupOrder order);
 
     int updateJobSignupOrder(JobSignupOrder order);
+
+    List<JobRefundOrderVo> selectPaidOrdersWithSignIn(@Param("jobId") Long jobId);
 }

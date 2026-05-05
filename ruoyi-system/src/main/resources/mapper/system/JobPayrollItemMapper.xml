@@ -25,6 +25,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by id asc
     </select>
 
+    <select id="selectCreditedEmployeeIdsByJobId" parameterType="Long" resultType="Long">
+        select distinct employee_user_id
+        from job_payroll_item
+        where job_id = #{jobId}
+          and status = 1
+          and employee_user_id is not null
+    </select>
+
     <insert id="batchInsertJobPayrollItems">
         insert into job_payroll_item (
             id, batch_id, job_id, employee_uid, employee_user_id, hours, hourly_rate, amount, status, create_time, update_time

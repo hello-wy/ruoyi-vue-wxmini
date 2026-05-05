@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.wxmini.bo.WxMerchantJobStatusUpdateBo;
 import com.ruoyi.wxmini.service.IWxJobScheduleService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import io.swagger.annotations.Api;
@@ -9,6 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,5 +55,17 @@ public class WxJobScheduleController extends BaseController {
             return error("请先登录");
         }
         return success(wxJobScheduleService.listSignupUsers(userId, jobId, keyword));
+    }
+
+    @ApiOperation("修改商家岗位状态")
+    @PostMapping("/{jobId}/status")
+    public AjaxResult updateJobStatus(@PathVariable("jobId") Long jobId,
+                                      @RequestBody WxMerchantJobStatusUpdateBo bo) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        wxJobScheduleService.updateMerchantJobStatus(userId, jobId, bo == null ? null : bo.getStatus());
+        return success();
     }
 }

@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.mapper.JobSignupOrderMapper;
@@ -62,5 +63,10 @@ public class JobSignupOrderServiceImpl implements IJobSignupOrderService {
     public int updateJobSignupOrder(JobSignupOrder order) {
         order.setUpdateTime(DateUtils.getNowDate());
         return jobSignupOrderMapper.updateJobSignupOrder(order);
+    }
+
+    @Override
+    public List<JobRefundOrderVo> selectPaidOrdersWithSignIn(Long jobId) {
+        return jobSignupOrderMapper.selectPaidOrdersWithSignIn(jobId);
     }
 }

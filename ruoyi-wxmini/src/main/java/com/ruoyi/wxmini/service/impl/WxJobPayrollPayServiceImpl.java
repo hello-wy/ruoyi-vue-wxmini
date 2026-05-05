@@ -168,7 +168,7 @@ public class WxJobPayrollPayServiceImpl extends AbsWxPayBaseService<WxJobPayroll
             throw new ServiceException("当前用户缺少openId");
         }
         WxPayCreateOrderParam orderParam = new WxPayCreateOrderParam();
-        orderParam.setOrderNo(ORDER_PREFIX + DateUtils.dateTimeNow("yyyyMMddHHmmss") + System.currentTimeMillis());
+        orderParam.setOrderNo("PR" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + System.currentTimeMillis());
         orderParam.setOrderDesc(payVo.getJobTitle());
         orderParam.setAmount(payVo.getTotalAmount().multiply(new BigDecimal("100")).intValue());
         orderParam.setOpenId(merchant.getOpenId());
@@ -244,7 +244,7 @@ public class WxJobPayrollPayServiceImpl extends AbsWxPayBaseService<WxJobPayroll
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected boolean finalizePaidBatch(String orderNo, String transactionId, String requestId, Date payTime) {
+    public boolean finalizePaidBatch(String orderNo, String transactionId, String requestId, Date payTime) {
         JobPayrollBatch batch = jobPayrollBatchMapper.selectJobPayrollBatchByOrderNoForUpdate(orderNo);
         if (batch == null) {
             return false;

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +48,8 @@ class WxJobSignupPayServiceImplTest {
     private IUserInfoService userInfoService;
     @Mock
     private WxPayService wxPayService;
+    @Spy
+    private WxJobSignupPayHelper payHelper = new WxJobSignupPayHelper();
 
     @InjectMocks
     private WxJobSignupPayServiceImpl service;
@@ -105,6 +109,32 @@ class WxJobSignupPayServiceImplTest {
     }
 
     @Test
+    void should_keep_pending_order_when_query_temporarily_not_paid() throws Exception {
+        JobSignupOrder order = new JobSignupOrder();
+        order.setId(1L);
+        order.setOrderNo("order-1");
+        order.setUserId("user-1");
+        order.setJobId(1L);
+        order.setAmount(new BigDecimal("50.00"));
+        order.setStatus(JobSignupOrderStatusEnum.PENDING.getCode());
+        DailyJobs job = new DailyJobs();
+        job.setId(1L);
+        job.setTitle("日结助教");
+        when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
+        when(dailyJobsService.selectDailyJobsById(1L)).thenReturn(job);
+
+        WxPayOrderQueryV3Result queryResult = new WxPayOrderQueryV3Result();
+        queryResult.setTradeState("NOTPAY");
+        when(wxPayService.queryOrderV3(any(WxPayOrderQueryV3Request.class))).thenReturn(queryResult);
+
+        WxJobSignupOrderDetailVo detail = service.queryJobOrder("user-1", "order-1");
+
+        assertEquals(JobSignupOrderStatusEnum.PENDING.getCode(), detail.getStatus());
+        verify(wxPayService, never()).closeOrderV3("order-1");
+        verify(jobSignupOrderService, never()).updateJobSignupOrder(order);
+    }
+
+    @Test
     void should_reject_create_when_paid_order_exists() {
         DailyJobs job = new DailyJobs();
         job.setId(1L);
@@ -152,6 +182,8 @@ class WxJobSignupPayServiceImplTest {
         assertTrue(result.getOrderNo() != null && !result.getOrderNo().isEmpty());
         assertEquals(JobSignupOrderStatusEnum.CANCELED.getCode(), pendingOrder.getStatus());
         verify(wxPayService).closeOrderV3("pending-1");
+        verify(wxPayService).createOrderV3(any(), argThat(request ->
+                "兼职押金：日结助教".equals(request.getDescription())));
         verify(jobSignupOrderService).updateJobSignupOrder(pendingOrder);
         verify(jobSignupOrderService).insertJobSignupOrder(any(JobSignupOrder.class));
     }
@@ -170,7 +202,6 @@ class WxJobSignupPayServiceImplTest {
         job.setId(1L);
         job.setStatus(0L);
         job.setSignupLimit(2);
-        when(dailyJobsService.selectDailyJobsById(1L)).thenReturn(job);
         when(dailyJobsService.selectDailyJobsByIdForUpdate(1L)).thenReturn(job);
         when(dailyJobsService.countPaidSignupOrders(1L, JobSignupOrderStatusEnum.PAID.getCode())).thenReturn(0);
         when(jobSignupOrderService.updateJobSignupOrder(order)).thenReturn(1);
@@ -201,7 +232,6 @@ class WxJobSignupPayServiceImplTest {
         job.setId(1L);
         job.setStatus(0L);
         job.setSignupLimit(1);
-        when(dailyJobsService.selectDailyJobsById(1L)).thenReturn(job);
         when(dailyJobsService.selectDailyJobsByIdForUpdate(1L)).thenReturn(job);
         when(dailyJobsService.countPaidSignupOrders(1L, JobSignupOrderStatusEnum.PAID.getCode())).thenReturn(1);
         when(jobSignupOrderService.updateJobSignupOrder(order)).thenReturn(1);

@@ -3,8 +3,10 @@ package com.ruoyi.wxmini.controller;
 import cn.hutool.core.io.IoUtil;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
+import com.github.binarywang.wxpay.bean.notify.WxPayTransferBatchesNotifyV3Result;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.system.service.IWalletService;
 import com.ruoyi.wxmini.bo.WxJobPayrollCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
@@ -38,6 +40,8 @@ public class WxPayController {
     private IWxJobSignupPayService wxJobSignupPayService;
     @Resource
     private IWxJobPayrollPayService wxJobPayrollPayService;
+    @Resource
+    private IWalletService walletService;
 
     @ApiOperation("查询当前用户沙龙订单列表（需登录）")
     @GetMapping("/salon/orders/my")
@@ -211,6 +215,27 @@ public class WxPayController {
             }
             String requestId = request.getHeader("Request-ID");
             boolean handled = wxJobPayrollPayService.handlePayrollPaidCallback(result, requestId);
+            return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        }
+    }
+
+    @ApiOperation("微信提现结果异步回调通知（由微信服务器调用）")
+    @PostMapping("/wallet/notify")
+    public String walletTransferNotify(HttpServletRequest request) {
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String notifyData = IoUtil.readUtf8(inputStream);
+            SignatureHeader signatureHeader = SignatureHeader.builder()
+                    .serial(request.getHeader("Wechatpay-Serial"))
+                    .signature(request.getHeader("Wechatpay-Signature"))
+                    .nonce(request.getHeader("Wechatpay-Nonce"))
+                    .timeStamp(request.getHeader("Wechatpay-Timestamp"))
+                    .build();
+            WxPayTransferBatchesNotifyV3Result result = this.wxPayService.parseTransferBatchesNotifyV3Result(notifyData, signatureHeader);
+            boolean handled = walletService.syncWithdrawStatusByOutBatchNo(result.getResult() == null ? null : result.getResult().getOutBatchNo());
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);

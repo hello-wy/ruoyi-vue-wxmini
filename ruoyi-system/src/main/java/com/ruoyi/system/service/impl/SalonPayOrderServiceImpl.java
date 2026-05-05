@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.SalonPayOrder;
+import com.ruoyi.system.domain.vo.SalonRefundOrderVo;
 import com.ruoyi.system.mapper.SalonPayOrderMapper;
 import com.ruoyi.system.service.ISalonPayOrderService;
 
@@ -44,5 +45,10 @@ public class SalonPayOrderServiceImpl implements ISalonPayOrderService {
     public int updateSalonPayOrder(SalonPayOrder order) {
         order.setUpdateTime(DateUtils.getNowDate());
         return salonPayOrderMapper.updateSalonPayOrder(order);
+    }
+
+    @Override
+    public List<SalonRefundOrderVo> selectPaidSalonOrders(Long salonId, String keyword) {
+        return salonPayOrderMapper.selectPaidSalonOrders(salonId, keyword);
     }
 }

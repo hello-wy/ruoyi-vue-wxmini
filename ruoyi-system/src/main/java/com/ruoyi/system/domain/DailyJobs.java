@@ -101,6 +101,10 @@ public class DailyJobs extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Date updateDate;
 
+    /** 标题模糊搜索关键字 */
+    @ApiModelProperty(value = "标题模糊搜索关键字", hidden = true)
+    private String titleLike;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -256,9 +260,19 @@ public class DailyJobs extends BaseEntity
         this.updateDate = updateDate;
     }
 
-    public Date getUpdateDate() 
+    public Date getUpdateDate()
     {
         return updateDate;
+    }
+
+    public void setTitleLike(String titleLike)
+    {
+        this.titleLike = titleLike;
+    }
+
+    public String getTitleLike()
+    {
+        return titleLike;
     }
 
     @Override
