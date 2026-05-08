@@ -11,7 +11,8 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 签到与报名记录对象 sign_in_record
  * <p>
  * record_type=1: 讲座签到，lecture_id 有值<br>
- * record_type=2: 沙龙报名，salon_id 有值，contact_name/contact_phone 有值
+ * record_type=2: 沙龙报名，salon_id 有值，contact_name/contact_phone 有值<br>
+ * record_type=3: 兼职签到，job_id 有值
  * </p>
  *
  * @author ruoyi
@@ -28,8 +29,8 @@ public class SignInRecord extends BaseEntity
     @Excel(name = "用户ID")
     private Long uid;
 
-    /** 记录类型: 1-讲座签到, 2-沙龙报名 */
-    @Excel(name = "记录类型", readConverterExp = "1=讲座签到,2=沙龙报名")
+    /** 记录类型: 1-讲座签到, 2-沙龙报名, 3-兼职签到 */
+    @Excel(name = "记录类型", readConverterExp = "1=讲座签到,2=沙龙报名,3=兼职签到")
     private Integer recordType;
 
     /** 讲座ID，关联lectures表（record_type=1时有值） */

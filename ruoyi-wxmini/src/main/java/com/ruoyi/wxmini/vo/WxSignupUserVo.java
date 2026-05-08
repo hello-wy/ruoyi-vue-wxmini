@@ -1,11 +1,19 @@
 package com.ruoyi.wxmini.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
+
 public class WxSignupUserVo {
     private Long userInfoId;
     private String displayName;
     private String phoneMasked;
-    private Boolean payrollPaid;
-    private Integer payrollItemStatus;
+    private String orderNo;
+    private Integer attendanceStatus;
+    private String attendanceStatusLabel;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date signTime;
+    private Integer signedCount;
 
     public Long getUserInfoId() { return userInfoId; }
     public void setUserInfoId(Long userInfoId) { this.userInfoId = userInfoId; }
@@ -13,8 +21,14 @@ public class WxSignupUserVo {
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public String getPhoneMasked() { return phoneMasked; }
     public void setPhoneMasked(String phoneMasked) { this.phoneMasked = phoneMasked; }
-    public Boolean getPayrollPaid() { return payrollPaid; }
-    public void setPayrollPaid(Boolean payrollPaid) { this.payrollPaid = payrollPaid; }
-    public Integer getPayrollItemStatus() { return payrollItemStatus; }
-    public void setPayrollItemStatus(Integer payrollItemStatus) { this.payrollItemStatus = payrollItemStatus; }
+    public String getOrderNo() { return orderNo; }
+    public void setOrderNo(String orderNo) { this.orderNo = orderNo; }
+    public Integer getAttendanceStatus() { return attendanceStatus; }
+    public void setAttendanceStatus(Integer attendanceStatus) { this.attendanceStatus = attendanceStatus; }
+    public String getAttendanceStatusLabel() { return attendanceStatusLabel; }
+    public void setAttendanceStatusLabel(String attendanceStatusLabel) { this.attendanceStatusLabel = attendanceStatusLabel; }
+    public Date getSignTime() { return signTime; }
+    public void setSignTime(Date signTime) { this.signTime = signTime; }
+    public Integer getSignedCount() { return signedCount; }
+    public void setSignedCount(Integer signedCount) { this.signedCount = signedCount; }
 }

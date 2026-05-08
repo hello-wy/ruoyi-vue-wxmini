@@ -40,6 +40,8 @@ public interface ISignInRecordService
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
 
+    SignInRecord selectJobSignInRecord(Long jobId, Long uid);
+
     /**
      * 检查用户是否已报名某沙龙
      *
@@ -57,6 +59,4 @@ public interface ISignInRecordService
      * @return true=已签到
      */
     boolean isLectureSignedIn(Long uid, Long lectureId);
-
-    boolean isJobSignedIn(Long uid, Long jobId);
 }

@@ -74,6 +74,12 @@ public class SignInRecordServiceImpl implements ISignInRecordService
         return signInRecordMapper.selectSalonRegistrationByUid(uid);
     }
 
+    @Override
+    public SignInRecord selectJobSignInRecord(Long jobId, Long uid)
+    {
+        return signInRecordMapper.selectJobSignInRecord(jobId, uid);
+    }
+
     /**
      * 检查用户是否已报名某沙龙
      */
@@ -90,11 +96,5 @@ public class SignInRecordServiceImpl implements ISignInRecordService
     public boolean isLectureSignedIn(Long uid, Long lectureId)
     {
         return signInRecordMapper.countLectureSignIn(uid, lectureId) > 0;
-    }
-
-    @Override
-    public boolean isJobSignedIn(Long uid, Long jobId)
-    {
-        return signInRecordMapper.countJobSignIn(uid, jobId) > 0;
     }
 }

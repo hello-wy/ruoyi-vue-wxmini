@@ -47,6 +47,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
+    <select id="selectJobSignInRecord" resultMap="SignInRecordResult">
+        <include refid="selectSignInRecordVo"/>
+        where job_id = #{jobId}
+          and uid = #{uid}
+          and record_type = 3
+        order by sign_time desc, id desc
+        limit 1
+    </select>
+
     <!-- 新增 -->
     <insert id="insertSignInRecord" parameterType="SignInRecord" useGeneratedKeys="true" keyProperty="id">
         insert into sign_in_record
@@ -205,15 +214,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE uid = #{uid}
           AND lecture_id = #{lectureId}
           AND record_type = 1
-    </select>
-
-    <!-- 检查用户是否已签到某兼职 -->
-    <select id="countJobSignIn" resultType="int">
-        SELECT COUNT(1)
-        FROM sign_in_record
-        WHERE uid = #{uid}
-          AND job_id = #{jobId}
-          AND record_type = 3
     </select>
 
 </mapper>

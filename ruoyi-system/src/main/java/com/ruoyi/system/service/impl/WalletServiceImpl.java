@@ -123,6 +123,7 @@ public class WalletServiceImpl implements IWalletService
             WalletTransferCreateResult result = walletTransferGateway.createTransfer(buildTransferRequest(userInfo, amount, outBatchNo, outDetailNo));
             withdraw.setWxTransferNo(result.getBatchId());
             walletMapper.updateWithdrawStatus(withdraw);
+
             return syncWithdrawStatus(withdraw.getId());
         }
         catch (Exception e)

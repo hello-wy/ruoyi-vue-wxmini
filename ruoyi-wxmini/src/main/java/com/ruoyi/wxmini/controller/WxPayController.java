@@ -235,7 +235,8 @@ public class WxPayController {
                     .timeStamp(request.getHeader("Wechatpay-Timestamp"))
                     .build();
             WxPayTransferBatchesNotifyV3Result result = this.wxPayService.parseTransferBatchesNotifyV3Result(notifyData, signatureHeader);
-            boolean handled = walletService.syncWithdrawStatusByOutBatchNo(result.getResult() == null ? null : result.getResult().getOutBatchNo());
+            boolean handled = walletService.syncWithdrawStatusByOutBatchNo(
+                    result.getResult() == null ? null : result.getResult().getOutBatchNo());
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);

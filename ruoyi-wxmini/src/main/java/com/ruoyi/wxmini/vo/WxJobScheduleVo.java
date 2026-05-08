@@ -15,6 +15,10 @@ public class WxJobScheduleVo {
     private String location;
     private BigDecimal salaryDay;
     private Integer status;
+    private Integer attendanceStatus;
+    private String attendanceStatusLabel;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date signTime;
 
     public Long getJobId() { return jobId; }
     public void setJobId(Long jobId) { this.jobId = jobId; }
@@ -32,4 +36,10 @@ public class WxJobScheduleVo {
     public void setSalaryDay(BigDecimal salaryDay) { this.salaryDay = salaryDay; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
+    public Integer getAttendanceStatus() { return attendanceStatus; }
+    public void setAttendanceStatus(Integer attendanceStatus) { this.attendanceStatus = attendanceStatus; }
+    public String getAttendanceStatusLabel() { return attendanceStatusLabel; }
+    public void setAttendanceStatusLabel(String attendanceStatusLabel) { this.attendanceStatusLabel = attendanceStatusLabel; }
+    public Date getSignTime() { return signTime; }
+    public void setSignTime(Date signTime) { this.signTime = signTime; }
 }
