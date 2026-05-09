@@ -32,6 +32,8 @@ public class ResourcesConfig implements WebMvcConfigurer
         /** 本地文件上传路径 */
         registry.addResourceHandler(Constants.RESOURCE_PREFIX + "/**")
                 .addResourceLocations("file:" + RuoYiConfig.getProfile() + "/");
+        registry.addResourceHandler("/lectures/**")
+                .addResourceLocations("file:" + RuoYiConfig.getProfile() + "/lectures/");
 
         /** swagger配置 */
         registry.addResourceHandler("/swagger-ui/**")
