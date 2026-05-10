@@ -33,10 +33,26 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "id": 1
+    "id": 12,
+    "name": "幸福解码",
+    "cover": "6",
+    "coverId": 9,
+    "speakers": [
+      {
+        "id": 3,
+        "name": "黄老师",
+        "avatarUrl": "https://example.com/avatar.webp"
+      }
+    ]
   }
 }
 ```
+
+### 响应字段补充说明
+
+- `id`：讲座记录主键。
+- `cover`：讲座详情海报数量。
+- `coverId`：讲座封面资源目录 ID。
 
 ### 失败场景或特殊说明
 

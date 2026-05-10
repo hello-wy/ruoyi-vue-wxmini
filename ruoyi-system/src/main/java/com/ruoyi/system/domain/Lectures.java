@@ -55,6 +55,10 @@ public class Lectures extends BaseEntity
     @Excel(name = "活动封面图")
     private String cover;
 
+    /** 封面资源目录ID */
+    @Excel(name = "封面资源目录ID")
+    private Long coverId;
+
     /** 活动详情 */
     @Excel(name = "活动详情")
     private String detail;
@@ -159,6 +163,16 @@ public class Lectures extends BaseEntity
         return cover;
     }
 
+    public void setCoverId(Long coverId)
+    {
+        this.coverId = coverId;
+    }
+
+    public Long getCoverId()
+    {
+        return coverId;
+    }
+
     public void setCreateDate(Date createDate)
     {
         this.createDate = createDate;
@@ -189,6 +203,8 @@ public class Lectures extends BaseEntity
             .append("speaker", getSpeaker())
             .append("location", getLocation())
             .append("geo", getGeo())
+            .append("cover", getCover())
+            .append("coverId", getCoverId())
             .append("detail", getDetail())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())

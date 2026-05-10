@@ -37,11 +37,21 @@
   "total": 1,
   "rows": [
     {
-      "id": 1
+      "id": 12,
+      "name": "幸福解码",
+      "cover": "6",
+      "coverId": 9,
+      "speakerNames": "黄老师"
     }
   ]
 }
 ```
+
+### 响应字段补充说明
+
+- `id`：讲座记录主键。
+- `cover`：讲座详情海报数量。
+- `coverId`：讲座封面资源目录 ID；前端封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 
 ### 失败场景或特殊说明
 

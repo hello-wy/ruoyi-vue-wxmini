@@ -66,12 +66,14 @@ class WxGrowupControllerTest {
     void getCourseListShouldReturn200WhenDatabaseReturnsData() {
         LecturesListVo lecture = new LecturesListVo();
         lecture.setId(1L);
+        lecture.setCoverId(9L);
         when(redisCache.getCacheObject(any())).thenReturn(null);
         when(lecturesService.selectLecturesListVo(any())).thenReturn(Collections.singletonList(lecture));
         when(questionnaireService.selectRecentQuestionnaireList(1L)).thenReturn(Collections.singletonList(new Questionnaire()));
 
         TableDataInfoVo<LecturesListVo> result = controller.getCourseList(null);
         assertEquals(200, result.getCode());
+        assertEquals(9L, result.getRows().get(0).getCoverId());
     }
 
     @Test
@@ -85,9 +87,12 @@ class WxGrowupControllerTest {
     void getCourseInfoShouldReturn200WhenCourseExists() {
         LecturesDetailVo vo = new LecturesDetailVo();
         vo.setId(1L);
+        vo.setCoverId(9L);
         when(lecturesService.selectLecturesDetailById(1L)).thenReturn(vo);
         AjaxResult result = controller.getCourseInfo(1L);
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertNotNull(result.get(AjaxResult.DATA_TAG));
+        assertEquals(9L, ((LecturesDetailVo) result.get(AjaxResult.DATA_TAG)).getCoverId());
     }
 
     @Test
