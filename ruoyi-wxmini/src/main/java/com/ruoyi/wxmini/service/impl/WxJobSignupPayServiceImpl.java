@@ -10,8 +10,10 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import com.ruoyi.system.domain.DailyJobs;
 import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.ParttimeSignupWhitelist;
 import com.ruoyi.system.service.IDailyJobsService;
 import com.ruoyi.system.service.IJobSignupOrderService;
+import com.ruoyi.system.service.IParttimeSignupWhitelistService;
 import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxPayCreateOrderParam;
 import com.ruoyi.wxmini.domain.UserInfo;
@@ -45,6 +47,8 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
     private IDailyJobsService dailyJobsService;
     @Autowired
     private IUserInfoService userInfoService;
+    @Autowired
+    private IParttimeSignupWhitelistService parttimeSignupWhitelistService;
     @Resource
     private WxPayService wxPayService;
     @Resource
@@ -79,6 +83,7 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         if (userInfo == null || userInfo.getOpenId() == null || userInfo.getOpenId().isEmpty()) {
             throw new RuntimeException("当前用户缺少openId");
         }
+        validateSignupWhitelist(userInfo);
         WxJobSignupOrderDetailVo payVo = new WxJobSignupOrderDetailVo();
         payVo.setJobId(job.getId());
         payVo.setJobTitle(job.getTitle());
@@ -245,6 +250,19 @@ public class WxJobSignupPayServiceImpl extends AbsWxPayBaseService<WxJobSignupOr
         order.setRefundTime(DateUtils.getNowDate());
         order.setStatus(JobSignupOrderStatusEnum.REFUNDED.getCode());
         return jobSignupOrderService.updateJobSignupOrder(order) > 0;
+    }
+
+    private void validateSignupWhitelist(UserInfo userInfo) {
+        if (userInfo == null || userInfo.getRealName() == null || userInfo.getRealName().trim().isEmpty()
+                || userInfo.getIdCard() == null || userInfo.getIdCard().trim().isEmpty()) {
+            throw new RuntimeException("请你联系管理员开通权限进行报名");
+        }
+        ParttimeSignupWhitelist whitelist = parttimeSignupWhitelistService
+                .selectEnabledParttimeSignupWhitelistByIdCard(userInfo.getIdCard().trim().toUpperCase());
+        if (whitelist == null || whitelist.getRealName() == null
+                || !userInfo.getRealName().trim().equals(whitelist.getRealName().trim())) {
+            throw new RuntimeException("请你联系管理员开通权限进行报名");
+        }
     }
 
     private JobSignupOrder loadOwnedJobOrder(String userId, String orderNo) {

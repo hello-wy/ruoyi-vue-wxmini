@@ -10,8 +10,10 @@ import com.ruoyi.system.domain.DailyJobs;
 import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.service.IDailyJobsService;
 import com.ruoyi.system.service.IJobSignupOrderService;
+import com.ruoyi.system.service.IParttimeSignupWhitelistService;
 import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.system.domain.ParttimeSignupWhitelist;
 import com.ruoyi.wxmini.enums.JobSignupOrderStatusEnum;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.vo.WxJobSignupOrderDetailVo;
@@ -46,6 +48,8 @@ class WxJobSignupPayServiceImplTest {
     private IDailyJobsService dailyJobsService;
     @Mock
     private IUserInfoService userInfoService;
+    @Mock
+    private IParttimeSignupWhitelistService parttimeSignupWhitelistService;
     @Mock
     private WxPayService wxPayService;
     @Spy
@@ -135,6 +139,33 @@ class WxJobSignupPayServiceImplTest {
     }
 
     @Test
+    void should_reject_create_when_whitelist_name_not_matched() {
+        DailyJobs job = new DailyJobs();
+        job.setId(1L);
+        job.setTitle("日结助教");
+        job.setStatus(0L);
+        when(dailyJobsService.selectDailyJobsById(1L)).thenReturn(job);
+        when(jobSignupOrderService.selectLatestPaidOrder("user-1", 1L)).thenReturn(null);
+        when(jobSignupOrderService.selectLatestPendingOrder("user-1", 1L)).thenReturn(null);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId("user-1");
+        userInfo.setOpenId("openid-1");
+        userInfo.setRealName("李四");
+        userInfo.setIdCard("110105199001011234");
+        when(userInfoService.selectUserInfoByUserId("user-1")).thenReturn(userInfo);
+        ParttimeSignupWhitelist whitelist = new ParttimeSignupWhitelist();
+        whitelist.setRealName("张三");
+        whitelist.setIdCard("110105199001011234");
+        when(parttimeSignupWhitelistService.selectEnabledParttimeSignupWhitelistByIdCard("110105199001011234")).thenReturn(whitelist);
+
+        WxJobSignupCreateOrderBo bo = new WxJobSignupCreateOrderBo();
+        bo.setJobId(1L);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.createJobOrder("user-1", bo));
+        assertEquals("请你联系管理员开通权限进行报名", ex.getMessage());
+    }
+
+    @Test
     void should_reject_create_when_paid_order_exists() {
         DailyJobs job = new DailyJobs();
         job.setId(1L);
@@ -165,7 +196,13 @@ class WxJobSignupPayServiceImplTest {
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId("user-1");
         userInfo.setOpenId("openid-1");
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("110105199001011234");
         when(userInfoService.selectUserInfoByUserId("user-1")).thenReturn(userInfo);
+        ParttimeSignupWhitelist whitelist = new ParttimeSignupWhitelist();
+        whitelist.setRealName("张三");
+        whitelist.setIdCard("110105199001011234");
+        when(parttimeSignupWhitelistService.selectEnabledParttimeSignupWhitelistByIdCard("110105199001011234")).thenReturn(whitelist);
         WxPayConfig wxPayConfig = new WxPayConfig();
         wxPayConfig.setAppId("wx-appid");
         wxPayConfig.setMchId("mch-id");
