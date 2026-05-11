@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.bussiness;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -14,10 +15,15 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Api(tags = "兼职报名白名单")
 @RestController
@@ -26,6 +32,15 @@ public class ParttimeSignupWhitelistController extends BaseController {
 
     @Autowired
     private IParttimeSignupWhitelistService whitelistService;
+
+    @ApiOperation("查询兼职报名白名单列表")
+    @PreAuthorize("@ss.hasRole('admin')")
+    @GetMapping("/list")
+    public TableDataInfoVo<ParttimeSignupWhitelist> list(ParttimeSignupWhitelist whitelist) {
+        startPage();
+        List<ParttimeSignupWhitelist> list = whitelistService.selectParttimeSignupWhitelistList(whitelist);
+        return getDataTable(list);
+    }
 
     @ApiOperation("新增兼职报名白名单")
     @PreAuthorize("@ss.hasRole('admin')")
@@ -54,6 +69,14 @@ public class ParttimeSignupWhitelistController extends BaseController {
         whitelist.setCreateBy(resolveCreateBy());
         whitelist.setCreateTime(DateUtils.getNowDate());
         return toAjax(whitelistService.insertParttimeSignupWhitelist(whitelist));
+    }
+
+    @ApiOperation("删除兼职报名白名单")
+    @PreAuthorize("@ss.hasRole('admin')")
+    @Log(title = "兼职报名白名单", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{id}")
+    public AjaxResult remove(@PathVariable("id") Long id) {
+        return toAjax(whitelistService.deleteParttimeSignupWhitelistById(id));
     }
 
     private String resolveCreateBy() {
