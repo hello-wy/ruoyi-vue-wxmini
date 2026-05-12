@@ -1,6 +1,7 @@
 package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
 import com.ruoyi.wxmini.bo.WxUserTypeUpdateBo;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
@@ -73,6 +74,19 @@ class WxUserProfileControllerTest {
     }
 
     @Test
+    void initUserTypeShouldReturnWhitelistMessageWhenMerchantBlocked() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
+        bo.setUserType(2);
+        when(wxUserProfileService.initCurrentUserType(USER_ID, 2)).thenThrow(new ServiceException("当前账号暂未开通商家身份"));
+
+        AjaxResult result = controller.initUserType(bo);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("当前账号暂未开通商家身份", result.get(AjaxResult.MSG_TAG));
+    }
+
+    @Test
     void switchUserTypeShouldReturn200WhenAuntTypeAccepted() {
         WxMiniUserContext.setCurrentUserId(USER_ID);
         WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
@@ -80,6 +94,19 @@ class WxUserProfileControllerTest {
         when(wxUserProfileService.switchCurrentUserType(USER_ID, 3)).thenReturn(1);
         AjaxResult result = controller.switchUserType(bo);
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void switchUserTypeShouldReturnWhitelistMessageWhenMerchantBlocked() {
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        WxUserTypeUpdateBo bo = new WxUserTypeUpdateBo();
+        bo.setUserType(2);
+        when(wxUserProfileService.switchCurrentUserType(USER_ID, 2)).thenThrow(new ServiceException("当前账号暂未开通商家身份"));
+
+        AjaxResult result = controller.switchUserType(bo);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("当前账号暂未开通商家身份", result.get(AjaxResult.MSG_TAG));
     }
 
     @Test

@@ -1,7 +1,10 @@
 package com.ruoyi.wxmini.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.system.domain.MerchantUserTypeWhitelist;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.service.IMerchantUserTypeWhitelistService;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.WxUserProfile;
@@ -17,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -33,16 +37,60 @@ class WxUserProfileServiceImplTest {
     @Mock
     private WxUserProfileMapper wxUserProfileMapper;
 
+    @Mock
+    private IMerchantUserTypeWhitelistService merchantUserTypeWhitelistService;
+
     @InjectMocks
     private WxUserProfileServiceImpl service;
 
     @Test
-    void switchCurrentUserTypeShouldAllowMerchantType() {
+    void switchCurrentUserTypeShouldRejectMerchantWhenWhitelistMissing() {
         UserInfo userInfo = new UserInfo();
         userInfo.setUserId(USER_ID);
         userInfo.setUserType(0);
+        userInfo.setIdCard("11010519900101123X");
+        userInfo.setRealName("张三");
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectEnabledMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(null);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> service.switchCurrentUserType(USER_ID, 2));
+
+        assertEquals("当前账号暂未开通商家身份", error.getMessage());
+    }
+
+    @Test
+    void switchCurrentUserTypeShouldRejectMerchantWhenRealNameMismatched() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setUserType(0);
+        userInfo.setIdCard("11010519900101123X");
+        userInfo.setRealName("张三");
+        MerchantUserTypeWhitelist whitelist = new MerchantUserTypeWhitelist();
+        whitelist.setIdCard("11010519900101123X");
+        whitelist.setRealName("李四");
+        whitelist.setStatus(1);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectEnabledMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(whitelist);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> service.switchCurrentUserType(USER_ID, 2));
+
+        assertEquals("当前账号暂未开通商家身份", error.getMessage());
+    }
+
+    @Test
+    void switchCurrentUserTypeShouldAllowMerchantWhenWhitelistMatches() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setUserType(0);
+        userInfo.setIdCard("11010519900101123X");
+        userInfo.setRealName("张三");
+        MerchantUserTypeWhitelist whitelist = new MerchantUserTypeWhitelist();
+        whitelist.setIdCard("11010519900101123X");
+        whitelist.setRealName("张三");
+        whitelist.setStatus(1);
         when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
         when(userInfoService.updateUserInfo(userInfo)).thenReturn(1);
+        when(merchantUserTypeWhitelistService.selectEnabledMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(whitelist);
 
         int rows = service.switchCurrentUserType(USER_ID, 2);
 
@@ -67,12 +115,44 @@ class WxUserProfileServiceImplTest {
     }
 
     @Test
-    void getCurrentUserProfileShouldExposeAuntAsSwitchableType() {
+    void getCurrentUserProfileShouldHideMerchantWhenWhitelistUnavailable() {
         WxUserProfileVo profile = new WxUserProfileVo();
         profile.setUserInfoId(1L);
         profile.setUserName("张三");
         profile.setUserType(0);
+        profile.setRealName("张三");
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("11010519900101123X");
         when(wxUserProfileMapper.selectProfileDetailByUserId(USER_ID)).thenReturn(profile);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectEnabledMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(null);
+
+        WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
+
+        assertTrue(result.getCanSwitchUserType());
+        assertEquals(Arrays.asList(0, 1, 3), result.getSwitchableUserTypes());
+    }
+
+    @Test
+    void getCurrentUserProfileShouldExposeMerchantWhenWhitelistMatches() {
+        WxUserProfileVo profile = new WxUserProfileVo();
+        profile.setUserInfoId(1L);
+        profile.setUserName("张三");
+        profile.setUserType(1);
+        profile.setRealName("张三");
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("11010519900101123X");
+        MerchantUserTypeWhitelist whitelist = new MerchantUserTypeWhitelist();
+        whitelist.setRealName("张三");
+        whitelist.setIdCard("11010519900101123X");
+        whitelist.setStatus(1);
+        when(wxUserProfileMapper.selectProfileDetailByUserId(USER_ID)).thenReturn(profile);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectEnabledMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(whitelist);
 
         WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
 

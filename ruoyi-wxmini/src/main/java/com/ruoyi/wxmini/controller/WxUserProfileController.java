@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
 import com.ruoyi.wxmini.bo.WxUserTypeUpdateBo;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
@@ -62,8 +63,12 @@ public class WxUserProfileController extends BaseController {
         if (bo == null || bo.getUserType() == null) {
             return error("请选择用户身份");
         }
-        int rows = wxUserProfileService.initCurrentUserType(userId, bo.getUserType());
-        return rows > 0 ? success() : error("身份初始化失败");
+        try {
+            int rows = wxUserProfileService.initCurrentUserType(userId, bo.getUserType());
+            return rows > 0 ? success() : error("身份初始化失败");
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
     }
 
     @ApiOperation("切换当前登录用户身份")
@@ -76,7 +81,11 @@ public class WxUserProfileController extends BaseController {
         if (bo == null || bo.getUserType() == null) {
             return error("请选择用户身份");
         }
-        int rows = wxUserProfileService.switchCurrentUserType(userId, bo.getUserType());
-        return rows > 0 ? success() : error("身份切换失败");
+        try {
+            int rows = wxUserProfileService.switchCurrentUserType(userId, bo.getUserType());
+            return rows > 0 ? success() : error("身份切换失败");
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
     }
 }
