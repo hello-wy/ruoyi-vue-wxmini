@@ -3,6 +3,7 @@
 ## 用途
 
 - `GET`：获取当前登录用户个人资料。
+- 返回前端可切换的身份列表，前端应据此决定是否展示商家身份选项。
 
 ## 鉴权
 
@@ -59,7 +60,14 @@
 - `isRealnameAuth` 取自 `user_info.is_realname_auth`，`1` 表示已完成实名认证，`0` 或空表示未完成。
 - `displayName` 优先取 `user_info.real_name`；没有实名姓名时返回手机号脱敏值（前 3 位 + `****` + 后 4 位），不再回退到 `user_name`。
 - `realName` 取自 `user_info.real_name`，即实名认证写入的真实姓名。
-- 当前实现会返回 `switchableUserTypes = [0, 1, 2, 3]`。
+- `switchableUserTypes` 由服务端动态计算。
+- 默认始终返回 `0=家长`、`1=学生`、`3=阿姨`。
+- 是否包含 `2=商家` 取决于当前用户是否满足商家白名单条件：
+  - 当前用户 `user_info.id_card` 非空；
+  - 当前用户 `user_info.real_name` 非空；
+  - 存在 `status = 1` 的商家白名单记录，且白名单 `id_card` 与当前用户身份证完全一致；
+  - 白名单 `real_name` 与当前用户实名姓名完全一致。
+- 若不满足上述任一条件，则返回 `switchableUserTypes = [0, 1, 3]`，前端不应展示商家身份选项。
 
 ## 实现来源文件
 
