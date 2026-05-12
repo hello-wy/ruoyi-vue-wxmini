@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +44,6 @@ class WxJobPayrollPayServiceImplTest {
         WxPayCreateOrderParam orderParam = service.buildOrderParam("merchant-1", payVo, new HashMap<>());
 
         assertTrue(orderParam.getOrderNo().length() <= 32, "微信商户订单号长度不能超过32位");
-        assertTrue(orderParam.getOrderNo().startsWith("PR"));
-        assertEquals(30, orderParam.getOrderNo().length());
+        assertTrue(orderParam.getOrderNo().matches("PR\\d{27}"));
     }
 }
