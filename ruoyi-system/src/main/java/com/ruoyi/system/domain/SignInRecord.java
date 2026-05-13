@@ -66,6 +66,29 @@ public class SignInRecord extends BaseEntity
     @Excel(name = "备注")
     private String remark;
 
+    /** 兼职签到图片地址 */
+    private String signImageUrl;
+
+    /** 兼职签到图片相对路径 */
+    private String signImageName;
+
+    /** 审核状态：0-未提交，1-待审核，2-已通过，3-已驳回 */
+    private Integer auditStatus;
+
+    /** 审核备注 */
+    private String auditRemark;
+
+    /** 审核时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date auditTime;
+
+    /** 审核人 */
+    private String auditBy;
+
+    /** 提交时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date submitTime;
+
     /** 签到设备或IP（可选，用于防作弊） */
     @Excel(name = "设备信息")
     private String deviceInfo;
@@ -92,6 +115,20 @@ public class SignInRecord extends BaseEntity
     public String getContactPhone()             { return contactPhone; }
     public void setRemark(String remark)        { this.remark = remark; }
     public String getRemark()                   { return remark; }
+    public void setSignImageUrl(String signImageUrl) { this.signImageUrl = signImageUrl; }
+    public String getSignImageUrl()             { return signImageUrl; }
+    public void setSignImageName(String signImageName) { this.signImageName = signImageName; }
+    public String getSignImageName()            { return signImageName; }
+    public void setAuditStatus(Integer auditStatus) { this.auditStatus = auditStatus; }
+    public Integer getAuditStatus()             { return auditStatus; }
+    public void setAuditRemark(String auditRemark) { this.auditRemark = auditRemark; }
+    public String getAuditRemark()              { return auditRemark; }
+    public void setAuditTime(Date auditTime)    { this.auditTime = auditTime; }
+    public Date getAuditTime()                  { return auditTime; }
+    public void setAuditBy(String auditBy)      { this.auditBy = auditBy; }
+    public String getAuditBy()                  { return auditBy; }
+    public void setSubmitTime(Date submitTime)  { this.submitTime = submitTime; }
+    public Date getSubmitTime()                 { return submitTime; }
     public void setDeviceInfo(String deviceInfo) { this.deviceInfo = deviceInfo; }
     public String getDeviceInfo()               { return deviceInfo; }
 
@@ -109,6 +146,13 @@ public class SignInRecord extends BaseEntity
                 .append("contactName", getContactName())
                 .append("contactPhone", getContactPhone())
                 .append("remark", getRemark())
+                .append("signImageUrl", getSignImageUrl())
+                .append("signImageName", getSignImageName())
+                .append("auditStatus", getAuditStatus())
+                .append("auditRemark", getAuditRemark())
+                .append("auditTime", getAuditTime())
+                .append("auditBy", getAuditBy())
+                .append("submitTime", getSubmitTime())
                 .append("deviceInfo", getDeviceInfo())
                 .toString();
     }

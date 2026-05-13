@@ -32,6 +32,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="attendanceStatus" column="attendance_status"/>
         <result property="attendanceStatusLabel" column="attendance_status_label"/>
         <result property="signTime" column="sign_time"/>
+        <result property="signImageUrl" column="sign_image_url"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditStatusLabel" column="audit_status_label"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="canUploadSignImage" column="can_upload_sign_image"/>
     </resultMap>
 
     <resultMap id="JobSignupUserRecordResult" type="com.ruoyi.system.domain.vo.JobSignupUserRecordVo">
@@ -44,6 +49,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="attendanceStatusLabel" column="attendance_status_label"/>
         <result property="signTime" column="sign_time"/>
         <result property="signedCount" column="signed_count"/>
+        <result property="signImageUrl" column="sign_image_url"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditStatusLabel" column="audit_status_label"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="submitTime" column="submit_time"/>
     </resultMap>
 
     <sql id="selectJobSignupOrderVo">
@@ -90,7 +100,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                    when sir.sign_status = 3 then '已取消'
                    else '未签到'
                end as attendance_status_label,
-               sir.sign_time
+               sir.sign_time,
+               sir.sign_image_url,
+               case when sir.id is null then 0 else ifnull(sir.audit_status, 0) end as audit_status,
+               case
+                   when sir.id is null or ifnull(sir.audit_status, 0) = 0 then '未提交'
+                   when sir.audit_status = 1 then '待审核'
+                   when sir.audit_status = 2 then '已通过'
+                   when sir.audit_status = 3 then '已驳回'
+                   else '未提交'
+               end as audit_status_label,
+               sir.audit_remark,
+               case
+                   when sir.id is null then true
+                   when ifnull(sir.audit_status, 0) = 3 then true
+                   else false
+               end as can_upload_sign_image
         from job_signup_order jso
                  inner join daily_jobs dj on dj.id = jso.job_id
                  left join sign_in_record sir
@@ -130,7 +155,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                    else '未签到'
                end as attendance_status_label,
                sir.sign_time,
-               case when sir.id is null then 0 else 1 end as signed_count
+               case when sir.id is null then 0 else 1 end as signed_count,
+               sir.sign_image_url,
+               case when sir.id is null then 0 else ifnull(sir.audit_status, 0) end as audit_status,
+               case
+                   when sir.id is null or ifnull(sir.audit_status, 0) = 0 then '未提交'
+                   when sir.audit_status = 1 then '待审核'
+                   when sir.audit_status = 2 then '已通过'
+                   when sir.audit_status = 3 then '已驳回'
+                   else '未提交'
+               end as audit_status_label,
+               sir.audit_remark,
+               sir.submit_time
         from job_signup_order jso
                  inner join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
@@ -149,6 +185,117 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
               )
           </if>
         order by ui.id desc
+    </select>
+
+    <resultMap id="JobSignAuditRecordResult" type="com.ruoyi.system.domain.vo.JobSignAuditRecordVo">
+        <result property="id" column="id"/>
+        <result property="recordId" column="record_id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="displayName" column="display_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="phoneMasked" column="phone_masked"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="attendanceStatus" column="attendance_status"/>
+        <result property="attendanceStatusLabel" column="attendance_status_label"/>
+        <result property="signImageUrl" column="sign_image_url"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditStatusLabel" column="audit_status_label"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="signTime" column="sign_time"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="auditTime" column="audit_time"/>
+    </resultMap>
+
+    <select id="selectJobSignAuditRecords" resultMap="JobSignAuditRecordResult">
+        select sir.id,
+               sir.id as record_id,
+               jso.job_id,
+               ui.id as user_info_id,
+               ui.user_id,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as display_name,
+               ui.user_name,
+               case
+                   when ui.phone is null or ui.phone = '' then ''
+                   when char_length(ui.phone) &lt; 7 then ui.phone
+                   else concat(left(ui.phone, 3), '****', right(ui.phone, 4))
+               end as phone_masked,
+               jso.order_no,
+               case when sir.id is null then 0 else sir.sign_status end as attendance_status,
+               case
+                   when sir.id is null then '未签到'
+                   when sir.sign_status = 1 then '已签到'
+                   when sir.sign_status = 2 then '迟到'
+                   when sir.sign_status = 3 then '已取消'
+                   else '未签到'
+               end as attendance_status_label,
+               sir.sign_image_url,
+               case when sir.id is null then 0 else ifnull(sir.audit_status, 0) end as audit_status,
+               case
+                   when sir.id is null or ifnull(sir.audit_status, 0) = 0 then '未提交'
+                   when sir.audit_status = 1 then '待审核'
+                   when sir.audit_status = 2 then '已通过'
+                   when sir.audit_status = 3 then '已驳回'
+                   else '未提交'
+               end as audit_status_label,
+               sir.audit_remark,
+               sir.sign_time,
+               sir.submit_time,
+               sir.audit_time
+        from job_signup_order jso
+                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join wx_user_profile up on up.uid = ui.id
+                 left join sign_in_record sir
+                           on sir.job_id = jso.job_id
+                               and sir.uid = ui.id
+                               and sir.record_type = 3
+        where jso.job_id = #{jobId}
+          and jso.status = 1
+        order by ifnull(sir.submit_time, sir.sign_time) desc, ui.id desc
+    </select>
+
+    <select id="selectPaidOrdersWithSignIn" resultType="com.ruoyi.system.domain.vo.JobRefundOrderVo">
+        select jso.id as order_id,
+               jso.order_no,
+               jso.user_id,
+               jso.job_id,
+               dj.title as job_title,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as user_name,
+               jso.amount,
+               jso.status,
+               case when sir.id is null then false else true end as signed_in,
+               jso.pay_time,
+               jso.refund_time,
+               ifnull(sir.audit_status, 0) as audit_status,
+               case
+                   when sir.id is null or ifnull(sir.audit_status, 0) = 0 then '未提交'
+                   when sir.audit_status = 1 then '待审核'
+                   when sir.audit_status = 2 then '已通过'
+                   when sir.audit_status = 3 then '已驳回'
+                   else '未提交'
+               end as audit_status_label,
+               sir.sign_image_url,
+               case when jso.status = 1 and ifnull(sir.audit_status, 0) = 2 then true else false end as can_refund
+        from job_signup_order jso
+                 inner join daily_jobs dj on dj.id = jso.job_id
+                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join wx_user_profile up on up.uid = ui.id
+                 left join sign_in_record sir
+                           on sir.job_id = jso.job_id
+                               and sir.uid = ui.id
+                               and sir.record_type = 3
+        where jso.job_id = #{jobId}
+          and jso.status in (1, 2)
+        order by jso.pay_time desc, jso.id desc
     </select>
 
     <select id="selectLatestPaidOrder" resultMap="JobSignupOrderResult">

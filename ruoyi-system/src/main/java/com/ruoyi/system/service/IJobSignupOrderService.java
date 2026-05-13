@@ -3,6 +3,7 @@ package com.ruoyi.system.service;
 import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
+import com.ruoyi.system.domain.vo.JobSignAuditRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 
 import java.util.List;
@@ -17,6 +18,8 @@ public interface IJobSignupOrderService {
     List<JobScheduleRecordVo> selectMyPaidJobSchedules(String userId, Integer paidStatus);
 
     List<JobSignupUserRecordVo> selectPaidSignupUsersByJobId(Long jobId, Integer paidStatus, String keyword);
+
+    List<JobSignAuditRecordVo> selectJobSignAuditRecords(Long jobId);
 
     JobSignupOrder selectLatestPaidOrder(String userId, Long jobId);
 

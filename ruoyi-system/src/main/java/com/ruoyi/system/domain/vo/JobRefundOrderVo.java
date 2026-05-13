@@ -22,6 +22,10 @@ public class JobRefundOrderVo {
     private Date payTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date refundTime;
+    private Integer auditStatus;
+    private String auditStatusLabel;
+    private String signImageUrl;
+    private Boolean canRefund;
 
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
@@ -45,4 +49,12 @@ public class JobRefundOrderVo {
     public void setPayTime(Date payTime) { this.payTime = payTime; }
     public Date getRefundTime() { return refundTime; }
     public void setRefundTime(Date refundTime) { this.refundTime = refundTime; }
+    public Integer getAuditStatus() { return auditStatus; }
+    public void setAuditStatus(Integer auditStatus) { this.auditStatus = auditStatus; }
+    public String getAuditStatusLabel() { return auditStatusLabel; }
+    public void setAuditStatusLabel(String auditStatusLabel) { this.auditStatusLabel = auditStatusLabel; }
+    public String getSignImageUrl() { return signImageUrl; }
+    public void setSignImageUrl(String signImageUrl) { this.signImageUrl = signImageUrl; }
+    public Boolean getCanRefund() { return canRefund; }
+    public void setCanRefund(Boolean canRefund) { this.canRefund = canRefund; }
 }

@@ -1,17 +1,22 @@
 package com.ruoyi.wxmini.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.DailyJobs;
+import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.SignInRecord;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.service.IDailyJobsService;
 import com.ruoyi.system.service.IJobSignupOrderService;
+import com.ruoyi.system.service.ISignInRecordService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IWxJobScheduleService;
 import com.ruoyi.wxmini.vo.WxJobScheduleVo;
 import com.ruoyi.wxmini.vo.WxMerchantJobVo;
 import com.ruoyi.wxmini.vo.WxSignupUserVo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -25,6 +30,9 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
 
     private static final Integer PAID_STATUS = 1;
     private static final Integer USER_TYPE_MERCHANT = 2;
+    private static final Integer RECORD_TYPE_JOB = 3;
+    private static final Integer SIGN_STATUS_PENDING = 0;
+    private static final Integer AUDIT_STATUS_PENDING = 1;
 
     @Resource
     private IJobSignupOrderService jobSignupOrderService;
@@ -34,6 +42,9 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
 
     @Resource
     private IUserInfoService userInfoService;
+
+    @Resource
+    private ISignInRecordService signInRecordService;
 
     @Override
     public List<WxJobScheduleVo> listMySchedules(String userId) {
@@ -52,6 +63,11 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
             vo.setAttendanceStatus(record.getAttendanceStatus());
             vo.setAttendanceStatusLabel(record.getAttendanceStatusLabel());
             vo.setSignTime(record.getSignTime());
+            vo.setSignImageUrl(record.getSignImageUrl());
+            vo.setAuditStatus(record.getAuditStatus());
+            vo.setAuditStatusLabel(record.getAuditStatusLabel());
+            vo.setAuditRemark(record.getAuditRemark());
+            vo.setCanUploadSignImage(record.getCanUploadSignImage());
             result.add(vo);
         }
         return result;
@@ -92,12 +108,56 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
             vo.setAttendanceStatusLabel(record.getAttendanceStatusLabel());
             vo.setSignTime(record.getSignTime());
             vo.setSignedCount(record.getSignedCount());
+            vo.setSignImageUrl(record.getSignImageUrl());
+            vo.setAuditStatus(record.getAuditStatus());
+            vo.setAuditStatusLabel(record.getAuditStatusLabel());
+            vo.setAuditRemark(record.getAuditRemark());
+            vo.setSubmitTime(record.getSubmitTime());
             result.add(vo);
         }
         return result;
     }
 
-//    TODO：这个存在问题
+    @Override
+    public void submitJobSignImage(String currentUserId, Long jobId, String signImageUrl) {
+        if (jobId == null) {
+            throw new ServiceException("岗位不能为空");
+        }
+        if (StringUtils.isBlank(signImageUrl)) {
+            throw new ServiceException("签到图片不能为空");
+        }
+        JobSignupOrder order = jobSignupOrderService.selectLatestPaidOrder(currentUserId, jobId);
+        if (order == null) {
+            throw new ServiceException("未找到已支付报名订单");
+        }
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(currentUserId);
+        if (userInfo == null || userInfo.getId() == null) {
+            throw new ServiceException("用户不存在");
+        }
+        SignInRecord record = signInRecordService.selectJobSignInRecord(jobId, userInfo.getId());
+        if (record == null) {
+            record = new SignInRecord();
+            record.setUid(userInfo.getId());
+            record.setJobId(jobId);
+            record.setRecordType(RECORD_TYPE_JOB);
+            record.setSignStatus(SIGN_STATUS_PENDING);
+            record.setSignTime(DateUtils.getNowDate());
+            record.setSignImageUrl(signImageUrl);
+            record.setSignImageName(signImageUrl);
+            record.setAuditStatus(AUDIT_STATUS_PENDING);
+            record.setSubmitTime(DateUtils.getNowDate());
+            signInRecordService.insertSignInRecord(record);
+            return;
+        }
+        record.setSignStatus(SIGN_STATUS_PENDING);
+        record.setSignTime(DateUtils.getNowDate());
+        record.setSignImageUrl(signImageUrl);
+        record.setSignImageName(signImageUrl);
+        record.setAuditStatus(AUDIT_STATUS_PENDING);
+        record.setSubmitTime(DateUtils.getNowDate());
+        signInRecordService.updateJobSignSubmitFields(record);
+    }
+
     @Override
     public void updateMerchantJobStatus(String currentUserId, Long jobId, Long targetStatus) {
         UserInfo currentUser = requireMerchant(currentUserId, "仅商家可修改岗位状态");

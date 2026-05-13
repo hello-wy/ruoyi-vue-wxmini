@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.wxmini.bo.WxJobSignSubmitBo;
 import com.ruoyi.wxmini.bo.WxMerchantJobStatusUpdateBo;
 import com.ruoyi.wxmini.service.IWxJobScheduleService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
@@ -55,6 +56,18 @@ public class WxJobScheduleController extends BaseController {
             return error("请先登录");
         }
         return success(wxJobScheduleService.listSignupUsers(userId, jobId, keyword));
+    }
+
+    @ApiOperation("提交兼职签到图片")
+    @PostMapping("/{jobId}/sign-in")
+    public AjaxResult submitSignIn(@PathVariable("jobId") Long jobId,
+                                   @RequestBody(required = false) WxJobSignSubmitBo bo) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        wxJobScheduleService.submitJobSignImage(userId, jobId, bo == null ? null : bo.getSignImageUrl());
+        return success();
     }
 
     @ApiOperation("修改商家岗位状态")

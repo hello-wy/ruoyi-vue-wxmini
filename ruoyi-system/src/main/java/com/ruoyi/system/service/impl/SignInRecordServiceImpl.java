@@ -80,6 +80,18 @@ public class SignInRecordServiceImpl implements ISignInRecordService
         return signInRecordMapper.selectJobSignInRecord(jobId, uid);
     }
 
+    @Override
+    public int updateJobSignSubmitFields(SignInRecord signInRecord)
+    {
+        return signInRecordMapper.updateJobSignSubmitFields(signInRecord);
+    }
+
+    @Override
+    public int updateJobSignAuditFields(SignInRecord signInRecord)
+    {
+        return signInRecordMapper.updateJobSignAuditFields(signInRecord);
+    }
+
     /**
      * 检查用户是否已报名某沙龙
      */

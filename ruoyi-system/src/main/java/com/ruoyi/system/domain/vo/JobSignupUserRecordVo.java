@@ -12,6 +12,11 @@ public class JobSignupUserRecordVo {
     private String attendanceStatusLabel;
     private Date signTime;
     private Integer signedCount;
+    private String signImageUrl;
+    private Integer auditStatus;
+    private String auditStatusLabel;
+    private String auditRemark;
+    private Date submitTime;
 
     public Long getUserInfoId() { return userInfoId; }
     public void setUserInfoId(Long userInfoId) { this.userInfoId = userInfoId; }
@@ -31,4 +36,14 @@ public class JobSignupUserRecordVo {
     public void setSignTime(Date signTime) { this.signTime = signTime; }
     public Integer getSignedCount() { return signedCount; }
     public void setSignedCount(Integer signedCount) { this.signedCount = signedCount; }
+    public String getSignImageUrl() { return signImageUrl; }
+    public void setSignImageUrl(String signImageUrl) { this.signImageUrl = signImageUrl; }
+    public Integer getAuditStatus() { return auditStatus; }
+    public void setAuditStatus(Integer auditStatus) { this.auditStatus = auditStatus; }
+    public String getAuditStatusLabel() { return auditStatusLabel; }
+    public void setAuditStatusLabel(String auditStatusLabel) { this.auditStatusLabel = auditStatusLabel; }
+    public String getAuditRemark() { return auditRemark; }
+    public void setAuditRemark(String auditRemark) { this.auditRemark = auditRemark; }
+    public Date getSubmitTime() { return submitTime; }
+    public void setSubmitTime(Date submitTime) { this.submitTime = submitTime; }
 }

@@ -11,6 +11,7 @@ import com.ruoyi.wxmini.util.WxMiniUserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,6 +64,40 @@ public class WxCommonController {
             ajax.put("url", serverConfig.getUrl() + resourcePath);
             ajax.put("fileName", resourcePath);
             ajax.put("newFileName", fileName);
+            ajax.put("originalFilename", file.getOriginalFilename());
+            return ajax;
+        } catch (Exception e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/uploadJobSignImage")
+    public AjaxResult uploadJobSignImage(@RequestParam("jobId") Long jobId, MultipartFile file) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            if (StringUtils.isBlank(userId)) {
+                return AjaxResult.error("请先登录");
+            }
+            if (jobId == null) {
+                return AjaxResult.error("岗位不能为空");
+            }
+            if (file == null || file.isEmpty()) {
+                return AjaxResult.error("上传文件不能为空");
+            }
+
+            String extension = StringUtils.lowerCase(FileUploadUtils.getExtension(file));
+            if (!FileUploadUtils.isAllowedExtension(extension, ALLOWED_IMAGE_EXTENSIONS)) {
+                return AjaxResult.error("仅支持上传 JPG、JPEG、PNG 格式图片");
+            }
+
+            String uploadDir = Paths.get(RuoYiConfig.getProfile(), "sign", "job", String.valueOf(jobId)).toString();
+            String resourcePath = FileUploadUtils.upload(uploadDir, file, ALLOWED_IMAGE_EXTENSIONS);
+            String newFileName = Paths.get(resourcePath).getFileName().toString();
+
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("url", serverConfig.getUrl() + resourcePath);
+            ajax.put("fileName", resourcePath);
+            ajax.put("newFileName", newFileName);
             ajax.put("originalFilename", file.getOriginalFilename());
             return ajax;
         } catch (Exception e) {

@@ -42,6 +42,10 @@ public interface ISignInRecordService
 
     SignInRecord selectJobSignInRecord(Long jobId, Long uid);
 
+    int updateJobSignSubmitFields(SignInRecord signInRecord);
+
+    int updateJobSignAuditFields(SignInRecord signInRecord);
+
     /**
      * 检查用户是否已报名某沙龙
      *

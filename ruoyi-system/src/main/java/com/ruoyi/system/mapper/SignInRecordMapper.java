@@ -45,6 +45,10 @@ public interface SignInRecordMapper
      */
     int updateSignInRecord(SignInRecord signInRecord);
 
+    int updateJobSignSubmitFields(SignInRecord signInRecord);
+
+    int updateJobSignAuditFields(SignInRecord signInRecord);
+
     /**
      * 删除记录
      *

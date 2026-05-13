@@ -2,7 +2,7 @@
 
 ## 用途
 
-- 查询指定兼职岗位的退款管理订单列表。
+- 查询指定兼职岗位的退款管理订单列表，并返回签到审核状态与退款资格。
 
 ## 鉴权
 
@@ -39,14 +39,18 @@
       "orderId": 1,
       "orderNo": "JOB202605030001",
       "userId": "wx-user-1",
-      "jobId": 1,
+      "jobId": 12,
       "jobTitle": "周末活动协助",
       "userName": "张三",
       "amount": 30.00,
       "status": 1,
       "signedIn": true,
       "payTime": "2026-05-03 10:00:00",
-      "refundTime": null
+      "refundTime": null,
+      "auditStatus": 2,
+      "auditStatusLabel": "已通过",
+      "signImageUrl": "/profile/sign/job/12/20260513_xxx.png",
+      "canRefund": true
     }
   ]
 }
@@ -57,6 +61,8 @@
 - 未登录或 token 无效时，请求会失败。
 - 无权限时，请求会被拦截。
 - `jobId` 缺失时，请求参数校验失败。
+- `canRefund=true` 表示当前订单满足退款前置条件。
+- 兼职退款场景已不应仅依赖 `signedIn` 字段判断是否可退。
 
 ## 实现来源文件
 

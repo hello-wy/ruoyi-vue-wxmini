@@ -4,6 +4,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
+import com.ruoyi.system.domain.vo.JobSignAuditRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.mapper.JobSignupOrderMapper;
 import com.ruoyi.system.service.IJobSignupOrderService;
@@ -40,6 +41,11 @@ public class JobSignupOrderServiceImpl implements IJobSignupOrderService {
     @Override
     public List<JobSignupUserRecordVo> selectPaidSignupUsersByJobId(Long jobId, Integer paidStatus, String keyword) {
         return jobSignupOrderMapper.selectPaidSignupUsersByJobId(jobId, paidStatus, keyword);
+    }
+
+    @Override
+    public List<JobSignAuditRecordVo> selectJobSignAuditRecords(Long jobId) {
+        return jobSignupOrderMapper.selectJobSignAuditRecords(jobId);
     }
 
     @Override

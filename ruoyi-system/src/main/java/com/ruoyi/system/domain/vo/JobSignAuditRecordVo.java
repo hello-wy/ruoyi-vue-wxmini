@@ -1,30 +1,46 @@
-package com.ruoyi.wxmini.vo;
+package com.ruoyi.system.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
-public class WxSignupUserVo {
+public class JobSignAuditRecordVo {
+    private Long id;
+    private Long recordId;
+    private Long jobId;
     private Long userInfoId;
+    private String userId;
     private String displayName;
+    private String userName;
     private String phoneMasked;
     private String orderNo;
     private Integer attendanceStatus;
     private String attendanceStatusLabel;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date signTime;
-    private Integer signedCount;
     private String signImageUrl;
     private Integer auditStatus;
     private String auditStatusLabel;
     private String auditRemark;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date signTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date submitTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date auditTime;
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getRecordId() { return recordId; }
+    public void setRecordId(Long recordId) { this.recordId = recordId; }
+    public Long getJobId() { return jobId; }
+    public void setJobId(Long jobId) { this.jobId = jobId; }
     public Long getUserInfoId() { return userInfoId; }
     public void setUserInfoId(Long userInfoId) { this.userInfoId = userInfoId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
     public String getPhoneMasked() { return phoneMasked; }
     public void setPhoneMasked(String phoneMasked) { this.phoneMasked = phoneMasked; }
     public String getOrderNo() { return orderNo; }
@@ -33,10 +49,6 @@ public class WxSignupUserVo {
     public void setAttendanceStatus(Integer attendanceStatus) { this.attendanceStatus = attendanceStatus; }
     public String getAttendanceStatusLabel() { return attendanceStatusLabel; }
     public void setAttendanceStatusLabel(String attendanceStatusLabel) { this.attendanceStatusLabel = attendanceStatusLabel; }
-    public Date getSignTime() { return signTime; }
-    public void setSignTime(Date signTime) { this.signTime = signTime; }
-    public Integer getSignedCount() { return signedCount; }
-    public void setSignedCount(Integer signedCount) { this.signedCount = signedCount; }
     public String getSignImageUrl() { return signImageUrl; }
     public void setSignImageUrl(String signImageUrl) { this.signImageUrl = signImageUrl; }
     public Integer getAuditStatus() { return auditStatus; }
@@ -45,6 +57,10 @@ public class WxSignupUserVo {
     public void setAuditStatusLabel(String auditStatusLabel) { this.auditStatusLabel = auditStatusLabel; }
     public String getAuditRemark() { return auditRemark; }
     public void setAuditRemark(String auditRemark) { this.auditRemark = auditRemark; }
+    public Date getSignTime() { return signTime; }
+    public void setSignTime(Date signTime) { this.signTime = signTime; }
     public Date getSubmitTime() { return submitTime; }
     public void setSubmitTime(Date submitTime) { this.submitTime = submitTime; }
+    public Date getAuditTime() { return auditTime; }
+    public void setAuditTime(Date auditTime) { this.auditTime = auditTime; }
 }

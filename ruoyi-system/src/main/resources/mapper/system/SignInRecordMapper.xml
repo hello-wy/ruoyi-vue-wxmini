@@ -16,13 +16,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="contactName"  column="contact_name"  />
         <result property="contactPhone" column="contact_phone" />
         <result property="remark"       column="remark"        />
+        <result property="signImageUrl" column="sign_image_url" />
+        <result property="signImageName" column="sign_image_name" />
+        <result property="auditStatus"  column="audit_status"  />
+        <result property="auditRemark"  column="audit_remark"  />
+        <result property="auditTime"    column="audit_time"    />
+        <result property="auditBy"      column="audit_by"      />
+        <result property="submitTime"   column="submit_time"   />
         <result property="deviceInfo"   column="device_info"   />
     </resultMap>
 
     <sql id="selectSignInRecordVo">
         select id, uid, record_type, lecture_id, salon_id, job_id,
                sign_time, sign_status, contact_name, contact_phone,
-               remark, device_info
+               remark, sign_image_url, sign_image_name, audit_status,
+               audit_remark, audit_time, audit_by, submit_time, device_info
         from sign_in_record
     </sql>
 
@@ -36,6 +44,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="salonId != null">                and salon_id = #{salonId}</if>
             <if test="jobId != null">                  and job_id = #{jobId}</if>
             <if test="signStatus != null">             and sign_status = #{signStatus}</if>
+            <if test="auditStatus != null">            and audit_status = #{auditStatus}</if>
             <if test="deviceInfo != null and deviceInfo != ''"> and device_info = #{deviceInfo}</if>
         </where>
         order by sign_time desc
@@ -70,6 +79,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null">contact_name,</if>
             <if test="contactPhone != null">contact_phone,</if>
             <if test="remark != null">remark,</if>
+            <if test="signImageUrl != null">sign_image_url,</if>
+            <if test="signImageName != null">sign_image_name,</if>
+            <if test="auditStatus != null">audit_status,</if>
+            <if test="auditRemark != null">audit_remark,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="auditBy != null">audit_by,</if>
+            <if test="submitTime != null">submit_time,</if>
             <if test="deviceInfo != null">device_info,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -83,6 +99,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null">#{contactName},</if>
             <if test="contactPhone != null">#{contactPhone},</if>
             <if test="remark != null">#{remark},</if>
+            <if test="signImageUrl != null">#{signImageUrl},</if>
+            <if test="signImageName != null">#{signImageName},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="auditRemark != null">#{auditRemark},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="auditBy != null">#{auditBy},</if>
+            <if test="submitTime != null">#{submitTime},</if>
             <if test="deviceInfo != null">#{deviceInfo},</if>
         </trim>
     </insert>
@@ -101,8 +124,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="contactName != null">contact_name = #{contactName},</if>
             <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="signImageUrl != null">sign_image_url = #{signImageUrl},</if>
+            <if test="signImageName != null">sign_image_name = #{signImageName},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="auditBy != null">audit_by = #{auditBy},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
             <if test="deviceInfo != null">device_info = #{deviceInfo},</if>
         </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateJobSignSubmitFields" parameterType="SignInRecord">
+        update sign_in_record
+        set sign_time = #{signTime},
+            sign_status = #{signStatus},
+            remark = #{remark},
+            sign_image_url = #{signImageUrl},
+            sign_image_name = #{signImageName},
+            audit_status = #{auditStatus},
+            audit_remark = null,
+            audit_time = null,
+            audit_by = null,
+            submit_time = #{submitTime}
+        where id = #{id}
+    </update>
+
+    <update id="updateJobSignAuditFields" parameterType="SignInRecord">
+        update sign_in_record
+        set sign_status = #{signStatus},
+            audit_status = #{auditStatus},
+            audit_remark = #{auditRemark},
+            audit_time = #{auditTime},
+            audit_by = #{auditBy}
         where id = #{id}
     </update>
 

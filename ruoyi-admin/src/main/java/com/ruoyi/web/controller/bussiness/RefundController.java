@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
+import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.SalonRefundOrderVo;
 import com.ruoyi.system.service.IJobSignupOrderService;
@@ -31,6 +32,8 @@ public class RefundController extends BaseController {
     private ISalonPayOrderService salonPayOrderService;
     @Autowired
     private IWxRefundService wxRefundService;
+    @Autowired
+    private JobSignAuditController jobSignAuditController;
 
     @ApiOperation("兼职退款列表")
     @PreAuthorize("@ss.hasPermi('system:refund:list')")
@@ -46,6 +49,8 @@ public class RefundController extends BaseController {
     @PostMapping("/job/{orderNo}")
     public AjaxResult refundJobOrder(@PathVariable("orderNo") String orderNo) {
         try {
+            JobSignupOrder order = jobSignupOrderService.selectJobSignupOrderByOrderNo(orderNo);
+            jobSignAuditController.validateRefundOrder(order, orderNo);
             wxRefundService.refundJobOrder(orderNo, "后台管理员退款");
             return success("退款成功");
         } catch (Exception e) {

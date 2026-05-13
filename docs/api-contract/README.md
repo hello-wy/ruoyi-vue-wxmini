@@ -35,6 +35,9 @@
 - `system/info/list.md`
 - `system/info/{ids}.md`
 - `system/info/{id}.md`
+- `system/job-sign-audit__list.md`
+- `system/job-sign-audit__refund-check__{orderNo}.md`
+- `system/job-sign-audit__{id}__audit.md`
 - `system/jobs/export.md`
 - `system/jobs/index.md`
 - `system/jobs/list.md`
@@ -96,6 +99,7 @@
 - `wxmini/baby/index.md`
 - `wxmini/baby/list.md`
 - `wxmini/baby/{id}.md`
+- `wxmini/common__uploadJobSignImage.md`
 - `wxmini/growup/courses.md`
 - `wxmini/growup/courses__{id}.md`
 - `wxmini/growup/enrollments__list.md`
@@ -103,6 +107,9 @@
 - `wxmini/jobs/index.md`
 - `wxmini/jobs/list.md`
 - `wxmini/jobs/mine__defaults.md`
+- `wxmini/jobs__schedules__my.md`
+- `wxmini/jobs__{jobId}__sign-in.md`
+- `wxmini/jobs__{jobId}__signup-users.md`
 - `wxmini/login.md`
 - `wxmini/pay/jobs__notify.md`
 - `wxmini/pay/jobs__orders__create.md`
