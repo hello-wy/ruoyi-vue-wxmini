@@ -2,11 +2,12 @@
 
 ## 用途
 
-- 上传兼职签到图片，供后续提交签到材料时引用。
+- 上传兼职签到图片，供小程序端兼职安排页提交签到凭证使用。
 
 ## 鉴权
 
 - 需要 `Wx-Authorization: Bearer <token>`。
+- 服务端使用当前登录小程序用户 ID 作为目录名。
 
 ## 请求头
 
@@ -23,7 +24,6 @@
 
 ## Body 参数
 
-- `jobId`：必填，兼职岗位 ID，表单字段。
 - `file`：必填，签到图片文件，仅支持 `jpg`、`jpeg`、`png`。
 
 ## 成功响应示例
@@ -32,20 +32,19 @@
 {
   "code": 200,
   "msg": "操作成功",
-  "url": "https://api.example.com/profile/sign/job/12/20260513_xxx.png",
-  "fileName": "/profile/sign/job/12/20260513_xxx.png",
-  "newFileName": "20260513_xxx.png",
-  "originalFilename": "signin.png"
+  "url": "https://zhiyujia.xyz/profile/job-sign/321/1715832000000.jpg",
+  "fileName": "/profile/job-sign/321/1715832000000.jpg",
+  "newFileName": "1715832000000.jpg",
+  "originalFilename": "sign.jpg"
 }
 ```
 
 ## 失败场景或特殊说明
 
 - 未登录时返回：`请先登录`。
-- `jobId` 为空时返回：`岗位不能为空`。
 - 文件为空时返回：`上传文件不能为空`。
 - 文件格式非法时返回：`仅支持上传 JPG、JPEG、PNG 格式图片`。
-- 文件保存目录为：`{profile}/sign/job/{jobId}`。
+- 文件保存目录为：`{profile}/job-sign/{userId}`。
 - 前端提交签到时应优先使用返回的 `fileName`，即相对路径 `/profile/...`。
 
 ## 实现来源文件

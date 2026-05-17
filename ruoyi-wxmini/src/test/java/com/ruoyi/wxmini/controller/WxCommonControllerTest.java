@@ -13,6 +13,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -23,11 +25,14 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +61,24 @@ class WxCommonControllerTest {
     void tearDown() {
         RequestContextHolder.resetRequestAttributes();
         WxMiniUserContext.clear();
+    }
+
+    @Test
+    void controllerPostMappingsShouldBeUnique() {
+        RequestMapping classMapping = WxCommonController.class.getAnnotation(RequestMapping.class);
+        String basePath = classMapping.value()[0];
+        Set<String> mappings = new HashSet<>();
+
+        for (java.lang.reflect.Method method : WxCommonController.class.getDeclaredMethods()) {
+            PostMapping postMapping = method.getAnnotation(PostMapping.class);
+            if (postMapping == null) {
+                continue;
+            }
+            String path = basePath + postMapping.value()[0];
+            if (!mappings.add(path)) {
+                fail("Duplicate POST mapping: " + path);
+            }
+        }
     }
 
     @Test
