@@ -2,10 +2,14 @@ package com.ruoyi.wxmini.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.DailyJobs;
+import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.JobAttendanceAdminOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.service.IDailyJobsService;
+import com.ruoyi.system.service.IJobAttendanceAdminService;
 import com.ruoyi.system.service.IJobSignupOrderService;
+import com.ruoyi.system.service.ISignInRecordService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.vo.WxJobScheduleVo;
@@ -35,6 +39,10 @@ class WxJobScheduleServiceImplTest {
     private IDailyJobsService dailyJobsService;
     @Mock
     private IUserInfoService userInfoService;
+    @Mock
+    private ISignInRecordService signInRecordService;
+    @Mock
+    private IJobAttendanceAdminService jobAttendanceAdminService;
 
     @InjectMocks
     private WxJobScheduleServiceImpl service;
@@ -50,6 +58,10 @@ class WxJobScheduleServiceImplTest {
         record.setAttendanceStatus(1);
         record.setAttendanceStatusLabel("已签到");
         record.setSignTime(signTime);
+        record.setSignImageUrl("/profile/job-sign/321/10.jpg");
+        record.setAuditStatus(1);
+        record.setAuditStatusLabel("待审核");
+        record.setCanUploadSignImage(false);
         when(jobSignupOrderService.selectMyPaidJobSchedules("student-1", 1))
                 .thenReturn(Collections.singletonList(record));
 
@@ -59,6 +71,10 @@ class WxJobScheduleServiceImplTest {
         assertEquals(1, schedules.get(0).getAttendanceStatus());
         assertEquals("已签到", schedules.get(0).getAttendanceStatusLabel());
         assertEquals(signTime, schedules.get(0).getSignTime());
+        assertEquals("/profile/job-sign/321/10.jpg", schedules.get(0).getSignImageUrl());
+        assertEquals(1, schedules.get(0).getAuditStatus());
+        assertEquals("待审核", schedules.get(0).getAuditStatusLabel());
+        assertEquals(false, schedules.get(0).getCanUploadSignImage());
     }
 
     @Test
@@ -99,6 +115,7 @@ class WxJobScheduleServiceImplTest {
         job.setPublisherUid(100L);
         JobSignupUserRecordVo record = new JobSignupUserRecordVo();
         Date signTime = new Date();
+        Date submitTime = new Date();
         record.setUserInfoId(200L);
         record.setDisplayName("张三");
         record.setOrderNo("order-1");
@@ -106,6 +123,10 @@ class WxJobScheduleServiceImplTest {
         record.setAttendanceStatusLabel("已签到");
         record.setSignTime(signTime);
         record.setSignedCount(1);
+        record.setSignImageUrl("/profile/job-sign/321/10.jpg");
+        record.setAuditStatus(2);
+        record.setAuditStatusLabel("已通过");
+        record.setSubmitTime(submitTime);
         when(userInfoService.selectUserInfoByUserId("merchant-1")).thenReturn(merchant);
         when(dailyJobsService.selectDailyJobsById(10L)).thenReturn(job);
         when(jobSignupOrderService.selectPaidSignupUsersByJobId(10L, 1, null))
@@ -120,6 +141,10 @@ class WxJobScheduleServiceImplTest {
         assertEquals("已签到", users.get(0).getAttendanceStatusLabel());
         assertEquals(signTime, users.get(0).getSignTime());
         assertEquals(1, users.get(0).getSignedCount());
+        assertEquals("/profile/job-sign/321/10.jpg", users.get(0).getSignImageUrl());
+        assertEquals(2, users.get(0).getAuditStatus());
+        assertEquals("已通过", users.get(0).getAuditStatusLabel());
+        assertEquals(submitTime, users.get(0).getSubmitTime());
     }
 
     @Test
@@ -135,6 +160,36 @@ class WxJobScheduleServiceImplTest {
                 () -> service.listSignupUsers("merchant-1", 10L, null));
 
         assertEquals("仅岗位发布商家可查看报名用户", ex.getMessage());
+    }
+
+    @Test
+    void should_submit_own_order_sign_image() {
+        JobSignupOrder order = new JobSignupOrder();
+        order.setOrderNo("order-1");
+        order.setUserId("student-1");
+        JobAttendanceAdminOrderVo detail = new JobAttendanceAdminOrderVo();
+        detail.setOrderNo("order-1");
+        detail.setSignImageUrl("/profile/job-sign/321/10.jpg");
+        when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
+        when(jobAttendanceAdminService.submitSignImage("order-1", "/profile/job-sign/321/10.jpg")).thenReturn(detail);
+
+        JobAttendanceAdminOrderVo result = service.submitSignImage("student-1", "order-1", "/profile/job-sign/321/10.jpg");
+
+        assertEquals("order-1", result.getOrderNo());
+        assertEquals("/profile/job-sign/321/10.jpg", result.getSignImageUrl());
+    }
+
+    @Test
+    void should_reject_other_user_order_sign_image() {
+        JobSignupOrder order = new JobSignupOrder();
+        order.setOrderNo("order-1");
+        order.setUserId("student-2");
+        when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
+
+        ServiceException ex = assertThrows(ServiceException.class,
+                () -> service.submitSignImage("student-1", "order-1", "/profile/job-sign/321/10.jpg"));
+
+        assertEquals("只能提交自己的兼职签到图片", ex.getMessage());
     }
 
     private UserInfo merchantUser() {

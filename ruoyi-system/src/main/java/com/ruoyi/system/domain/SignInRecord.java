@@ -66,27 +66,34 @@ public class SignInRecord extends BaseEntity
     @Excel(name = "备注")
     private String remark;
 
-    /** 兼职签到图片地址 */
+    /** 签到图片地址 */
+    @Excel(name = "签到图片地址")
     private String signImageUrl;
 
-    /** 兼职签到图片相对路径 */
+    /** 签到图片文件名 */
+    @Excel(name = "签到图片文件名")
     private String signImageName;
 
     /** 审核状态：0-未提交，1-待审核，2-已通过，3-已驳回 */
+    @Excel(name = "审核状态", readConverterExp = "0=未提交,1=待审核,2=已通过,3=已驳回")
     private Integer auditStatus;
 
     /** 审核备注 */
+    @Excel(name = "审核备注")
     private String auditRemark;
 
     /** 审核时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "审核时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date auditTime;
 
     /** 审核人 */
+    @Excel(name = "审核人")
     private String auditBy;
 
     /** 提交时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date submitTime;
 
     /** 签到设备或IP（可选，用于防作弊） */

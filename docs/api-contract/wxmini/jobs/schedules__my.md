@@ -23,11 +23,26 @@
       "workTime": "09:00-18:00",
       "location": "南京市鼓楼区xx广场",
       "salaryDay": 200.00,
-      "status": 1
+      "status": 1,
+      "attendanceStatus": 0,
+      "attendanceStatusLabel": "未签到",
+      "signImageUrl": "/profile/job-sign/321/1715832000000.jpg",
+      "auditStatus": 1,
+      "auditRemark": null,
+      "signTime": null
     }
   ]
 }
 ```
+
+## 字段说明
+
+- `orderNo`：报名订单号，提交签到图片时使用。
+- `attendanceStatus` / `attendanceStatusLabel`：后台签到状态。
+- `signImageUrl`：用户已上传的签到图片相对路径；未上传时为空。
+- `auditStatus`：签到图片审核状态，`0` 未提交，`1` 待审核，`2` 已通过，`3` 已驳回。
+- `auditRemark`：审核备注。
+- `signTime`：签到通过或记录签到的时间。
 
 ## 失败场景或特殊说明
 

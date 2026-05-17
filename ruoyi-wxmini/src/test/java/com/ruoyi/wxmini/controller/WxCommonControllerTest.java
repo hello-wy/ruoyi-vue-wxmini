@@ -125,6 +125,27 @@ class WxCommonControllerTest {
     }
 
     @Test
+    void uploadJobSignImageShouldSaveUnderUserDirectory() throws Exception {
+        MockHttpServletRequest request = buildRequest("/wxmini/common/uploadJobSignImage");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "sign.jpg",
+            "image/jpeg",
+            "sign-image".getBytes(StandardCharsets.UTF_8)
+        );
+
+        AjaxResult result = controller.uploadJobSignImage(file);
+
+        assertEquals(200, result.get("code"));
+        String fileName = (String) result.get("fileName");
+        assertTrue(fileName.startsWith("/profile/job-sign/321/"));
+        assertTrue(fileName.endsWith(".jpg"));
+        assertTrue(Files.exists(tempDir.resolve(fileName.replaceFirst("^/profile/", ""))));
+    }
+
+    @Test
     void uploadAvatarShouldUseForwardedHttpsUrlWhenProxyHeadersExist() throws Exception {
         Path avatarDir = tempDir.resolve("avatar");
         Files.createDirectories(avatarDir);

@@ -5,9 +5,11 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.system.domain.DailyJobs;
 import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.domain.SignInRecord;
+import com.ruoyi.system.domain.vo.JobAttendanceAdminOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.service.IDailyJobsService;
+import com.ruoyi.system.service.IJobAttendanceAdminService;
 import com.ruoyi.system.service.IJobSignupOrderService;
 import com.ruoyi.system.service.ISignInRecordService;
 import com.ruoyi.wxmini.domain.UserInfo;
@@ -45,6 +47,9 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
 
     @Resource
     private ISignInRecordService signInRecordService;
+
+    @Resource
+    private IJobAttendanceAdminService jobAttendanceAdminService;
 
     @Override
     public List<WxJobScheduleVo> listMySchedules(String userId) {
@@ -156,6 +161,18 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
         record.setAuditStatus(AUDIT_STATUS_PENDING);
         record.setSubmitTime(DateUtils.getNowDate());
         signInRecordService.updateJobSignSubmitFields(record);
+    }
+
+    @Override
+    public JobAttendanceAdminOrderVo submitSignImage(String currentUserId, String orderNo, String signImageUrl) {
+        JobSignupOrder order = jobSignupOrderService.selectJobSignupOrderByOrderNo(orderNo);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (!currentUserId.equals(order.getUserId())) {
+            throw new ServiceException("只能提交自己的兼职签到图片");
+        }
+        return jobAttendanceAdminService.submitSignImage(orderNo, signImageUrl);
     }
 
     @Override

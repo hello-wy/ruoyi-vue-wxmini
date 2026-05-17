@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @Api(tags = "【小程序】兼职安排与报名用户")
 @RestController
@@ -68,6 +69,21 @@ public class WxJobScheduleController extends BaseController {
         }
         wxJobScheduleService.submitJobSignImage(userId, jobId, bo == null ? null : bo.getSignImageUrl());
         return success();
+    }
+
+    @ApiOperation("提交兼职签到图片")
+    @PostMapping("/orders/{orderNo}/sign-image")
+    public AjaxResult submitSignImage(@PathVariable("orderNo") String orderNo,
+                                      @RequestBody Map<String, String> body) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        String signImageUrl = body == null ? null : body.get("signImageUrl");
+        if (StringUtils.isBlank(signImageUrl)) {
+            return error("签到图片不能为空");
+        }
+        return success(wxJobScheduleService.submitSignImage(userId, orderNo, signImageUrl));
     }
 
     @ApiOperation("修改商家岗位状态")

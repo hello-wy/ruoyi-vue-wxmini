@@ -1,5 +1,6 @@
 package com.ruoyi.wxmini.service;
 
+import com.ruoyi.system.domain.vo.JobAttendanceAdminOrderVo;
 import com.ruoyi.wxmini.vo.WxJobScheduleVo;
 import com.ruoyi.wxmini.vo.WxMerchantJobVo;
 import com.ruoyi.wxmini.vo.WxSignupUserVo;
@@ -14,6 +15,8 @@ public interface IWxJobScheduleService {
     List<WxSignupUserVo> listSignupUsers(String currentUserId, Long jobId, String keyword);
 
     void submitJobSignImage(String currentUserId, Long jobId, String signImageUrl);
+
+    JobAttendanceAdminOrderVo submitSignImage(String currentUserId, String orderNo, String signImageUrl);
 
     void updateMerchantJobStatus(String currentUserId, Long jobId, Long targetStatus);
 }
