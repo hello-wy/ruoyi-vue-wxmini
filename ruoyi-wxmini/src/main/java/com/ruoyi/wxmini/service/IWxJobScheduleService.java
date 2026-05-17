@@ -12,4 +12,6 @@ public interface IWxJobScheduleService {
     List<WxMerchantJobVo> listMerchantJobs(String currentUserId);
 
     List<WxSignupUserVo> listSignupUsers(String currentUserId, Long jobId, String keyword);
+
+    com.ruoyi.system.domain.vo.JobAttendanceAdminOrderVo submitSignImage(String currentUserId, String orderNo, String signImageUrl);
 }

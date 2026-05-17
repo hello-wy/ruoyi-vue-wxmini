@@ -3,6 +3,7 @@ package com.ruoyi.system.mapper;
 import java.util.List;
 import com.ruoyi.system.domain.SignInRecord;
 import com.ruoyi.system.domain.vo.SignInRecordWithLectureVo;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 签到与报名记录 Mapper 接口
@@ -75,6 +76,8 @@ public interface SignInRecordMapper
      * @return 报名记录（含沙龙信息）列表
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
+
+    SignInRecord selectJobSignInRecord(@Param("jobId") Long jobId, @Param("uid") Long uid);
 
     /**
      * 检查用户是否已报名某沙龙

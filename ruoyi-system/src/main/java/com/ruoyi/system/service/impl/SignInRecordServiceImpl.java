@@ -74,6 +74,12 @@ public class SignInRecordServiceImpl implements ISignInRecordService
         return signInRecordMapper.selectSalonRegistrationByUid(uid);
     }
 
+    @Override
+    public SignInRecord selectJobSignInRecord(Long jobId, Long uid)
+    {
+        return signInRecordMapper.selectJobSignInRecord(jobId, uid);
+    }
+
     /**
      * 检查用户是否已报名某沙龙
      */

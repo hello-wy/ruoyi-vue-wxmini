@@ -2,6 +2,8 @@ package com.ruoyi.wxmini.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.DailyJobs;
+import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.JobAttendanceAdminOrderVo;
 import com.ruoyi.system.domain.vo.JobScheduleRecordVo;
 import com.ruoyi.system.domain.vo.JobSignupUserRecordVo;
 import com.ruoyi.system.service.IDailyJobsService;
@@ -35,6 +37,9 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
     @Resource
     private IUserInfoService userInfoService;
 
+    @Resource
+    private com.ruoyi.system.service.IJobAttendanceAdminService jobAttendanceAdminService;
+
     @Override
     public List<WxJobScheduleVo> listMySchedules(String userId) {
         List<JobScheduleRecordVo> records = jobSignupOrderService.selectMyPaidJobSchedules(userId, PAID_STATUS);
@@ -49,6 +54,12 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
             vo.setLocation(record.getLocation());
             vo.setSalaryDay(record.getSalaryDay());
             vo.setStatus(record.getStatus());
+            vo.setAttendanceStatus(record.getAttendanceStatus());
+            vo.setAttendanceStatusLabel(record.getAttendanceStatusLabel());
+            vo.setSignImageUrl(record.getSignImageUrl());
+            vo.setAuditStatus(record.getAuditStatus());
+            vo.setAuditRemark(record.getAuditRemark());
+            vo.setSignTime(record.getSignTime());
             result.add(vo);
         }
         return result;
@@ -84,9 +95,29 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
             vo.setUserInfoId(record.getUserInfoId());
             vo.setDisplayName(record.getDisplayName());
             vo.setPhoneMasked(record.getPhoneMasked());
+            vo.setOrderNo(record.getOrderNo());
+            vo.setAttendanceStatus(record.getAttendanceStatus());
+            vo.setAttendanceStatusLabel(record.getAttendanceStatusLabel());
+            vo.setSignImageUrl(record.getSignImageUrl());
+            vo.setAuditStatus(record.getAuditStatus());
+            vo.setAuditRemark(record.getAuditRemark());
+            vo.setSignTime(record.getSignTime());
+            vo.setSignedCount(record.getSignedCount());
             result.add(vo);
         }
         return result;
+    }
+
+    @Override
+    public JobAttendanceAdminOrderVo submitSignImage(String currentUserId, String orderNo, String signImageUrl) {
+        JobSignupOrder order = jobSignupOrderService.selectJobSignupOrderByOrderNo(orderNo);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (!currentUserId.equals(order.getUserId())) {
+            throw new ServiceException("只能提交自己的兼职签到图片");
+        }
+        return jobAttendanceAdminService.submitSignImage(orderNo, signImageUrl);
     }
 
     private UserInfo requireMerchant(String userId, String message) {

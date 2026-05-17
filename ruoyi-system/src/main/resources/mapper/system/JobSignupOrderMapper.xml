@@ -29,6 +29,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="location" column="location"/>
         <result property="salaryDay" column="salary_day"/>
         <result property="status" column="status"/>
+        <result property="attendanceStatus" column="attendance_status"/>
+        <result property="attendanceStatusLabel" column="attendance_status_label"/>
+        <result property="signImageUrl" column="sign_image_url"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="signTime" column="sign_time"/>
     </resultMap>
 
     <resultMap id="JobSignupUserRecordResult" type="com.ruoyi.system.domain.vo.JobSignupUserRecordVo">
@@ -36,6 +42,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="userId" column="user_id"/>
         <result property="displayName" column="display_name"/>
         <result property="phoneMasked" column="phone_masked"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="attendanceStatus" column="attendance_status"/>
+        <result property="attendanceStatusLabel" column="attendance_status_label"/>
+        <result property="signImageUrl" column="sign_image_url"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditRemark" column="audit_remark"/>
+        <result property="signTime" column="sign_time"/>
+        <result property="signedCount" column="signed_count"/>
     </resultMap>
 
     <sql id="selectJobSignupOrderVo">
@@ -73,30 +87,69 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                dj.work_time,
                dj.location,
                dj.salary_day,
-               jso.status
+               jso.status,
+               case when sir.id is null then 0 else sir.sign_status end as attendance_status,
+               case
+                   when sir.id is null then '未签到'
+                   when sir.sign_status = 1 then '已签到'
+                   when sir.sign_status = 2 then '迟到'
+                   when sir.sign_status = 3 then '已取消'
+                   else '未签到'
+               end as attendance_status_label,
+               sir.sign_image_url,
+               sir.audit_status,
+               sir.audit_remark,
+               sir.sign_time
         from job_signup_order jso
                  inner join daily_jobs dj on dj.id = jso.job_id
+                 left join sign_in_record sir
+                           on sir.job_id = jso.job_id
+                               and sir.record_type = 3
+                               and sir.uid = (
+                                   select ui.id
+                                   from user_info ui
+                                   where ui.user_id = jso.user_id
+                                   limit 1
+                               )
         where jso.user_id = #{userId}
           and jso.status = #{paidStatus}
         order by dj.work_date asc, dj.id desc
     </select>
 
     <select id="selectPaidSignupUsersByJobId" resultMap="JobSignupUserRecordResult">
-        select distinct ui.id as user_info_id,
-                        ui.user_id,
-                        case
-                            when up.real_name is not null and up.real_name != '' then up.real_name
-                            when up.nick_name is not null and up.nick_name != '' then up.nick_name
-                            else ui.user_name
-                        end as display_name,
-                        case
-                            when ui.phone is null or ui.phone = '' then ''
-                            when char_length(ui.phone) &lt; 7 then ui.phone
-                            else concat(left(ui.phone, 3), '****', right(ui.phone, 4))
-                        end as phone_masked
+        select ui.id as user_info_id,
+               ui.user_id,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as display_name,
+               case
+                   when ui.phone is null or ui.phone = '' then ''
+                   when char_length(ui.phone) &lt; 7 then ui.phone
+                   else concat(left(ui.phone, 3), '****', right(ui.phone, 4))
+               end as phone_masked,
+               jso.order_no,
+               case when sir.id is null then 0 else sir.sign_status end as attendance_status,
+               case
+                   when sir.id is null then '未签到'
+                   when sir.sign_status = 1 then '已签到'
+                   when sir.sign_status = 2 then '迟到'
+                   when sir.sign_status = 3 then '已取消'
+                   else '未签到'
+               end as attendance_status_label,
+               sir.sign_image_url,
+               sir.audit_status,
+               sir.audit_remark,
+               sir.sign_time,
+               case when sir.id is null then 0 else 1 end as signed_count
         from job_signup_order jso
                  inner join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
+                 left join sign_in_record sir
+                           on sir.job_id = jso.job_id
+                               and sir.uid = ui.id
+                               and sir.record_type = 3
         where jso.job_id = #{jobId}
           and jso.status = #{paidStatus}
           <if test="keyword != null and keyword != ''">

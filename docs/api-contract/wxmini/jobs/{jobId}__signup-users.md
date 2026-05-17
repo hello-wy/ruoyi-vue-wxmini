@@ -23,11 +23,29 @@
     {
       "userInfoId": 2001,
       "displayName": "张三",
-      "phoneMasked": "138****8000"
+      "phoneMasked": "138****8000",
+      "orderNo": "JOB202605020001",
+      "attendanceStatus": 0,
+      "attendanceStatusLabel": "未签到",
+      "signImageUrl": "/profile/job-sign/321/1715832000000.jpg",
+      "auditStatus": 1,
+      "auditRemark": null,
+      "signTime": null,
+      "signedCount": 0
     }
   ]
 }
 ```
+
+## 字段说明
+
+- `orderNo`：报名订单号。
+- `attendanceStatus` / `attendanceStatusLabel`：后台签到状态。
+- `signImageUrl`：报名用户已上传的签到图片相对路径；未上传时为空。
+- `auditStatus`：签到图片审核状态，`0` 未提交，`1` 待审核，`2` 已通过，`3` 已驳回。
+- `auditRemark`：审核备注。
+- `signTime`：签到通过或记录签到的时间。
+- `signedCount`：该用户当前岗位签到记录数。
 
 ## 失败场景或特殊说明
 

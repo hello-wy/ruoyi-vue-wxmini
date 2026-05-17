@@ -40,6 +40,8 @@ public interface ISignInRecordService
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
 
+    SignInRecord selectJobSignInRecord(Long jobId, Long uid);
+
     /**
      * 检查用户是否已报名某沙龙
      *
