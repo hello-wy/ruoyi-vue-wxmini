@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
@@ -84,6 +85,9 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
         DailyJobs query = new DailyJobs();
         query.setPublisherUid(merchant.getId());
         List<DailyJobs> jobs = dailyJobsService.selectDailyJobsList(query);
+        jobs = jobs.stream()
+                .filter(j -> !Long.valueOf(3L).equals(j.getStatus()))
+                .collect(Collectors.toList());
         List<WxMerchantJobVo> result = new ArrayList<>();
         for (DailyJobs job : jobs) {
             result.add(toMerchantJobVo(job));

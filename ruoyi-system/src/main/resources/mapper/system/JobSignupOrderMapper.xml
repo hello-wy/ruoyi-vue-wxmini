@@ -133,12 +133,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectPaidSignupUsersByJobId" resultMap="JobSignupUserRecordResult">
-        select ui.id as user_info_id,
-               ui.user_id,
+        select coalesce(ui.id, 0) as user_info_id,
+               jso.user_id,
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name
-                   else ui.user_name
+                   when ui.user_name is not null and ui.user_name != '' then ui.user_name
+                   else '未注册用户'
                end as display_name,
                case
                    when ui.phone is null or ui.phone = '' then ''
@@ -168,7 +169,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                sir.audit_remark,
                sir.submit_time
         from job_signup_order jso
-                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
                            on sir.job_id = jso.job_id
@@ -184,7 +185,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 or up.nick_name like concat('%', #{keyword}, '%')
               )
           </if>
-        order by ui.id desc
+        order by ui.id desc, jso.id desc
     </select>
 
     <resultMap id="JobSignAuditRecordResult" type="com.ruoyi.system.domain.vo.JobSignAuditRecordVo">
@@ -212,12 +213,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select sir.id,
                sir.id as record_id,
                jso.job_id,
-               ui.id as user_info_id,
-               ui.user_id,
+               coalesce(ui.id, 0) as user_info_id,
+               jso.user_id,
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name
-                   else ui.user_name
+                   when ui.user_name is not null and ui.user_name != '' then ui.user_name
+                   else '未注册用户'
                end as display_name,
                ui.user_name,
                case
@@ -248,7 +250,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                sir.submit_time,
                sir.audit_time
         from job_signup_order jso
-                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
                            on sir.job_id = jso.job_id
@@ -256,7 +258,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                                and sir.record_type = 3
         where jso.job_id = #{jobId}
           and jso.status = 1
-        order by ifnull(sir.submit_time, sir.sign_time) desc, ui.id desc
+        order by ifnull(sir.submit_time, sir.sign_time) desc, ui.id desc, jso.id desc
     </select>
 
     <select id="selectPaidOrdersWithSignIn" resultType="com.ruoyi.system.domain.vo.JobRefundOrderVo">
@@ -268,7 +270,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name
-                   else ui.user_name
+                   when ui.user_name is not null and ui.user_name != '' then ui.user_name
+                   else '未注册用户'
                end as user_name,
                jso.amount,
                jso.status,
@@ -287,7 +290,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                case when jso.status = 1 and ifnull(sir.audit_status, 0) = 2 then true else false end as can_refund
         from job_signup_order jso
                  inner join daily_jobs dj on dj.id = jso.job_id
-                 inner join user_info ui on ui.user_id = jso.user_id
+                 left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
                            on sir.job_id = jso.job_id

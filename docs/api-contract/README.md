@@ -109,7 +109,7 @@
 - `wxmini/jobs/mine__defaults.md`
 - `wxmini/jobs__schedules__my.md`
 - `wxmini/jobs__{jobId}__sign-in.md`
-- `wxmini/jobs__{jobId}__signup-users.md`
+- `wxmini/jobs/{jobId}__signup-users.md`
 - `wxmini/login.md`
 - `wxmini/pay/jobs__notify.md`
 - `wxmini/pay/jobs__orders__create.md`
