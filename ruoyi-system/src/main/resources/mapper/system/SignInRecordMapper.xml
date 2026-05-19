@@ -11,6 +11,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="lectureId"    column="lecture_id"    />
         <result property="salonId"      column="salon_id"      />
         <result property="jobId"        column="job_id"        />
+        <result property="jobOrderId"   column="job_order_id"  />
         <result property="signTime"     column="sign_time"     />
         <result property="signStatus"   column="sign_status"   />
         <result property="contactName"  column="contact_name"  />
@@ -27,7 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSignInRecordVo">
-        select id, uid, record_type, lecture_id, salon_id, job_id,
+        select id, uid, record_type, lecture_id, salon_id, job_id, job_order_id,
                sign_time, sign_status, contact_name, contact_phone,
                remark, sign_image_url, sign_image_name, audit_status,
                audit_remark, audit_time, audit_by, submit_time, device_info
@@ -43,6 +44,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="lectureId != null">              and lecture_id = #{lectureId}</if>
             <if test="salonId != null">                and salon_id = #{salonId}</if>
             <if test="jobId != null">                  and job_id = #{jobId}</if>
+            <if test="jobOrderId != null">             and job_order_id = #{jobOrderId}</if>
             <if test="signStatus != null">             and sign_status = #{signStatus}</if>
             <if test="auditStatus != null">            and audit_status = #{auditStatus}</if>
             <if test="deviceInfo != null and deviceInfo != ''"> and device_info = #{deviceInfo}</if>
@@ -56,10 +58,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectJobSignInRecord" resultMap="SignInRecordResult">
+    <select id="selectJobSignInRecordByOrderId" resultMap="SignInRecordResult">
         <include refid="selectSignInRecordVo"/>
-        where job_id = #{jobId}
-          and uid = #{uid}
+        where job_order_id = #{jobOrderId}
           and record_type = 3
         order by sign_time desc, id desc
         limit 1
@@ -74,6 +75,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="lectureId != null">lecture_id,</if>
             <if test="salonId != null">salon_id,</if>
             <if test="jobId != null">job_id,</if>
+            <if test="jobOrderId != null">job_order_id,</if>
             <if test="signTime != null">sign_time,</if>
             <if test="signStatus != null">sign_status,</if>
             <if test="contactName != null">contact_name,</if>
@@ -94,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="lectureId != null">#{lectureId},</if>
             <if test="salonId != null">#{salonId},</if>
             <if test="jobId != null">#{jobId},</if>
+            <if test="jobOrderId != null">#{jobOrderId},</if>
             <if test="signTime != null">#{signTime},</if>
             <if test="signStatus != null">#{signStatus},</if>
             <if test="contactName != null">#{contactName},</if>
@@ -119,6 +122,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="lectureId != null">lecture_id = #{lectureId},</if>
             <if test="salonId != null">salon_id = #{salonId},</if>
             <if test="jobId != null">job_id = #{jobId},</if>
+            <if test="jobOrderId != null">job_order_id = #{jobOrderId},</if>
             <if test="signTime != null">sign_time = #{signTime},</if>
             <if test="signStatus != null">sign_status = #{signStatus},</if>
             <if test="contactName != null">contact_name = #{contactName},</if>

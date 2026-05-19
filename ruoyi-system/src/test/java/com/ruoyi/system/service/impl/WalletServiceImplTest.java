@@ -7,18 +7,22 @@ import com.ruoyi.system.mapper.WalletMapper;
 import com.ruoyi.system.service.IWalletTransferGateway;
 import com.ruoyi.system.service.dto.WalletTransferCreateResult;
 import com.ruoyi.system.service.dto.WalletTransferQueryResult;
+import com.ruoyi.system.service.dto.WithdrawResult;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -39,6 +43,15 @@ class WalletServiceImplTest {
     @InjectMocks
     private WalletServiceImpl service;
 
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(service, "transferMinAmount", new BigDecimal("1.00"));
+        ReflectionTestUtils.setField(service, "transferMaxAmount", new BigDecimal("5000.00"));
+        ReflectionTestUtils.setField(service, "transferNotifyUrl", "https://zhiyujia.xyz/api/wxmini/pay/wallet/notify");
+        ReflectionTestUtils.setField(service, "transferSceneId", "1005");
+        ReflectionTestUtils.setField(service, "transferBatchName", "钱包提现");
+    }
+
     @Test
     void resolveCurrentUserUidShouldReturnUserInfoId() {
         UserInfo userInfo = new UserInfo();
@@ -58,9 +71,11 @@ class WalletServiceImplTest {
         userInfo.setOpenId("openid-1");
         when(userInfoService.selectUserInfoByUserId("wx-user-1")).thenReturn(userInfo);
 
-        String result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
+        WithdrawResult result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
 
-        assertEquals("请先完成实名认证后再提现", result);
+        assertFalse(result.isSuccess());
+        assertEquals("USER_NOT_REALNAME", result.getFailType());
+        assertEquals("请先完成实名认证后再提现", result.getUserMessage());
         verify(walletMapper, never()).insertWithdraw(any());
     }
 
@@ -73,9 +88,11 @@ class WalletServiceImplTest {
         userInfo.setIdCard("110101199001010011");
         when(userInfoService.selectUserInfoByUserId("wx-user-1")).thenReturn(userInfo);
 
-        String result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
+        WithdrawResult result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
 
-        assertEquals("未获取到微信账户信息，请重新登录后重试", result);
+        assertFalse(result.isSuccess());
+        assertEquals("OPENID_MISSING", result.getFailType());
+        assertEquals("未获取到微信账户信息，请重新登录后重试", result.getUserMessage());
         verify(walletMapper, never()).insertWithdraw(any());
     }
 
@@ -153,9 +170,10 @@ class WalletServiceImplTest {
             return 1;
         });
 
-        String result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
+        WithdrawResult result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
 
-        assertEquals("微信提现成功", result);
+        assertTrue(result.isSuccess());
+        assertEquals("微信提现成功", result.getMsg());
         verify(walletMapper).insertWithdraw(insertCaptor.capture());
         verify(walletMapper, atLeastOnce()).updateWithdrawStatus(any());
         assertTrue(insertCaptor.getValue().getOutBatchNo().startsWith("WD"));

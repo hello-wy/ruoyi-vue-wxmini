@@ -119,14 +119,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from job_signup_order jso
                  inner join daily_jobs dj on dj.id = jso.job_id
                  left join sign_in_record sir
-                           on sir.job_id = jso.job_id
+                           on sir.job_order_id = jso.id
                                and sir.record_type = 3
-                               and sir.uid = (
-                                   select ui.id
-                                   from user_info ui
-                                   where ui.user_id = jso.user_id
-                                   limit 1
-                               )
         where jso.user_id = #{userId}
           and jso.status = #{paidStatus}
         order by dj.work_date asc, dj.id desc
@@ -172,8 +166,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
-                           on sir.job_id = jso.job_id
-                               and sir.uid = ui.id
+                           on sir.job_order_id = jso.id
                                and sir.record_type = 3
         where jso.job_id = #{jobId}
           and jso.status = #{paidStatus}
@@ -253,8 +246,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
-                           on sir.job_id = jso.job_id
-                               and sir.uid = ui.id
+                           on sir.job_order_id = jso.id
                                and sir.record_type = 3
         where jso.job_id = #{jobId}
           and jso.status = 1
@@ -293,8 +285,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                  left join user_info ui on ui.user_id = jso.user_id
                  left join wx_user_profile up on up.uid = ui.id
                  left join sign_in_record sir
-                           on sir.job_id = jso.job_id
-                               and sir.uid = ui.id
+                           on sir.job_order_id = jso.id
                                and sir.record_type = 3
         where jso.job_id = #{jobId}
           and jso.status in (1, 2)

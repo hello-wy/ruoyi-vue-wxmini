@@ -40,7 +40,7 @@ public interface ISignInRecordService
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
 
-    SignInRecord selectJobSignInRecord(Long jobId, Long uid);
+    SignInRecord selectJobSignInRecordByOrderId(Long jobOrderId);
 
     int updateJobSignSubmitFields(SignInRecord signInRecord);
 

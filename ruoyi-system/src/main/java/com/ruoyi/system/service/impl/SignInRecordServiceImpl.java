@@ -75,9 +75,9 @@ public class SignInRecordServiceImpl implements ISignInRecordService
     }
 
     @Override
-    public SignInRecord selectJobSignInRecord(Long jobId, Long uid)
+    public SignInRecord selectJobSignInRecordByOrderId(Long jobOrderId)
     {
-        return signInRecordMapper.selectJobSignInRecord(jobId, uid);
+        return signInRecordMapper.selectJobSignInRecordByOrderId(jobOrderId);
     }
 
     @Override

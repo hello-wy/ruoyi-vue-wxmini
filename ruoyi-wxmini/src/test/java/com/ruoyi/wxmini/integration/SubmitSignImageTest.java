@@ -49,6 +49,7 @@ class SubmitSignImageTest {
     private static final String STUDENT_USER_ID = "student-1";
     private static final Long STUDENT_USER_INFO_ID = 321L;
     private static final Long JOB_ID = 10L;
+    private static final Long JOB_ORDER_ID = 9001L;
     private static final Integer RECORD_TYPE_JOB = 3;
     private static final Integer SIGN_STATUS_PENDING = 0;
     private static final Integer AUDIT_STATUS_PENDING = 1;
@@ -77,7 +78,7 @@ class SubmitSignImageTest {
 
         primeOrderAndUser(orderNo);
         // No existing record → service inserts a new one.
-        when(signInRecordService.selectJobSignInRecord(JOB_ID, STUDENT_USER_INFO_ID))
+        when(signInRecordService.selectJobSignInRecordByOrderId(JOB_ORDER_ID))
                 .thenReturn(null);
 
         service.submitJobSignImage(STUDENT_USER_ID, JOB_ID, signImageUrl);
@@ -90,6 +91,7 @@ class SubmitSignImageTest {
         assertNotNull(written);
         assertEquals(STUDENT_USER_INFO_ID, written.getUid());
         assertEquals(JOB_ID, written.getJobId());
+        assertEquals(JOB_ORDER_ID, written.getJobOrderId());
         assertEquals(RECORD_TYPE_JOB, written.getRecordType());
         assertEquals(SIGN_STATUS_PENDING, written.getSignStatus());
         assertEquals(AUDIT_STATUS_PENDING, written.getAuditStatus());
@@ -115,7 +117,7 @@ class SubmitSignImageTest {
         existing.setRecordType(RECORD_TYPE_JOB);
         existing.setSignStatus(1);
         existing.setAuditStatus(3); // 已驳回
-        when(signInRecordService.selectJobSignInRecord(JOB_ID, STUDENT_USER_INFO_ID))
+        when(signInRecordService.selectJobSignInRecordByOrderId(JOB_ORDER_ID))
                 .thenReturn(existing);
 
         service.submitJobSignImage(STUDENT_USER_ID, JOB_ID, signImageUrl);
@@ -170,6 +172,7 @@ class SubmitSignImageTest {
 
     private void primeOrderAndUser(String orderNo) {
         JobSignupOrder paidOrder = new JobSignupOrder();
+        paidOrder.setId(JOB_ORDER_ID);
         paidOrder.setOrderNo(orderNo);
         paidOrder.setUserId(STUDENT_USER_ID);
         paidOrder.setJobId(JOB_ID);

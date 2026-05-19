@@ -49,6 +49,12 @@ public class WalletWithdraw extends BaseEntity
     @Excel(name = "微信明细单号")
     private String wxDetailNo;
 
+    /** 失败类型枚举 */
+    private String failType;
+
+    /** 面向用户的失败提示 */
+    private String userMessage;
+
     /** 申请时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date applyTime;
@@ -73,4 +79,8 @@ public class WalletWithdraw extends BaseEntity
     public void setWxDetailNo(String wxDetailNo)        { this.wxDetailNo = wxDetailNo; }
     public Date getApplyTime()                          { return applyTime; }
     public void setApplyTime(Date applyTime)            { this.applyTime = applyTime; }
+    public String getFailType()                         { return failType; }
+    public void setFailType(String failType)            { this.failType = failType; }
+    public String getUserMessage()                      { return userMessage; }
+    public void setUserMessage(String userMessage)      { this.userMessage = userMessage; }
 }

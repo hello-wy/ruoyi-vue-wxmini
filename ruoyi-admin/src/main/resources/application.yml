@@ -164,6 +164,12 @@ wx:
     certSerialNo: 3293EB1F74ED95161EEC040763046F4B2E0B2167
     privateKeyPath: classpath:cert/apiclient_key.pem #apiclient_key.pem证书文件的绝对路径或者以classpath:开头的类路径
     publicKeyPath: classpath:cert/pub_key.pem # 示例 classpath:cert/wechatpay_public.pem
+    transfer:
+      notify-url: https://zhiyujia.xyz/api/wxmini/pay/wallet/notify
+      scene-id: "1005"
+      min-amount: 1.00
+      max-amount: 2000.00
+      batch-name: 钱包提现
     realname:
       mchId: 1111208156
       appId: wx0ac1366c34e4ce68

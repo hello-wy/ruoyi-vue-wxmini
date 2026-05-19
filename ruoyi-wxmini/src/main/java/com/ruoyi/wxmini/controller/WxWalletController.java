@@ -14,6 +14,7 @@ import com.ruoyi.system.domain.UserWallet;
 import com.ruoyi.system.domain.WalletTransaction;
 import com.ruoyi.system.domain.WalletWithdraw;
 import com.ruoyi.system.service.IWalletService;
+import com.ruoyi.system.service.dto.WithdrawResult;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 
 /**
@@ -67,12 +68,12 @@ public class WxWalletController extends BaseController
         {
             return error("金额格式不正确");
         }
-        String msg = walletService.applyWithdraw(userId, uid, amount);
-        if (msg.startsWith("微信提现") || msg.startsWith("请稍后刷新查看结果"))
+        WithdrawResult result = walletService.applyWithdraw(userId, uid, amount);
+        if (result.isSuccess())
         {
-            return success(msg);
+            return AjaxResult.success(result.getMsg(), result);
         }
-        return error(msg);
+        return AjaxResult.error(result.getUserMessage(), result);
     }
 
     /**

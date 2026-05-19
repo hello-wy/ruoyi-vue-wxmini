@@ -45,6 +45,10 @@ public class SignInRecord extends BaseEntity
     @Excel(name = "兼职岗位ID")
     private Long jobId;
 
+    /** 兼职报名订单ID，关联job_signup_order表（record_type=3时有值） */
+    @Excel(name = "兼职报名订单ID")
+    private Long jobOrderId;
+
     /** 签到/报名时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @Excel(name = "签到/报名时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
@@ -112,6 +116,8 @@ public class SignInRecord extends BaseEntity
     public Long getSalonId()                    { return salonId; }
     public void setJobId(Long jobId)            { this.jobId = jobId; }
     public Long getJobId()                      { return jobId; }
+    public void setJobOrderId(Long jobOrderId)  { this.jobOrderId = jobOrderId; }
+    public Long getJobOrderId()                 { return jobOrderId; }
     public void setSignTime(Date signTime)      { this.signTime = signTime; }
     public Date getSignTime()                   { return signTime; }
     public void setSignStatus(Integer signStatus) { this.signStatus = signStatus; }
@@ -148,6 +154,7 @@ public class SignInRecord extends BaseEntity
                 .append("lectureId", getLectureId())
                 .append("salonId", getSalonId())
                 .append("jobId", getJobId())
+                .append("jobOrderId", getJobOrderId())
                 .append("signTime", getSignTime())
                 .append("signStatus", getSignStatus())
                 .append("contactName", getContactName())

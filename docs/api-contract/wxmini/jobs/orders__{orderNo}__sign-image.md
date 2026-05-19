@@ -52,7 +52,8 @@
 - `signImageUrl`：由 `POST /wxmini/common/uploadJobSignImage` 返回的 `fileName`。
 - `auditStatus`：提交后置为 `1` 待审核。
 - `auditStatusLabel`：审核状态文案，`0` 未提交，`1` 待审核，`2` 已通过，`3` 已驳回。
-- `auditRemark` / `auditTime`：重新提交图片时清空历史审核备注与审核时间。
+- `auditRemark` / `auditTime`：重新提交图片时清空当前订单历史审核备注与审核时间。
+- 兼职签到记录按 `orderNo` 对应的报名订单隔离保存；同一岗位重新报名后，新的签到图不会覆盖历史订单记录。
 
 ## 失败场景或特殊说明
 

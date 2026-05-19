@@ -4,7 +4,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.domain.UserWallet;
 import com.ruoyi.system.domain.WalletTransaction;
 import com.ruoyi.system.domain.WalletWithdraw;
+import com.ruoyi.system.enums.WithdrawFailType;
 import com.ruoyi.system.service.IWalletService;
+import com.ruoyi.system.service.dto.WithdrawResult;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +64,8 @@ class WxWalletControllerTest {
         body.put("amount", "50.00");
         WxMiniUserContext.setCurrentUserId("wx-user-1");
         when(walletService.resolveCurrentUserUid("wx-user-1")).thenReturn(10L);
-        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00"))).thenReturn("可用余额不足");
+        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00")))
+                .thenReturn(WithdrawResult.fail(WithdrawFailType.BALANCE_INSUFFICIENT));
 
         AjaxResult result = controller.withdraw(body);
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
@@ -74,7 +77,8 @@ class WxWalletControllerTest {
         body.put("amount", "50.00");
         WxMiniUserContext.setCurrentUserId("wx-user-1");
         when(walletService.resolveCurrentUserUid("wx-user-1")).thenReturn(10L);
-        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00"))).thenReturn("微信提现成功");
+        when(walletService.applyWithdraw("wx-user-1", 10L, new BigDecimal("50.00")))
+                .thenReturn(WithdrawResult.success(1L, "WD101234", "微信提现成功"));
 
         AjaxResult result = controller.withdraw(body);
         assertEquals(200, result.get(AjaxResult.CODE_TAG));

@@ -27,6 +27,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,6 +80,34 @@ class WxJobScheduleServiceImplTest {
         assertEquals(1, schedules.get(0).getAuditStatus());
         assertEquals("待审核", schedules.get(0).getAuditStatusLabel());
         assertEquals(false, schedules.get(0).getCanUploadSignImage());
+    }
+
+    @Test
+    void should_return_new_order_schedule_without_old_sign_result() {
+        JobScheduleRecordVo record = new JobScheduleRecordVo();
+        record.setJobId(10L);
+        record.setOrderNo("order-new");
+        record.setTitle("日结助教");
+        record.setSalaryDay(new BigDecimal("200.00"));
+        record.setAttendanceStatus(0);
+        record.setAttendanceStatusLabel("未签到");
+        record.setAuditStatus(0);
+        record.setAuditStatusLabel("未提交");
+        record.setCanUploadSignImage(true);
+        when(jobSignupOrderService.selectMyPaidJobSchedules("student-1", 1))
+                .thenReturn(Collections.singletonList(record));
+
+        List<WxJobScheduleVo> schedules = service.listMySchedules("student-1");
+
+        assertEquals(1, schedules.size());
+        assertEquals("order-new", schedules.get(0).getOrderNo());
+        assertEquals(0, schedules.get(0).getAttendanceStatus());
+        assertEquals("未签到", schedules.get(0).getAttendanceStatusLabel());
+        assertEquals(0, schedules.get(0).getAuditStatus());
+        assertEquals("未提交", schedules.get(0).getAuditStatusLabel());
+        assertNull(schedules.get(0).getSignImageUrl());
+        assertNull(schedules.get(0).getSignTime());
+        assertTrue(schedules.get(0).getCanUploadSignImage());
     }
 
     @Test

@@ -81,7 +81,7 @@ public interface SignInRecordMapper
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
 
-    SignInRecord selectJobSignInRecord(@Param("jobId") Long jobId, @Param("uid") Long uid);
+    SignInRecord selectJobSignInRecordByOrderId(@Param("jobOrderId") Long jobOrderId);
 
     /**
      * 检查用户是否已报名某沙龙

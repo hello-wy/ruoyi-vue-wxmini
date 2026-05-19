@@ -6,16 +6,22 @@ import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import com.ruoyi.system.domain.UserWallet;
 import com.ruoyi.system.domain.WalletTransaction;
 import com.ruoyi.system.domain.WalletWithdraw;
+import com.ruoyi.system.enums.WithdrawFailType;
 import com.ruoyi.system.mapper.WalletMapper;
 import com.ruoyi.system.service.IWalletService;
 import com.ruoyi.system.service.IWalletTransferGateway;
 import com.ruoyi.system.service.dto.WalletTransferCreateRequest;
 import com.ruoyi.system.service.dto.WalletTransferCreateResult;
 import com.ruoyi.system.service.dto.WalletTransferQueryResult;
+import com.ruoyi.system.service.dto.WithdrawResult;
+import com.ruoyi.system.util.WithdrawFailReasonMapper;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +31,8 @@ import java.util.List;
 @Service
 public class WalletServiceImpl implements IWalletService
 {
-    private static final BigDecimal MIN_WITHDRAW = new BigDecimal("1.00");
+    private static final Logger log = LoggerFactory.getLogger(WalletServiceImpl.class);
+
     private static final Integer DIRECTION_INCOME = 1;
     private static final Integer DIRECTION_EXPENSE = 2;
     private static final Integer WITHDRAW_STATUS_PROCESSING = 0;
@@ -34,10 +41,23 @@ public class WalletServiceImpl implements IWalletService
     private static final Integer REALNAME_VERIFIED = 1;
     private static final String WITHDRAW_BIZ_TYPE = "WITHDRAW";
     private static final String WITHDRAW_REMARK = "微信提现";
-    private static final String TRANSFER_NOTIFY_URL = "https://zhiyujia.xyz/api/wxmini/pay/wallet/notify";
-    private static final String TRANSFER_SCENE_ID = "1005";
     private static final String DETAIL_STATUS_SUCCESS = "SUCCESS";
     private static final String DETAIL_STATUS_FAILED = "FAIL";
+
+    @Value("${wx.pay.transfer.notifyUrl:}")
+    private String transferNotifyUrl;
+
+    @Value("${wx.pay.transfer.sceneId:1005}")
+    private String transferSceneId;
+
+    @Value("${wx.pay.transfer.minAmount:1.00}")
+    private BigDecimal transferMinAmount;
+
+    @Value("${wx.pay.transfer.maxAmount:5000.00}")
+    private BigDecimal transferMaxAmount;
+
+    @Value("${wx.pay.transfer.batchName:钱包提现}")
+    private String transferBatchName;
 
     @Autowired
     private WalletMapper walletMapper;
@@ -77,34 +97,47 @@ public class WalletServiceImpl implements IWalletService
     }
 
     @Override
-    public String applyWithdraw(String userId, Long uid, BigDecimal amount)
+    public WithdrawResult applyWithdraw(String userId, Long uid, BigDecimal amount)
     {
-        if (amount == null || amount.compareTo(MIN_WITHDRAW) < 0)
+        // 金额校验
+        if (amount == null || amount.compareTo(transferMinAmount) < 0)
         {
-            return "提现金额不能低于1元";
+            return WithdrawResult.fail(WithdrawFailType.AMOUNT_OUT_OF_LIMIT,
+                    "提现金额不能低于" + transferMinAmount.stripTrailingZeros().toPlainString() + "元");
         }
         if (amount.scale() > 2)
         {
-            return "提现金额最多保留两位小数";
+            return WithdrawResult.fail(WithdrawFailType.AMOUNT_OUT_OF_LIMIT, "提现金额最多保留两位小数");
         }
+
+        // 用户信息校验
         UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
         if (userInfo == null)
         {
-            return "用户不存在";
+            return WithdrawResult.fail(WithdrawFailType.UNKNOWN, "用户不存在");
         }
-        if (!REALNAME_VERIFIED.equals(userInfo.getIsRealnameAuth()) || StringUtils.isAnyBlank(userInfo.getRealName(), userInfo.getIdCard()))
+        if (!REALNAME_VERIFIED.equals(userInfo.getIsRealnameAuth())
+                || StringUtils.isAnyBlank(userInfo.getRealName(), userInfo.getIdCard()))
         {
-            return "请先完成实名认证后再提现";
+            return WithdrawResult.fail(WithdrawFailType.USER_NOT_REALNAME);
         }
         if (StringUtils.isBlank(userInfo.getOpenId()))
         {
-            return "未获取到微信账户信息，请重新登录后重试";
+            return WithdrawResult.fail(WithdrawFailType.OPENID_MISSING);
         }
 
+        // 余额校验
         UserWallet wallet = getOrCreateWallet(uid);
         if (wallet.getBalance().compareTo(amount) < 0)
         {
-            return "可用余额不足";
+            return WithdrawResult.fail(WithdrawFailType.BALANCE_INSUFFICIENT);
+        }
+
+        // 互斥检查：同用户处理中提现
+        int pendingCount = walletMapper.selectPendingWithdrawCountByUid(uid);
+        if (pendingCount > 0)
+        {
+            return WithdrawResult.fail(WithdrawFailType.PENDING_WITHDRAW_EXISTS);
         }
 
         String outBatchNo = buildOutBatchNo(uid);
@@ -120,16 +153,29 @@ public class WalletServiceImpl implements IWalletService
 
         try
         {
-            WalletTransferCreateResult result = walletTransferGateway.createTransfer(buildTransferRequest(userInfo, amount, outBatchNo, outDetailNo));
+            WalletTransferCreateResult result = walletTransferGateway.createTransfer(
+                    buildTransferRequest(userInfo, amount, outBatchNo, outDetailNo));
             withdraw.setWxTransferNo(result.getBatchId());
             walletMapper.updateWithdrawStatus(withdraw);
 
-            return syncWithdrawStatus(withdraw.getId());
+            return syncWithdrawStatusForResult(withdraw);
         }
         catch (Exception e)
         {
-            markWithdrawFailed(withdraw.getId(), e.getMessage(), null, null, null);
-            return StringUtils.defaultIfBlank(e.getMessage(), "微信提现发起失败，请稍后重试");
+            String errCode = extractErrCode(e);
+            String errMsg = e.getMessage();
+            WithdrawFailType failType = WithdrawFailReasonMapper.resolve(errCode, errMsg);
+
+            log.error("[Withdraw] uid={}, outBatchNo={}, failType={}, errMsg={}",
+                    uid, outBatchNo, failType, errMsg, e);
+
+            withdraw.setStatus(WITHDRAW_STATUS_FAILED);
+            withdraw.setFailType(failType.name());
+            withdraw.setUserMessage(failType.getUserMessage());
+            withdraw.setRemark(StringUtils.defaultIfBlank(errMsg, "微信提现发起失败"));
+            walletMapper.updateWithdrawStatus(withdraw);
+
+            return WithdrawResult.fail(failType);
         }
     }
 
@@ -207,6 +253,51 @@ public class WalletServiceImpl implements IWalletService
         walletMapper.insertTransaction(transaction);
     }
 
+    /**
+     * SDK 调用成功后同步查询状态，返回结构化 WithdrawResult
+     */
+    private WithdrawResult syncWithdrawStatusForResult(WalletWithdraw withdraw)
+    {
+        try
+        {
+            boolean updated = updateWithdrawByDetailQuery(withdraw);
+            if (!updated)
+            {
+                return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+            }
+            WalletWithdraw latest = walletMapper.selectWithdrawById(withdraw.getId());
+            if (latest == null)
+            {
+                return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+            }
+            if (WITHDRAW_STATUS_SUCCESS.equals(latest.getStatus()))
+            {
+                return WithdrawResult.success(latest.getId(), latest.getOutBatchNo(), "微信提现成功");
+            }
+            if (WITHDRAW_STATUS_FAILED.equals(latest.getStatus()))
+            {
+                WithdrawFailType failType = WithdrawFailType.UNKNOWN;
+                if (StringUtils.isNotBlank(latest.getFailType()))
+                {
+                    try
+                    {
+                        failType = WithdrawFailType.valueOf(latest.getFailType());
+                    }
+                    catch (IllegalArgumentException ignored)
+                    {
+                    }
+                }
+                return WithdrawResult.fail(failType,
+                        StringUtils.defaultIfBlank(latest.getUserMessage(), failType.getUserMessage()));
+            }
+            return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+        }
+        catch (Exception e)
+        {
+            return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+        }
+    }
+
     private WalletTransferCreateRequest buildTransferRequest(UserInfo userInfo, BigDecimal amount, String outBatchNo, String outDetailNo)
     {
         WalletTransferCreateRequest request = new WalletTransferCreateRequest();
@@ -215,43 +306,12 @@ public class WalletServiceImpl implements IWalletService
         request.setAmount(amount);
         request.setOutBatchNo(outBatchNo);
         request.setOutDetailNo(outDetailNo);
-        request.setBatchName("钱包提现");
+        request.setBatchName(transferBatchName);
         request.setBatchRemark(WITHDRAW_REMARK);
         request.setTransferRemark(WITHDRAW_REMARK);
-        request.setNotifyUrl(TRANSFER_NOTIFY_URL);
-        request.setTransferSceneId(TRANSFER_SCENE_ID);
+        request.setNotifyUrl(transferNotifyUrl);
+        request.setTransferSceneId(transferSceneId);
         return request;
-    }
-
-    private String syncWithdrawStatus(Long withdrawId)
-    {
-        WalletWithdraw withdraw = walletMapper.selectWithdrawById(withdrawId);
-        if (withdraw == null)
-        {
-            return "微信提现已发起，请稍后刷新查看结果";
-        }
-        try
-        {
-            boolean updated = updateWithdrawByDetailQuery(withdraw);
-            WalletWithdraw latest = walletMapper.selectWithdrawById(withdrawId);
-            if (!updated || latest == null)
-            {
-                return "微信提现已发起，请稍后刷新查看结果";
-            }
-            if (WITHDRAW_STATUS_SUCCESS.equals(latest.getStatus()))
-            {
-                return "微信提现成功";
-            }
-            if (WITHDRAW_STATUS_FAILED.equals(latest.getStatus()))
-            {
-                return StringUtils.defaultIfBlank(latest.getRemark(), "微信提现失败，请稍后重试");
-            }
-            return "微信提现已发起，请稍后刷新查看结果";
-        }
-        catch (Exception e)
-        {
-            return "微信提现已发起，请稍后刷新查看结果";
-        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -327,8 +387,13 @@ public class WalletServiceImpl implements IWalletService
         {
             return;
         }
+
+        WithdrawFailType failType = WithdrawFailReasonMapper.fromFailReason(reason);
+
         withdraw.setStatus(WITHDRAW_STATUS_FAILED);
         withdraw.setRemark(StringUtils.defaultIfBlank(reason, "微信提现失败，请稍后重试"));
+        withdraw.setFailType(failType.name());
+        withdraw.setUserMessage(failType.getUserMessage());
         if (StringUtils.isNotBlank(batchId))
         {
             withdraw.setWxTransferNo(batchId);
@@ -342,6 +407,31 @@ public class WalletServiceImpl implements IWalletService
             withdraw.setWxDetailNo(detailId);
         }
         walletMapper.updateWithdrawStatus(withdraw);
+
+        log.error("[Withdraw] markFailed uid={}, outBatchNo={}, failType={}, reason={}",
+                withdraw.getUid(), withdraw.getOutBatchNo(), failType, reason);
+    }
+
+    /**
+     * 从异常中提取微信支付错误码
+     * WxPayException 有 getErrCode() 方法
+     */
+    private String extractErrCode(Exception e)
+    {
+        // 使用反射避免 ruoyi-system 对 weixin-java-pay 的编译依赖
+        try
+        {
+            if (e.getClass().getName().contains("WxPayException"))
+            {
+                java.lang.reflect.Method getErrCode = e.getClass().getMethod("getErrCode");
+                Object errCode = getErrCode.invoke(e);
+                return errCode != null ? errCode.toString() : null;
+            }
+        }
+        catch (Exception ignored)
+        {
+        }
+        return null;
     }
 
     private String buildOutBatchNo(Long uid)

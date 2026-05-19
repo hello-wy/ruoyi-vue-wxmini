@@ -29,4 +29,11 @@ public interface WalletMapper
     int insertTransaction(WalletTransaction transaction);
 
     List<WalletTransaction> selectTransactionListByUid(@Param("uid") Long uid);
+
+    int selectPendingWithdrawCountByUid(@Param("uid") Long uid);
+
+    /**
+     * 查询待对账的提现记录：status=0 且 create_time 早于3分钟前
+     */
+    List<WalletWithdraw> selectPendingWithdrawsForReconcile();
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.ruoyi.system.domain.UserWallet;
 import com.ruoyi.system.domain.WalletTransaction;
 import com.ruoyi.system.domain.WalletWithdraw;
+import com.ruoyi.system.service.dto.WithdrawResult;
 
 public interface IWalletService
 {
@@ -12,7 +13,7 @@ public interface IWalletService
 
     Long resolveCurrentUserUid(String userId);
 
-    String applyWithdraw(String userId, Long uid, BigDecimal amount);
+    WithdrawResult applyWithdraw(String userId, Long uid, BigDecimal amount);
 
     boolean syncWithdrawStatusByOutBatchNo(String outBatchNo);
 

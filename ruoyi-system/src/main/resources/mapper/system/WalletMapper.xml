@@ -69,16 +69,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="outBatchNo"   column="out_batch_no" />
         <result property="outDetailNo"  column="out_detail_no" />
         <result property="wxDetailNo"   column="wx_detail_no" />
+        <result property="failType"     column="fail_type" />
+        <result property="userMessage"  column="user_message" />
         <result property="applyTime"    column="create_time" />
     </resultMap>
 
     <insert id="insertWithdraw" parameterType="com.ruoyi.system.domain.WalletWithdraw" useGeneratedKeys="true" keyProperty="id">
-        insert into wallet_withdraw (uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no)
-        values (#{uid}, #{amount}, #{status}, #{remark}, #{wxTransferNo}, #{outBatchNo}, #{outDetailNo}, #{wxDetailNo})
+        insert into wallet_withdraw (uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, fail_type, user_message)
+        values (#{uid}, #{amount}, #{status}, #{remark}, #{wxTransferNo}, #{outBatchNo}, #{outDetailNo}, #{wxDetailNo}, #{failType}, #{userMessage})
     </insert>
 
     <select id="selectWithdrawListByUid" resultMap="WithdrawResult">
-        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, fail_type, user_message, create_time
         from wallet_withdraw
         where uid = #{uid}
         order by create_time desc, id desc
@@ -86,13 +88,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectWithdrawById" parameterType="Long" resultMap="WithdrawResult">
-        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, fail_type, user_message, create_time
         from wallet_withdraw
         where id = #{id}
     </select>
 
     <select id="selectWithdrawByOutBatchNo" parameterType="String" resultMap="WithdrawResult">
-        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, create_time
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, fail_type, user_message, create_time
         from wallet_withdraw
         where out_batch_no = #{outBatchNo}
         limit 1
@@ -107,6 +109,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             out_batch_no = #{outBatchNo},
             out_detail_no = #{outDetailNo},
             wx_detail_no = #{wxDetailNo},
+            fail_type = #{failType},
+            user_message = #{userMessage},
             update_time = now()
         </set>
         where id = #{id}
@@ -123,6 +127,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where uid = #{uid}
         order by create_time desc, id desc
         limit 100
+    </select>
+
+    <select id="selectPendingWithdrawCountByUid" parameterType="Long" resultType="int">
+        select count(1)
+        from wallet_withdraw
+        where uid = #{uid} and status = 0
+    </select>
+
+    <select id="selectPendingWithdrawsForReconcile" resultMap="WithdrawResult">
+        select id, uid, amount, status, remark, wx_transfer_no, out_batch_no, out_detail_no, wx_detail_no, fail_type, user_message, create_time
+        from wallet_withdraw
+        where status = 0
+          and create_time &lt; NOW() - INTERVAL 3 MINUTE
     </select>
 
 </mapper>

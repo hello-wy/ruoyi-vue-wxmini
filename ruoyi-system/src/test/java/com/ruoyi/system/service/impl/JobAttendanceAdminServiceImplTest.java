@@ -44,6 +44,7 @@ class JobAttendanceAdminServiceImplTest {
     @Test
     void should_query_order_attendance_detail() {
         JobSignupOrder order = new JobSignupOrder();
+        order.setId(1001L);
         order.setOrderNo("order-1");
         order.setUserId("student-1");
         order.setJobId(10L);
@@ -62,7 +63,7 @@ class JobAttendanceAdminServiceImplTest {
         when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
         when(dailyJobsService.selectDailyJobsById(10L)).thenReturn(job);
         when(userInfoService.selectUserInfoByUserId("student-1")).thenReturn(userInfo);
-        when(signInRecordService.selectJobSignInRecord(10L, 200L)).thenReturn(record);
+        when(signInRecordService.selectJobSignInRecordByOrderId(1001L)).thenReturn(record);
 
         JobAttendanceAdminOrderVo detail = service.getOrderAttendance("order-1");
 
@@ -77,6 +78,7 @@ class JobAttendanceAdminServiceImplTest {
     @Test
     void should_reject_sign_in_when_already_signed_today() {
         JobSignupOrder order = new JobSignupOrder();
+        order.setId(1001L);
         order.setOrderNo("order-1");
         order.setUserId("student-1");
         order.setJobId(10L);
@@ -88,7 +90,7 @@ class JobAttendanceAdminServiceImplTest {
         todayRecord.setSignTime(new Date());
         when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
         when(userInfoService.selectUserInfoByUserId("student-1")).thenReturn(userInfo);
-        when(signInRecordService.selectJobSignInRecord(10L, 200L)).thenReturn(todayRecord);
+        when(signInRecordService.selectJobSignInRecordByOrderId(1001L)).thenReturn(todayRecord);
 
         ServiceException ex = assertThrows(ServiceException.class,
                 () -> service.confirmAttendance("order-1", "admin-user"));
@@ -99,6 +101,7 @@ class JobAttendanceAdminServiceImplTest {
     @Test
     void should_submit_job_sign_image_as_pending_audit_record() {
         JobSignupOrder order = new JobSignupOrder();
+        order.setId(1001L);
         order.setOrderNo("order-1");
         order.setUserId("student-1");
         order.setJobId(10L);
@@ -112,7 +115,7 @@ class JobAttendanceAdminServiceImplTest {
         when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
         when(userInfoService.selectUserInfoByUserId("student-1")).thenReturn(userInfo);
         when(dailyJobsService.selectDailyJobsById(10L)).thenReturn(job);
-        when(signInRecordService.selectJobSignInRecord(10L, 200L)).thenReturn(null);
+        when(signInRecordService.selectJobSignInRecordByOrderId(1001L)).thenReturn(null);
         when(signInRecordService.insertSignInRecord(any(SignInRecord.class))).thenReturn(1);
 
         JobAttendanceAdminOrderVo detail = service.submitSignImage("order-1", "/profile/job-sign/321/10.jpg");
@@ -126,6 +129,7 @@ class JobAttendanceAdminServiceImplTest {
         SignInRecord inserted = captor.getValue();
         assertEquals(Long.valueOf(200L), inserted.getUid());
         assertEquals(Long.valueOf(10L), inserted.getJobId());
+        assertEquals(Long.valueOf(1001L), inserted.getJobOrderId());
         assertEquals(Integer.valueOf(3), inserted.getRecordType());
         assertEquals("/profile/job-sign/321/10.jpg", inserted.getSignImageUrl());
         assertEquals(Integer.valueOf(1), inserted.getAuditStatus());
@@ -133,8 +137,39 @@ class JobAttendanceAdminServiceImplTest {
     }
 
     @Test
+    void should_insert_sign_record_bound_to_current_order() {
+        JobSignupOrder order = new JobSignupOrder();
+        order.setId(2002L);
+        order.setOrderNo("order-2");
+        order.setUserId("student-1");
+        order.setJobId(10L);
+        order.setStatus(1);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(200L);
+        userInfo.setUserId("student-1");
+        DailyJobs job = new DailyJobs();
+        job.setId(10L);
+        job.setTitle("日结助教");
+        when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-2")).thenReturn(order);
+        when(userInfoService.selectUserInfoByUserId("student-1")).thenReturn(userInfo);
+        when(dailyJobsService.selectDailyJobsById(10L)).thenReturn(job);
+        when(signInRecordService.selectJobSignInRecordByOrderId(2002L)).thenReturn(null);
+        when(signInRecordService.insertSignInRecord(any(SignInRecord.class))).thenReturn(1);
+
+        JobAttendanceAdminOrderVo detail = service.submitSignImage("order-2", "/profile/job-sign/321/20.jpg");
+
+        assertEquals("order-2", detail.getOrderNo());
+        ArgumentCaptor<SignInRecord> captor = ArgumentCaptor.forClass(SignInRecord.class);
+        verify(signInRecordService).insertSignInRecord(captor.capture());
+        SignInRecord inserted = captor.getValue();
+        assertEquals(Long.valueOf(2002L), inserted.getJobOrderId());
+        assertEquals(Long.valueOf(10L), inserted.getJobId());
+    }
+
+    @Test
     void should_insert_sign_in_record_when_confirming_attendance() {
         JobSignupOrder order = new JobSignupOrder();
+        order.setId(1001L);
         order.setOrderNo("order-1");
         order.setUserId("student-1");
         order.setJobId(10L);
@@ -148,7 +183,7 @@ class JobAttendanceAdminServiceImplTest {
         when(jobSignupOrderService.selectJobSignupOrderByOrderNo("order-1")).thenReturn(order);
         when(userInfoService.selectUserInfoByUserId("student-1")).thenReturn(userInfo);
         when(dailyJobsService.selectDailyJobsById(10L)).thenReturn(job);
-        when(signInRecordService.selectJobSignInRecord(10L, 200L)).thenReturn(null);
+        when(signInRecordService.selectJobSignInRecordByOrderId(1001L)).thenReturn(null);
         when(signInRecordService.insertSignInRecord(any(SignInRecord.class))).thenReturn(1);
 
         JobAttendanceAdminOrderVo detail = service.confirmAttendance("order-1", "admin-user");
@@ -162,6 +197,7 @@ class JobAttendanceAdminServiceImplTest {
         SignInRecord inserted = captor.getValue();
         assertEquals(Long.valueOf(200L), inserted.getUid());
         assertEquals(Long.valueOf(10L), inserted.getJobId());
+        assertEquals(Long.valueOf(1001L), inserted.getJobOrderId());
         assertEquals(Integer.valueOf(3), inserted.getRecordType());
         assertEquals(Integer.valueOf(1), inserted.getSignStatus());
     }

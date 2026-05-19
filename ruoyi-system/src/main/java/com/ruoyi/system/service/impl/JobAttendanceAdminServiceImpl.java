@@ -43,7 +43,7 @@ public class JobAttendanceAdminServiceImpl implements IJobAttendanceAdminService
         JobSignupOrder order = requirePaidOrder(orderNo);
         DailyJobs job = requireJob(order.getJobId());
         UserInfo userInfo = requireUserInfo(order.getUserId());
-        SignInRecord record = signInRecordService.selectJobSignInRecord(order.getJobId(), userInfo.getId());
+        SignInRecord record = signInRecordService.selectJobSignInRecordByOrderId(order.getId());
         return toOrderVo(order, job, userInfo, record);
     }
 
@@ -51,7 +51,7 @@ public class JobAttendanceAdminServiceImpl implements IJobAttendanceAdminService
     public JobAttendanceAdminOrderVo confirmAttendance(String orderNo, String operator) {
         JobSignupOrder order = requirePaidOrder(orderNo);
         UserInfo userInfo = requireUserInfo(order.getUserId());
-        SignInRecord existing = signInRecordService.selectJobSignInRecord(order.getJobId(), userInfo.getId());
+        SignInRecord existing = signInRecordService.selectJobSignInRecordByOrderId(order.getId());
         if (existing != null && existing.getSignTime() != null && isSameDay(existing.getSignTime(), DateUtils.getNowDate())) {
             throw new ServiceException("当前订单今天已签到");
         }
@@ -59,6 +59,7 @@ public class JobAttendanceAdminServiceImpl implements IJobAttendanceAdminService
         SignInRecord record = new SignInRecord();
         record.setUid(userInfo.getId());
         record.setJobId(order.getJobId());
+        record.setJobOrderId(order.getId());
         record.setRecordType(RECORD_TYPE_JOB);
         record.setSignStatus(SIGNED_STATUS);
         record.setSignTime(DateUtils.getNowDate());
@@ -75,11 +76,12 @@ public class JobAttendanceAdminServiceImpl implements IJobAttendanceAdminService
         JobSignupOrder order = requirePaidOrder(orderNo);
         UserInfo userInfo = requireUserInfo(order.getUserId());
         DailyJobs job = requireJob(order.getJobId());
-        SignInRecord record = signInRecordService.selectJobSignInRecord(order.getJobId(), userInfo.getId());
+        SignInRecord record = signInRecordService.selectJobSignInRecordByOrderId(order.getId());
         if (record == null) {
             record = new SignInRecord();
             record.setUid(userInfo.getId());
             record.setJobId(order.getJobId());
+            record.setJobOrderId(order.getId());
             record.setRecordType(RECORD_TYPE_JOB);
             record.setSignStatus(0);
             record.setSignImageUrl(signImageUrl);

@@ -143,11 +143,12 @@ public class WxJobScheduleServiceImpl implements IWxJobScheduleService {
         if (userInfo == null || userInfo.getId() == null) {
             throw new ServiceException("用户不存在");
         }
-        SignInRecord record = signInRecordService.selectJobSignInRecord(jobId, userInfo.getId());
+        SignInRecord record = signInRecordService.selectJobSignInRecordByOrderId(order.getId());
         if (record == null) {
             record = new SignInRecord();
             record.setUid(userInfo.getId());
             record.setJobId(jobId);
+            record.setJobOrderId(order.getId());
             record.setRecordType(RECORD_TYPE_JOB);
             record.setSignStatus(SIGN_STATUS_PENDING);
             record.setSignTime(DateUtils.getNowDate());
