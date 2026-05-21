@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -476,6 +477,118 @@ class WxTutoringControllerTest {
         assertEquals("南京市江宁区", saved.getRegion());
         assertEquals("百家湖 88号 1单元", saved.getLocation());
         assertEquals("120.1,31.9", saved.getGeo());
+    }
+
+    @Test
+    void addParentsShouldNormalizeServiceSlotsAndBackfillLegacyFields() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        BabyInfo babyInfo = new BabyInfo();
+        babyInfo.setId(7L);
+        UserServiceAddress address = buildAddress(11L);
+        Parents request = buildValidParentRequest(7L, 11L);
+        request.setServiceTimes("[{\"serviceDate\":\"2026-05-03\",\"startTime\":\"18:00\",\"endTime\":\"20:00\"},{\"serviceDate\":\"2026-05-01\",\"startTime\":\"09:30\",\"endTime\":\"11:30\"}]");
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(userServiceAddressService.selectAddressByIdAndUserId(11L, WECHAT_USER_ID)).thenReturn(address);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
+
+        controller.addParents(request);
+
+        ArgumentCaptor<Parents> captor = ArgumentCaptor.forClass(Parents.class);
+        verify(parentsService).insertParents(captor.capture());
+        Parents saved = captor.getValue();
+        assertEquals("2026-05-03,2026-05-01", saved.getServiceDates());
+        assertEquals("7,5", saved.getDayOfWeek());
+        assertEquals(LocalTime.parse("18:00"), saved.getStartTime());
+        assertEquals(LocalTime.parse("20:00"), saved.getEndTime());
+        assertEquals("[{\"serviceDate\":\"2026-05-03\",\"startTime\":\"18:00\",\"endTime\":\"20:00\"},{\"serviceDate\":\"2026-05-01\",\"startTime\":\"09:30\",\"endTime\":\"11:30\"}]", saved.getServiceTimes());
+    }
+
+    @Test
+    void addParentsShouldRejectMalformedServiceSchedulePayload() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        BabyInfo babyInfo = new BabyInfo();
+        babyInfo.setId(7L);
+        Parents request = buildValidParentRequest(7L, 11L);
+        request.setServiceTimes("not-json");
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(userServiceAddressService.selectAddressByIdAndUserId(11L, WECHAT_USER_ID)).thenReturn(buildAddress(11L));
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(null);
+
+        AjaxResult result = controller.addParents(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请完善服务时段", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
+    void addParentsShouldRejectDuplicateDemandForSameWechatUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        Parents existing = new Parents();
+        existing.setId(77L);
+        Parents request = buildValidParentRequest(7L, 11L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectSingleParentByWechatUid(WECHAT_USER_ID)).thenReturn(existing);
+
+        AjaxResult result = controller.addParents(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("你已发布需求，请前往详情编辑", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
+    void addParentsShouldRejectNonParentUserBeforeBindingOrAddressChecks() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(1);
+        Parents request = buildValidParentRequest(7L, 11L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+
+        AjaxResult result = controller.addParents(request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请先切换为家长身份", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).insertParents(any(Parents.class));
+        verify(babyInfoService, never()).selectBabyInfoByIdAndUserId(any(), any());
+        verify(userServiceAddressService, never()).selectAddressByIdAndUserId(any(), any());
+    }
+
+    @Test
+    void updateMyParentShouldRejectAddressOwnedByAnotherUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserType(0);
+        Parents existing = new Parents();
+        existing.setId(9L);
+        existing.setWechatUid(WECHAT_USER_ID);
+        existing.setSystemUid(3L);
+        Parents request = buildValidParentRequest(7L, 11L);
+        BabyInfo babyInfo = new BabyInfo();
+        babyInfo.setId(7L);
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WECHAT_USER_ID)).thenReturn(userInfo);
+        when(parentsService.selectParentsById(9L)).thenReturn(existing);
+        when(babyInfoService.selectBabyInfoByIdAndUserId(7L, WECHAT_USER_ID)).thenReturn(babyInfo);
+        when(userServiceAddressService.selectAddressByIdAndUserId(11L, WECHAT_USER_ID)).thenReturn(null);
+
+        AjaxResult result = controller.updateMyParent(9L, request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("服务地址不存在或无权使用", result.get(AjaxResult.MSG_TAG));
+        verify(parentsService, never()).updateParents(any(Parents.class));
     }
 
     @Test
