@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TutoringScheduleMapper">
+
+    <resultMap id="TutoringScheduleResult" type="com.ruoyi.system.domain.TutoringSchedule">
+        <result property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="bindingId" column="binding_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="parentUserId" column="parent_user_id"/>
+        <result property="tutorId" column="tutor_id"/>
+        <result property="tutorUserId" column="tutor_user_id"/>
+        <result property="serviceDate" column="service_date"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="hours" column="hours"/>
+        <result property="grossAmount" column="gross_amount"/>
+        <result property="commissionAmount" column="commission_amount"/>
+        <result property="netAmount" column="net_amount"/>
+        <result property="status" column="status"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="finishRemark" column="finish_remark"/>
+        <result property="confirmTime" column="confirm_time"/>
+        <result property="confirmRemark" column="confirm_remark"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="tutorName" column="tutor_name"/>
+        <result property="parentSubject" column="parent_subject"/>
+        <result property="parentGrade" column="parent_grade"/>
+        <result property="location" column="location"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="TutoringScheduleColumns">
+        select s.id,
+               s.order_id,
+               s.order_no,
+               s.binding_id,
+               s.parent_id,
+               s.parent_user_id,
+               s.tutor_id,
+               s.tutor_user_id,
+               s.service_date,
+               s.start_time,
+               s.end_time,
+               s.hours,
+               s.gross_amount,
+               s.commission_amount,
+               s.net_amount,
+               s.status,
+               s.finish_time,
+               s.finish_remark,
+               s.confirm_time,
+               s.confirm_remark,
+               s.create_by,
+               s.create_time,
+               s.update_by,
+               s.update_time,
+               p.name as parent_name,
+               p.subject as parent_subject,
+               p.grade as parent_grade,
+               p.location as location,
+               ui.user_name as tutor_name
+        from tutoring_schedule s
+                 left join parents p on p.id = s.parent_id
+                 left join user_info ui on ui.id = s.tutor_user_id
+    </sql>
+
+    <select id="countByOrderId" resultType="int">
+        select count(1)
+        from tutoring_schedule
+        where order_id = #{orderId}
+    </select>
+
+    <insert id="batchInsertTutoringSchedules">
+        insert into tutoring_schedule (
+            id, order_id, order_no, binding_id, parent_id, parent_user_id, tutor_id, tutor_user_id,
+            service_date, start_time, end_time, hours, gross_amount, commission_amount, net_amount,
+            status, finish_time, finish_remark, confirm_time, confirm_remark,
+            create_by, create_time, update_by, update_time
+        ) values
+        <foreach collection="items" item="item" separator=",">
+            (
+            #{item.id}, #{item.orderId}, #{item.orderNo}, #{item.bindingId}, #{item.parentId}, #{item.parentUserId}, #{item.tutorId}, #{item.tutorUserId},
+            #{item.serviceDate}, #{item.startTime}, #{item.endTime}, #{item.hours}, #{item.grossAmount}, #{item.commissionAmount}, #{item.netAmount},
+            #{item.status}, #{item.finishTime}, #{item.finishRemark}, #{item.confirmTime}, #{item.confirmRemark},
+            #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectMySchedules" resultMap="TutoringScheduleResult">
+        <include refid="TutoringScheduleColumns"/>
+        <where>
+            <if test="parentUserId != null">and s.parent_user_id = #{parentUserId}</if>
+            <if test="tutorUserId != null">and s.tutor_user_id = #{tutorUserId}</if>
+        </where>
+        order by s.service_date desc, s.start_time desc, s.id desc
+    </select>
+
+    <select id="selectById" resultMap="TutoringScheduleResult">
+        <include refid="TutoringScheduleColumns"/>
+        where s.id = #{id}
+    </select>
+
+    <select id="selectByIdForUpdate" resultMap="TutoringScheduleResult">
+        <include refid="TutoringScheduleColumns"/>
+        where s.id = #{id}
+        for update
+    </select>
+
+    <select id="selectAdminSchedules" parameterType="com.ruoyi.system.domain.TutoringSchedule" resultMap="TutoringScheduleResult">
+        <include refid="TutoringScheduleColumns"/>
+        <where>
+            <if test="status != null">and s.status = #{status}</if>
+            <if test="parentUserId != null">and s.parent_user_id = #{parentUserId}</if>
+            <if test="tutorUserId != null">and s.tutor_user_id = #{tutorUserId}</if>
+            <if test="orderNo != null and orderNo != ''">and s.order_no = #{orderNo}</if>
+        </where>
+        order by s.service_date desc, s.start_time desc, s.id desc
+    </select>
+
+    <update id="updateTutoringSchedule" parameterType="com.ruoyi.system.domain.TutoringSchedule">
+        update tutoring_schedule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="finishRemark != null">finish_remark = #{finishRemark},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="confirmRemark != null">confirm_remark = #{confirmRemark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>

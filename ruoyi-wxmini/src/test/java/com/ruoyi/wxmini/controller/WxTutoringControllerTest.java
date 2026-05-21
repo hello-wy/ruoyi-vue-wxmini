@@ -3,10 +3,17 @@ package com.ruoyi.wxmini.controller;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.domain.Parents;
+import com.ruoyi.system.domain.TutoringBinding;
+import com.ruoyi.system.domain.TutoringOrder;
+import com.ruoyi.system.domain.TutoringSchedule;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
+import com.ruoyi.wxmini.service.IWxMiniTutoringService;
 import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
+import com.ruoyi.wxmini.bo.WxTutoringCreateOrderBo;
+import com.ruoyi.wxmini.bo.WxTutoringScheduleActionBo;
+import com.ruoyi.wxmini.vo.WxPayParamVo;
 import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.UserServiceAddress;
@@ -53,6 +60,8 @@ class WxTutoringControllerTest {
     private IUserServiceAddressService userServiceAddressService;
     @Mock
     private IWxRealVerifyService wxRealVerifyService;
+    @Mock
+    private IWxMiniTutoringService wxMiniTutoringService;
 
     @InjectMocks
     private WxTutoringController controller;
@@ -354,6 +363,72 @@ class WxTutoringControllerTest {
         assertEquals(500, result.get(AjaxResult.CODE_TAG));
         assertEquals("请选择服务萌娃", result.get(AjaxResult.MSG_TAG));
         verify(parentsService, never()).insertParents(any(Parents.class));
+    }
+
+    @Test
+    void mineAvailableBindingsShouldReturnWrappedList() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        TutoringBinding binding = new TutoringBinding();
+        binding.setId(99L);
+        when(wxMiniTutoringService.listAvailableBindings(WECHAT_USER_ID)).thenReturn(java.util.Collections.singletonList(binding));
+
+        AjaxResult result = controller.mineAvailableBindings();
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(java.util.Collections.singletonList(binding), result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void createTutoringOrderShouldReturnWrappedPayParam() throws Exception {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        WxTutoringCreateOrderBo bo = new WxTutoringCreateOrderBo();
+        bo.setBindingId(18L);
+        WxPayParamVo payParamVo = new WxPayParamVo();
+        payParamVo.setOrderNo("TUTOR202605190001");
+        when(wxMiniTutoringService.createOrder(WECHAT_USER_ID, bo)).thenReturn(payParamVo);
+
+        AjaxResult result = controller.createTutoringOrder(bo);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(payParamVo, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void myTutoringSchedulesShouldReturnWrappedList() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        TutoringSchedule schedule = new TutoringSchedule();
+        schedule.setId(101L);
+        when(wxMiniTutoringService.listMySchedules(WECHAT_USER_ID)).thenReturn(java.util.Collections.singletonList(schedule));
+
+        AjaxResult result = controller.myTutoringSchedules();
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(java.util.Collections.singletonList(schedule), result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void finishTutoringScheduleShouldDelegateRemark() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        WxTutoringScheduleActionBo bo = new WxTutoringScheduleActionBo();
+        bo.setRemark("已上课");
+
+        AjaxResult result = controller.finishTutoringSchedule(101L, bo);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        verify(wxMiniTutoringService).finishSchedule(WECHAT_USER_ID, 101L, "已上课");
+    }
+
+    @Test
+    void tutoringOrderDetailShouldReturnWrappedOrder() {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        TutoringOrder order = new TutoringOrder();
+        order.setOrderNo("TORDER-1");
+        when(wxMiniTutoringService.getOrderDetail(WECHAT_USER_ID, "TORDER-1")).thenReturn(order);
+
+        AjaxResult result = controller.tutoringOrderDetail("TORDER-1");
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(order, result.get(AjaxResult.DATA_TAG));
     }
 
     @Test

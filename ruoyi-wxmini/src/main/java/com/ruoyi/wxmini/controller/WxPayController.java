@@ -12,6 +12,7 @@ import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
 import com.ruoyi.wxmini.service.IWxJobPayrollPayService;
 import com.ruoyi.wxmini.service.IWxJobSignupPayService;
+import com.ruoyi.wxmini.service.IWxMiniTutoringService;
 import com.ruoyi.wxmini.service.IWxSalonPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import io.swagger.annotations.Api;
@@ -40,6 +41,8 @@ public class WxPayController {
     private IWxJobSignupPayService wxJobSignupPayService;
     @Resource
     private IWxJobPayrollPayService wxJobPayrollPayService;
+    @Resource
+    private IWxMiniTutoringService wxMiniTutoringService;
     @Resource
     private IWalletService walletService;
 
@@ -215,6 +218,33 @@ public class WxPayController {
             }
             String requestId = request.getHeader("Request-ID");
             boolean handled = wxJobPayrollPayService.handlePayrollPaidCallback(result, requestId);
+            return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        }
+    }
+
+    @ApiOperation("微信家教支付结果异步回调通知（由微信服务器调用）")
+    @PostMapping("/tutoring/notify")
+    public String tutoringPayNotify(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String notifyData = IoUtil.readUtf8(inputStream);
+            SignatureHeader signatureHeader = SignatureHeader.builder()
+                    .serial(request.getHeader("Wechatpay-Serial"))
+                    .signature(request.getHeader("Wechatpay-Signature"))
+                    .nonce(request.getHeader("Wechatpay-Nonce"))
+                    .timeStamp(request.getHeader("Wechatpay-Timestamp"))
+                    .build();
+            WxPayNotifyV3Result result = this.wxPayService.parseOrderNotifyV3Result(notifyData, signatureHeader);
+            String tradeState = result.getResult().getTradeState();
+            boolean isPaySuccess = "SUCCESS".equals(tradeState);
+            if (!isPaySuccess) {
+                return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+            }
+            String requestId = request.getHeader("Request-ID");
+            boolean handled = wxMiniTutoringService.handleTutoringPaidCallback(result, requestId);
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);
