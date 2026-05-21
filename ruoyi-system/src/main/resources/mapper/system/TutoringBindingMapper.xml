@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TutoringBindingMapper">
+
+    <resultMap id="TutoringBindingResult" type="com.ruoyi.system.domain.TutoringBinding">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="parentUserId" column="parent_user_id"/>
+        <result property="tutorId" column="tutor_id"/>
+        <result property="tutorUserId" column="tutor_user_id"/>
+        <result property="status" column="status"/>
+        <result property="serviceTimesSnapshot" column="service_times_snapshot"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="parentSubject" column="parent_subject"/>
+        <result property="parentGrade" column="parent_grade"/>
+        <result property="parentRegion" column="parent_region"/>
+        <result property="tutorName" column="tutor_name"/>
+        <result property="tutorSchool" column="tutor_school"/>
+        <result property="tutorCurrentGrade" column="tutor_current_grade"/>
+    </resultMap>
+
+    <sql id="TutoringBindingColumns">
+        select tb.id,
+               tb.parent_id,
+               tb.parent_user_id,
+               tb.tutor_id,
+               tb.tutor_user_id,
+               tb.status,
+               tb.service_times_snapshot,
+               tb.remark,
+               tb.create_by,
+               tb.create_time,
+               tb.update_by,
+               tb.update_time,
+               p.name as parent_name,
+               p.subject as parent_subject,
+               p.grade as parent_grade,
+               p.region as parent_region,
+               ui.user_name as tutor_name,
+               t.school as tutor_school,
+               t.current_grade as tutor_current_grade
+        from tutoring_binding tb
+                 left join parents p on p.id = tb.parent_id
+                 left join tutors t on t.id = tb.tutor_id
+                 left join user_info ui on ui.id = tb.tutor_user_id
+    </sql>
+
+    <select id="selectById" resultMap="TutoringBindingResult">
+        <include refid="TutoringBindingColumns"/>
+        where tb.id = #{id}
+    </select>
+
+    <select id="selectByIdForUpdate" resultMap="TutoringBindingResult">
+        <include refid="TutoringBindingColumns"/>
+        where tb.id = #{id}
+        for update
+    </select>
+
+    <select id="selectByParentAndTutor" resultMap="TutoringBindingResult">
+        <include refid="TutoringBindingColumns"/>
+        where tb.parent_id = #{parentId}
+          and tb.tutor_id = #{tutorId}
+        order by tb.create_time desc, tb.id desc
+        limit 1
+    </select>
+
+    <select id="selectAvailableBindingsByParentUserId" resultMap="TutoringBindingResult">
+        <include refid="TutoringBindingColumns"/>
+        where tb.parent_user_id = #{parentUserId}
+          and tb.status = 0
+        order by tb.create_time desc, tb.id desc
+    </select>
+
+    <select id="selectBindingsForAdmin" parameterType="com.ruoyi.system.domain.TutoringBinding" resultMap="TutoringBindingResult">
+        <include refid="TutoringBindingColumns"/>
+        <where>
+            <if test="status != null">and tb.status = #{status}</if>
+            <if test="parentId != null">and tb.parent_id = #{parentId}</if>
+            <if test="tutorId != null">and tb.tutor_id = #{tutorId}</if>
+        </where>
+        order by tb.create_time desc, tb.id desc
+    </select>
+
+    <insert id="insertTutoringBinding" parameterType="com.ruoyi.system.domain.TutoringBinding">
+        insert into tutoring_binding (
+            id, parent_id, parent_user_id, tutor_id, tutor_user_id, status,
+            service_times_snapshot, remark, create_by, create_time, update_by, update_time
+        ) values (
+            #{id}, #{parentId}, #{parentUserId}, #{tutorId}, #{tutorUserId}, #{status},
+            #{serviceTimesSnapshot}, #{remark}, #{createBy}, #{createTime}, #{updateBy}, #{updateTime}
+        )
+    </insert>
+
+    <update id="updateTutoringBinding" parameterType="com.ruoyi.system.domain.TutoringBinding">
+        update tutoring_binding
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="serviceTimesSnapshot != null">service_times_snapshot = #{serviceTimesSnapshot},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="closeBindingsByParentId">
+        update tutoring_binding
+        set status = 2,
+            update_by = #{operator},
+            update_time = now()
+        where parent_id = #{parentId}
+          and status != 2
+          <if test="excludeId != null">and id != #{excludeId}</if>
+    </update>
+</mapper>

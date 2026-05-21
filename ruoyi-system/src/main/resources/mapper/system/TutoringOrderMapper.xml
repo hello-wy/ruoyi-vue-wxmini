@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TutoringOrderMapper">
+
+    <resultMap id="TutoringOrderResult" type="com.ruoyi.system.domain.TutoringOrder">
+        <result property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="bindingId" column="binding_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="parentUserId" column="parent_user_id"/>
+        <result property="tutorId" column="tutor_id"/>
+        <result property="tutorUserId" column="tutor_user_id"/>
+        <result property="wechatOpenId" column="wechat_open_id"/>
+        <result property="serviceTimesSnapshot" column="service_times_snapshot"/>
+        <result property="lessonCount" column="lesson_count"/>
+        <result property="hourlyPrice" column="hourly_price"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="commissionRate" column="commission_rate"/>
+        <result property="status" column="status"/>
+        <result property="wechatTransactionId" column="wechat_transaction_id"/>
+        <result property="requestId" column="request_id"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="tutorName" column="tutor_name"/>
+    </resultMap>
+
+    <sql id="TutoringOrderColumns">
+        select o.id,
+               o.order_no,
+               o.binding_id,
+               o.parent_id,
+               o.parent_user_id,
+               o.tutor_id,
+               o.tutor_user_id,
+               o.wechat_open_id,
+               o.service_times_snapshot,
+               o.lesson_count,
+               o.hourly_price,
+               o.total_amount,
+               o.commission_rate,
+               o.status,
+               o.wechat_transaction_id,
+               o.request_id,
+               o.pay_time,
+               o.create_by,
+               o.create_time,
+               o.update_by,
+               o.update_time,
+               p.name as parent_name,
+               ui.user_name as tutor_name
+        from tutoring_order o
+                 left join parents p on p.id = o.parent_id
+                 left join user_info ui on ui.id = o.tutor_user_id
+    </sql>
+
+    <insert id="insertTutoringOrder" parameterType="com.ruoyi.system.domain.TutoringOrder">
+        insert into tutoring_order (
+            id, order_no, binding_id, parent_id, parent_user_id, tutor_id, tutor_user_id,
+            wechat_open_id, service_times_snapshot, lesson_count, hourly_price, total_amount,
+            commission_rate, status, wechat_transaction_id, request_id, pay_time,
+            create_by, create_time, update_by, update_time
+        ) values (
+            #{id}, #{orderNo}, #{bindingId}, #{parentId}, #{parentUserId}, #{tutorId}, #{tutorUserId},
+            #{wechatOpenId}, #{serviceTimesSnapshot}, #{lessonCount}, #{hourlyPrice}, #{totalAmount},
+            #{commissionRate}, #{status}, #{wechatTransactionId}, #{requestId}, #{payTime},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime}
+        )
+    </insert>
+
+    <update id="updateTutoringOrder" parameterType="com.ruoyi.system.domain.TutoringOrder">
+        update tutoring_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="wechatTransactionId != null">wechat_transaction_id = #{wechatTransactionId},</if>
+            <if test="requestId != null">request_id = #{requestId},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="selectByOrderNo" resultMap="TutoringOrderResult">
+        <include refid="TutoringOrderColumns"/>
+        where o.order_no = #{orderNo}
+    </select>
+
+    <select id="selectByOrderNoForUpdate" resultMap="TutoringOrderResult">
+        <include refid="TutoringOrderColumns"/>
+        where o.order_no = #{orderNo}
+        for update
+    </select>
+
+    <select id="selectLatestByBindingId" resultMap="TutoringOrderResult">
+        <include refid="TutoringOrderColumns"/>
+        where o.binding_id = #{bindingId}
+        order by o.create_time desc, o.id desc
+        limit 1
+    </select>
+
+    <select id="selectMyOrders" resultMap="TutoringOrderResult">
+        <include refid="TutoringOrderColumns"/>
+        where o.parent_user_id = #{parentUserId}
+        order by o.create_time desc, o.id desc
+    </select>
+</mapper>

@@ -12,13 +12,19 @@ import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.service.IParentsService;
 import com.ruoyi.system.service.ITutorsService;
+import com.ruoyi.system.domain.TutoringBinding;
+import com.ruoyi.system.domain.TutoringOrder;
+import com.ruoyi.system.domain.TutoringSchedule;
 import com.ruoyi.wxmini.bo.WxRealVerifyRequestBo;
+import com.ruoyi.wxmini.bo.WxTutoringCreateOrderBo;
+import com.ruoyi.wxmini.bo.WxTutoringScheduleActionBo;
 import com.ruoyi.wxmini.domain.BabyInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.UserServiceAddress;
 import com.ruoyi.wxmini.service.IBabyInfoService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IUserServiceAddressService;
+import com.ruoyi.wxmini.service.IWxMiniTutoringService;
 import com.ruoyi.wxmini.service.IWxRealVerifyService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import com.ruoyi.wxmini.vo.WxRealVerifyResultVo;
@@ -75,6 +81,9 @@ public class WxTutoringController extends BaseController {
 
     @Resource
     private IWxRealVerifyService wxRealVerifyService;
+
+    @Resource
+    private IWxMiniTutoringService wxMiniTutoringService;
 
     @ApiOperation("分页查询已通过教员列表（公开，支持科目/区域/授课方式/学历筛选）")
     @ApiImplicitParams({
@@ -278,6 +287,93 @@ public class WxTutoringController extends BaseController {
         }
         Parents parents = parentsService.selectSingleParentByWechatUid(userId);
         return AjaxResult.success(parents);
+    }
+
+    @ApiOperation("查看当前家长可下单绑定列表（需登录）")
+    @GetMapping("/bindings/mine/available")
+    public AjaxResult mineAvailableBindings() {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return AjaxResult.error("请先登录");
+        }
+        List<TutoringBinding> list = wxMiniTutoringService.listAvailableBindings(userId);
+        return AjaxResult.success(list);
+    }
+
+    @ApiOperation("创建家教支付订单（需登录）")
+    @PostMapping("/orders/create")
+    public AjaxResult createTutoringOrder(@RequestBody WxTutoringCreateOrderBo bo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxMiniTutoringService.createOrder(userId, bo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查看当前登录用户的家教订单列表（需登录）")
+    @GetMapping("/orders/my")
+    public AjaxResult myTutoringOrders() {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxMiniTutoringService.listMyOrders(userId));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查看家教订单详情（需登录）")
+    @GetMapping("/orders/{orderNo}")
+    public AjaxResult tutoringOrderDetail(@PathVariable("orderNo") String orderNo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            TutoringOrder order = wxMiniTutoringService.getOrderDetail(userId, orderNo);
+            return AjaxResult.success(order);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查看我的家教课表（需登录）")
+    @GetMapping("/schedules/my")
+    public AjaxResult myTutoringSchedules() {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            List<TutoringSchedule> list = wxMiniTutoringService.listMySchedules(userId);
+            return AjaxResult.success(list);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("教员提交完课（需登录）")
+    @PostMapping("/schedules/{id}/finish")
+    public AjaxResult finishTutoringSchedule(@PathVariable("id") Long id, @RequestBody(required = false) WxTutoringScheduleActionBo bo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            wxMiniTutoringService.finishSchedule(userId, id, bo == null ? null : bo.getRemark());
+            return AjaxResult.success();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("家长确认完课（需登录）")
+    @PostMapping("/schedules/{id}/confirm")
+    public AjaxResult confirmTutoringSchedule(@PathVariable("id") Long id, @RequestBody(required = false) WxTutoringScheduleActionBo bo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            wxMiniTutoringService.confirmSchedule(userId, id, bo == null ? null : bo.getRemark());
+            return AjaxResult.success();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
     }
 
     @ApiOperation("修改当前登录用户发布的家教单（需登录）")
