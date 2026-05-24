@@ -3,7 +3,7 @@ package com.ruoyi.wxmini.controller;
 import cn.hutool.core.io.IoUtil;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
-import com.github.binarywang.wxpay.bean.notify.WxPayTransferBatchesNotifyV3Result;
+import com.github.binarywang.wxpay.bean.transfer.TransferBillsNotifyResult;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.service.IWalletService;
@@ -264,9 +264,10 @@ public class WxPayController {
                     .nonce(request.getHeader("Wechatpay-Nonce"))
                     .timeStamp(request.getHeader("Wechatpay-Timestamp"))
                     .build();
-            WxPayTransferBatchesNotifyV3Result result = this.wxPayService.parseTransferBatchesNotifyV3Result(notifyData, signatureHeader);
+            TransferBillsNotifyResult result = this.wxPayService.getTransferService()
+                    .parseTransferBillsNotifyResult(notifyData, signatureHeader);
             boolean handled = walletService.syncWithdrawStatusByOutBatchNo(
-                    result.getResult() == null ? null : result.getResult().getOutBatchNo());
+                    result.getResult() == null ? null : result.getResult().getOutBillNo());
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);

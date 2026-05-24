@@ -64,9 +64,18 @@ public class WxPayProperties {
         private BigDecimal minAmount = new BigDecimal("1.00");
 
         /** 最大提现金额（元） */
-        private BigDecimal maxAmount = new BigDecimal("5000.00");
+        private BigDecimal maxAmount = new BigDecimal("2000.00");
 
         /** 转账批次名称 */
         private String batchName = "钱包提现";
+
+        /** 用户收款感知文案 */
+        private String userRecvPerception = "钱包提现";
+
+        /** 转账场景报备：岗位类型 */
+        private String sceneReportJobType = "其他";
+
+        /** 转账场景报备：报酬说明 */
+        private String sceneReportRewardDesc = "微信提现";
     }
 }

@@ -21,6 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createDate" column="create_date" />
         <result property="updateDate" column="update_date" />
         <result property="realName" column="real_name" />
+        <result property="phone" column="phone" />
         <result property="idCard" column="id_card" />
         <result property="selfJudge" column="self_judge" />
         <result property="certificateList" column="certificate_list" />
@@ -44,6 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                t.create_date,
                t.update_date,
                ui.real_name,
+               ui.phone,
                ui.id_card,
                t.self_judge,
                t.certificate_list,
@@ -69,6 +71,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createDate != null"> and t.create_date = #{createDate}</if>
             <if test="updateDate != null"> and t.update_date = #{updateDate}</if>
             <if test="realName != null and realName != ''"> and ui.real_name like concat('%', #{realName}, '%')</if>
+            <if test="phone != null and phone != ''"> and ui.phone like concat('%', #{phone}, '%')</if>
             <if test="idCard != null and idCard != ''"> and ui.id_card = #{idCard}</if>
             <if test="selfJudge != null and selfJudge != ''"> and t.self_judge = #{selfJudge}</if>
             <if test="certificateList != null and certificateList != ''"> and t.certificate_list like concat('%', #{certificateList}, '%')</if>

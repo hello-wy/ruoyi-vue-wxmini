@@ -43,21 +43,38 @@ public class WalletServiceImpl implements IWalletService
     private static final String WITHDRAW_REMARK = "微信提现";
     private static final String DETAIL_STATUS_SUCCESS = "SUCCESS";
     private static final String DETAIL_STATUS_FAILED = "FAIL";
+    private static final String DETAIL_STATUS_FAILED_NEW = "FAILED";
+    private static final String TRANSFER_STATE_WAIT_USER_CONFIRM = "WAIT_USER_CONFIRM";
 
-    @Value("${wx.pay.transfer.notifyUrl:}")
+    @Value("${wx.pay.appId:}")
+    private String wxPayAppId;
+
+    @Value("${wx.pay.mchId:}")
+    private String wxPayMchId;
+
+    @Value("${wx.pay.transfer.notify-url:}")
     private String transferNotifyUrl;
 
-    @Value("${wx.pay.transfer.sceneId:1005}")
+    @Value("${wx.pay.transfer.scene-id:1005}")
     private String transferSceneId;
 
-    @Value("${wx.pay.transfer.minAmount:1.00}")
+    @Value("${wx.pay.transfer.min-amount:1.00}")
     private BigDecimal transferMinAmount;
 
-    @Value("${wx.pay.transfer.maxAmount:5000.00}")
+    @Value("${wx.pay.transfer.max-amount:2000.00}")
     private BigDecimal transferMaxAmount;
 
-    @Value("${wx.pay.transfer.batchName:钱包提现}")
+    @Value("${wx.pay.transfer.batch-name:钱包提现}")
     private String transferBatchName;
+
+    @Value("${wx.pay.transfer.user-recv-perception:钱包提现}")
+    private String transferUserRecvPerception;
+
+    @Value("${wx.pay.transfer.scene-report-job-type:其他}")
+    private String transferSceneReportJobType;
+
+    @Value("${wx.pay.transfer.scene-report-reward-desc:微信提现}")
+    private String transferSceneReportRewardDesc;
 
     @Autowired
     private WalletMapper walletMapper;
@@ -104,6 +121,11 @@ public class WalletServiceImpl implements IWalletService
         {
             return WithdrawResult.fail(WithdrawFailType.AMOUNT_OUT_OF_LIMIT,
                     "提现金额不能低于" + transferMinAmount.stripTrailingZeros().toPlainString() + "元");
+        }
+        if (amount.compareTo(transferMaxAmount) > 0)
+        {
+            return WithdrawResult.fail(WithdrawFailType.AMOUNT_OUT_OF_LIMIT,
+                    "提现金额不能高于" + transferMaxAmount.stripTrailingZeros().toPlainString() + "元");
         }
         if (amount.scale() > 2)
         {
@@ -158,7 +180,7 @@ public class WalletServiceImpl implements IWalletService
             withdraw.setWxTransferNo(result.getBatchId());
             walletMapper.updateWithdrawStatus(withdraw);
 
-            return syncWithdrawStatusForResult(withdraw);
+            return syncWithdrawStatusForResult(withdraw, result);
         }
         catch (Exception e)
         {
@@ -256,14 +278,14 @@ public class WalletServiceImpl implements IWalletService
     /**
      * SDK 调用成功后同步查询状态，返回结构化 WithdrawResult
      */
-    private WithdrawResult syncWithdrawStatusForResult(WalletWithdraw withdraw)
+    private WithdrawResult syncWithdrawStatusForResult(WalletWithdraw withdraw, WalletTransferCreateResult createResult)
     {
         try
         {
             boolean updated = updateWithdrawByDetailQuery(withdraw);
             if (!updated)
             {
-                return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+                return buildProcessingResult(withdraw, createResult);
             }
             WalletWithdraw latest = walletMapper.selectWithdrawById(withdraw.getId());
             if (latest == null)
@@ -290,12 +312,23 @@ public class WalletServiceImpl implements IWalletService
                 return WithdrawResult.fail(failType,
                         StringUtils.defaultIfBlank(latest.getUserMessage(), failType.getUserMessage()));
             }
-            return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
+            return buildProcessingResult(withdraw, createResult);
         }
         catch (Exception e)
         {
+            return buildProcessingResult(withdraw, createResult);
+        }
+    }
+
+    private WithdrawResult buildProcessingResult(WalletWithdraw withdraw, WalletTransferCreateResult createResult)
+    {
+        if (createResult == null || !TRANSFER_STATE_WAIT_USER_CONFIRM.equals(createResult.getState())
+                || StringUtils.isBlank(createResult.getPackageInfo()))
+        {
             return WithdrawResult.processing(withdraw.getId(), withdraw.getOutBatchNo());
         }
+        return WithdrawResult.processingWithPackage(withdraw.getId(), withdraw.getOutBatchNo(),
+                createResult.getPackageInfo(), wxPayAppId, wxPayMchId);
     }
 
     private WalletTransferCreateRequest buildTransferRequest(UserInfo userInfo, BigDecimal amount, String outBatchNo, String outDetailNo)
@@ -311,6 +344,9 @@ public class WalletServiceImpl implements IWalletService
         request.setTransferRemark(WITHDRAW_REMARK);
         request.setNotifyUrl(transferNotifyUrl);
         request.setTransferSceneId(transferSceneId);
+        request.setUserRecvPerception(transferUserRecvPerception);
+        request.addTransferSceneReportInfo("岗位类型", transferSceneReportJobType);
+        request.addTransferSceneReportInfo("报酬说明", transferSceneReportRewardDesc);
         return request;
     }
 
@@ -327,7 +363,8 @@ public class WalletServiceImpl implements IWalletService
             markWithdrawSuccess(withdraw, detail.getBatchId(), detail.getDetailId());
             return true;
         }
-        if (DETAIL_STATUS_FAILED.equals(detail.getDetailStatus()))
+        if (DETAIL_STATUS_FAILED.equals(detail.getDetailStatus())
+                || DETAIL_STATUS_FAILED_NEW.equals(detail.getDetailStatus()))
         {
             markWithdrawFailed(withdraw.getId(), detail.getFailReason(), detail.getBatchId(), detail.getOutBatchNo(), detail.getDetailId());
             return true;

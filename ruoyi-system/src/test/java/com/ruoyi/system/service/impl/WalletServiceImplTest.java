@@ -17,8 +17,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,10 +48,12 @@ class WalletServiceImplTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(service, "transferMinAmount", new BigDecimal("1.00"));
-        ReflectionTestUtils.setField(service, "transferMaxAmount", new BigDecimal("5000.00"));
+        ReflectionTestUtils.setField(service, "transferMaxAmount", new BigDecimal("2000.00"));
         ReflectionTestUtils.setField(service, "transferNotifyUrl", "https://zhiyujia.xyz/api/wxmini/pay/wallet/notify");
         ReflectionTestUtils.setField(service, "transferSceneId", "1005");
         ReflectionTestUtils.setField(service, "transferBatchName", "钱包提现");
+        ReflectionTestUtils.setField(service, "wxPayAppId", "wx-app-1");
+        ReflectionTestUtils.setField(service, "wxPayMchId", "mch-1");
     }
 
     @Test
@@ -61,6 +65,20 @@ class WalletServiceImplTest {
         Long uid = service.resolveCurrentUserUid("wx-user-1");
 
         assertEquals(Long.valueOf(8L), uid);
+    }
+
+    @Test
+    void transferConfigValuesShouldUseYamlKebabCaseKeys() throws Exception {
+        assertEquals("${wx.pay.transfer.notify-url:}", valueExpression("transferNotifyUrl"));
+        assertEquals("${wx.pay.transfer.scene-id:1005}", valueExpression("transferSceneId"));
+        assertEquals("${wx.pay.transfer.min-amount:1.00}", valueExpression("transferMinAmount"));
+        assertEquals("${wx.pay.transfer.max-amount:2000.00}", valueExpression("transferMaxAmount"));
+        assertEquals("${wx.pay.transfer.batch-name:钱包提现}", valueExpression("transferBatchName"));
+    }
+
+    private String valueExpression(String fieldName) throws Exception {
+        Field field = WalletServiceImpl.class.getDeclaredField(fieldName);
+        return field.getAnnotation(Value.class).value();
     }
 
     @Test
@@ -94,6 +112,17 @@ class WalletServiceImplTest {
         assertEquals("OPENID_MISSING", result.getFailType());
         assertEquals("未获取到微信账户信息，请重新登录后重试", result.getUserMessage());
         verify(walletMapper, never()).insertWithdraw(any());
+    }
+
+    @Test
+    void shouldRejectWithdrawWhenAmountExceedsMaximum() {
+        WithdrawResult result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("2000.01"));
+
+        assertFalse(result.isSuccess());
+        assertEquals("AMOUNT_OUT_OF_LIMIT", result.getFailType());
+        assertEquals("提现金额不能高于2000元", result.getUserMessage());
+        verify(walletMapper, never()).insertWithdraw(any());
+        verify(userInfoService, never()).selectUserInfoByUserId(any());
     }
 
     @Test
@@ -179,6 +208,62 @@ class WalletServiceImplTest {
         assertTrue(insertCaptor.getValue().getOutBatchNo().startsWith("WD"));
         verify(walletMapper).updateWallet(any(UserWallet.class));
         verify(walletMapper).insertTransaction(any(WalletTransaction.class));
+    }
+
+    @Test
+    void shouldReturnMerchantTransferPackageWhenUserConfirmationRequired() throws Exception {
+        UserInfo userInfo = newVerifiedUser();
+        when(userInfoService.selectUserInfoByUserId("wx-user-1")).thenReturn(userInfo);
+        when(walletMapper.selectWalletByUid(10L)).thenReturn(walletWithBalance("100.00"));
+
+        WalletTransferCreateResult createResult = new WalletTransferCreateResult();
+        createResult.setBatchId("wx-bill-1");
+        createResult.setState("WAIT_USER_CONFIRM");
+        createResult.setPackageInfo("transfer-package-1");
+        when(walletTransferGateway.createTransfer(any())).thenReturn(createResult);
+
+        when(walletTransferGateway.queryTransfer(any(), any())).thenReturn(waitUserConfirmDetail());
+        when(walletMapper.insertWithdraw(any())).thenAnswer(invocation -> {
+            WalletWithdraw withdraw = invocation.getArgument(0);
+            withdraw.setId(1L);
+            return 1;
+        });
+
+        WithdrawResult result = service.applyWithdraw("wx-user-1", 10L, new BigDecimal("10.00"));
+
+        assertTrue(result.isSuccess());
+        assertEquals(Integer.valueOf(0), result.getStatus());
+        assertEquals("transfer-package-1", result.getPackageInfo());
+        assertEquals("wx-app-1", result.getAppId());
+        assertEquals("mch-1", result.getMchId());
+    }
+
+    private UserInfo newVerifiedUser() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(10L);
+        userInfo.setIsRealnameAuth(1);
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("110101199001010011");
+        userInfo.setOpenId("openid-1");
+        return userInfo;
+    }
+
+    private UserWallet walletWithBalance(String balance) {
+        UserWallet wallet = new UserWallet();
+        wallet.setUid(10L);
+        wallet.setBalance(new BigDecimal(balance));
+        wallet.setFrozen(BigDecimal.ZERO);
+        wallet.setTotalEarned(new BigDecimal(balance));
+        wallet.setTotalWithdrawn(BigDecimal.ZERO);
+        return wallet;
+    }
+
+    private WalletTransferQueryResult waitUserConfirmDetail() {
+        WalletTransferQueryResult detail = new WalletTransferQueryResult();
+        detail.setBatchId("wx-bill-1");
+        detail.setDetailId("wx-bill-1");
+        detail.setDetailStatus("WAIT_USER_CONFIRM");
+        return detail;
     }
 
     @Test

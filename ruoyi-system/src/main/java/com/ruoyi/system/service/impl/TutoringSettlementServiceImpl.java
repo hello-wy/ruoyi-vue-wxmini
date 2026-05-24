@@ -37,6 +37,11 @@ public class TutoringSettlementServiceImpl implements ITutoringAdminService {
     }
 
     @Override
+    public com.ruoyi.system.domain.TutoringOrder createPendingOrder(Long parentId, Long tutorId, String operator) {
+        return tutoringBindingServiceSupport.createPendingOrder(parentId, tutorId, operator);
+    }
+
+    @Override
     public List<com.ruoyi.system.domain.TutoringBinding> listBindings(com.ruoyi.system.domain.TutoringBinding query) {
         return tutoringBindingServiceSupport.listBindings(query);
     }
@@ -50,6 +55,7 @@ public class TutoringSettlementServiceImpl implements ITutoringAdminService {
     @Transactional(rollbackFor = Exception.class)
     public void auditSchedule(Long scheduleId, Integer targetStatus, String remark, String operator) {
         tutoringBindingServiceSupport.auditSchedule(scheduleId, targetStatus, remark, operator);
+        payAuditedSchedule(scheduleId, operator);
     }
 
     @Override
@@ -68,17 +74,29 @@ public class TutoringSettlementServiceImpl implements ITutoringAdminService {
             throw new ServiceException("结算单不存在");
         }
         for (TutoringPayrollItem item : items) {
-            if (PAYROLL_STATUS_PAID == item.getStatus()) {
-                continue;
-            }
-            walletService.creditPayroll(item.getTutorUserId(), item.getNetAmount(), item.getWalletBizId(), "家教课酬入账");
-            item.setStatus(PAYROLL_STATUS_PAID);
-            item.setPaidBy(operator);
-            item.setPaidTime(DateUtils.getNowDate());
-            item.setUpdateBy(operator);
-            item.setUpdateTime(DateUtils.getNowDate());
-            tutoringPayrollItemMapper.updateTutoringPayrollItem(item);
-            tutoringBindingServiceSupport.markScheduleSettled(item.getScheduleId(), operator);
+            payPayrollItem(item, operator);
         }
+    }
+
+    private void payAuditedSchedule(Long scheduleId, String operator) {
+        TutoringPayrollItem item = tutoringPayrollItemMapper.selectByScheduleId(scheduleId);
+        if (item == null) {
+            throw new ServiceException("结算单生成失败");
+        }
+        payPayrollItem(item, operator);
+    }
+
+    private void payPayrollItem(TutoringPayrollItem item, String operator) {
+        if (PAYROLL_STATUS_PAID == item.getStatus()) {
+            return;
+        }
+        walletService.creditPayroll(item.getTutorUserId(), item.getNetAmount(), item.getWalletBizId(), "家教课酬入账");
+        item.setStatus(PAYROLL_STATUS_PAID);
+        item.setPaidBy(operator);
+        item.setPaidTime(DateUtils.getNowDate());
+        item.setUpdateBy(operator);
+        item.setUpdateTime(DateUtils.getNowDate());
+        tutoringPayrollItemMapper.updateTutoringPayrollItem(item);
+        tutoringBindingServiceSupport.markScheduleSettled(item.getScheduleId(), operator);
     }
 }

@@ -14,6 +14,8 @@ public interface IWxMiniTutoringService {
 
     WxPayParamVo createOrder(String wxUserId, WxTutoringCreateOrderBo bo) throws Exception;
 
+    WxPayParamVo payPendingOrder(String wxUserId, String orderNo) throws Exception;
+
     List<TutoringOrder> listMyOrders(String wxUserId);
 
     TutoringOrder getOrderDetail(String wxUserId, String orderNo);

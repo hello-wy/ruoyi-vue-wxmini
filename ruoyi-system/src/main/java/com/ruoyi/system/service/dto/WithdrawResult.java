@@ -29,6 +29,15 @@ public class WithdrawResult {
     /** 兼容旧 msg 字段 */
     private String msg;
 
+    /** 微信商家转账确认收款 package_info */
+    private String packageInfo;
+
+    /** 小程序 appId，用于 requestMerchantTransfer */
+    private String appId;
+
+    /** 微信支付商户号，用于 requestMerchantTransfer */
+    private String mchId;
+
     public WithdrawResult()
     {
     }
@@ -103,6 +112,36 @@ public class WithdrawResult {
         this.msg = msg;
     }
 
+    public String getPackageInfo()
+    {
+        return packageInfo;
+    }
+
+    public void setPackageInfo(String packageInfo)
+    {
+        this.packageInfo = packageInfo;
+    }
+
+    public String getAppId()
+    {
+        return appId;
+    }
+
+    public void setAppId(String appId)
+    {
+        this.appId = appId;
+    }
+
+    public String getMchId()
+    {
+        return mchId;
+    }
+
+    public void setMchId(String mchId)
+    {
+        this.mchId = mchId;
+    }
+
     // ========== Static factory methods ==========
 
     /**
@@ -130,6 +169,16 @@ public class WithdrawResult {
         result.setWithdrawId(withdrawId);
         result.setOutBatchNo(outBatchNo);
         result.setMsg("微信提现处理中");
+        return result;
+    }
+
+    public static WithdrawResult processingWithPackage(
+            Long withdrawId, String outBatchNo, String packageInfo, String appId, String mchId)
+    {
+        WithdrawResult result = processing(withdrawId, outBatchNo);
+        result.setPackageInfo(packageInfo);
+        result.setAppId(appId);
+        result.setMchId(mchId);
         return result;
     }
 

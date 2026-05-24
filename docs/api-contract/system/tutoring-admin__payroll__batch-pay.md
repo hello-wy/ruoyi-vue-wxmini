@@ -3,6 +3,7 @@
 ## 用途
 
 - `POST`：后台批量发放家教课酬，复用钱包入账能力。
+- 家教签到审核通过后会自动发放课酬；该接口主要用于处理历史遗留或人工补发的待发放结算单。
 
 ## 鉴权
 
@@ -38,6 +39,7 @@
 - 对已发放状态的结算单会直接跳过，不会重复调用 `IWalletService.creditPayroll`。
 - 钱包业务幂等依赖 `tutoring_payroll_item.status` 与 `walletBizId`，避免重复写入 `wallet_transaction`。
 - 发放成功后，会把对应课表状态推进到 `3=已结算`。
+- 发放金额为结算单 `netAmount`，即扣佣后的课酬。
 
 ## 实现来源文件
 

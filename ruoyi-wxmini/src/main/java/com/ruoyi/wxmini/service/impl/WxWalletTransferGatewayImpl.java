@@ -1,8 +1,8 @@
 package com.ruoyi.wxmini.service.impl;
 
-import com.github.binarywang.wxpay.bean.merchanttransfer.DetailsQueryResult;
-import com.github.binarywang.wxpay.bean.merchanttransfer.MerchantDetailsQueryRequest;
-import com.github.binarywang.wxpay.bean.merchanttransfer.TransferCreateResult;
+import com.github.binarywang.wxpay.bean.transfer.TransferBillsGetResult;
+import com.github.binarywang.wxpay.bean.transfer.TransferBillsRequest;
+import com.github.binarywang.wxpay.bean.transfer.TransferBillsResult;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.system.service.IWalletTransferGateway;
 import com.ruoyi.system.service.dto.WalletTransferCreateRequest;
@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WxWalletTransferGatewayImpl implements IWalletTransferGateway {
@@ -22,46 +23,46 @@ public class WxWalletTransferGatewayImpl implements IWalletTransferGateway {
 
     @Override
     public WalletTransferCreateResult createTransfer(WalletTransferCreateRequest request) throws Exception {
-        com.github.binarywang.wxpay.bean.merchanttransfer.TransferCreateRequest wxRequest = new com.github.binarywang.wxpay.bean.merchanttransfer.TransferCreateRequest();
+        TransferBillsRequest wxRequest = new TransferBillsRequest();
         wxRequest.setAppid(wxPayService.getConfig().getAppId());
-        wxRequest.setOutBatchNo(request.getOutBatchNo());
-        wxRequest.setBatchName(request.getBatchName());
-        wxRequest.setBatchRemark(request.getBatchRemark());
-        wxRequest.setTotalAmount(toFen(request.getAmount()));
-        wxRequest.setTotalNum(1);
+        wxRequest.setOutBillNo(request.getOutBatchNo());
         wxRequest.setTransferSceneId(request.getTransferSceneId());
+        wxRequest.setOpenid(request.getOpenId());
+        wxRequest.setUserName(request.getRealName());
+        wxRequest.setTransferAmount(toFen(request.getAmount()));
+        wxRequest.setTransferRemark(request.getTransferRemark());
         wxRequest.setNotifyUrl(request.getNotifyUrl());
+        wxRequest.setUserRecvPerception(request.getUserRecvPerception());
+        wxRequest.setTransferSceneReportInfos(toWxReportInfos(request.getTransferSceneReportInfos()));
 
-        com.github.binarywang.wxpay.bean.merchanttransfer.TransferCreateRequest.TransferDetailList detail = new com.github.binarywang.wxpay.bean.merchanttransfer.TransferCreateRequest.TransferDetailList();
-        detail.setOutDetailNo(request.getOutDetailNo());
-        detail.setTransferAmount(toFen(request.getAmount()));
-        detail.setTransferRemark(request.getTransferRemark());
-        detail.setOpenid(request.getOpenId());
-        detail.setUserName(request.getRealName());
-        wxRequest.setTransferDetailList(Collections.singletonList(detail));
-
-        TransferCreateResult createResult = wxPayService.getMerchantTransferService().createTransfer(wxRequest);
+        TransferBillsResult createResult = wxPayService.getTransferService().transferBills(wxRequest);
         WalletTransferCreateResult result = new WalletTransferCreateResult();
-        result.setBatchId(createResult.getBatchId());
+        result.setBatchId(createResult.getTransferBillNo());
+        result.setState(createResult.getState());
+        result.setPackageInfo(createResult.getPackageInfo());
         return result;
     }
 
     @Override
     public WalletTransferQueryResult queryTransfer(String outBatchNo, String outDetailNo) throws Exception {
-        MerchantDetailsQueryRequest request = new MerchantDetailsQueryRequest();
-        request.setOutBatchNo(outBatchNo);
-        request.setOutDetailNo(outDetailNo);
-        DetailsQueryResult detail = wxPayService.getMerchantTransferService().queryMerchantDetails(request);
+        TransferBillsGetResult detail = wxPayService.getTransferService().getBillsByOutBillNo(outBatchNo);
         if (detail == null) {
             return null;
         }
         WalletTransferQueryResult result = new WalletTransferQueryResult();
-        result.setBatchId(detail.getBatchId());
-        result.setOutBatchNo(detail.getOutBatchNo());
-        result.setDetailId(detail.getDetailId());
-        result.setDetailStatus(detail.getDetailStatus());
+        result.setBatchId(detail.getTransferBillNo());
+        result.setOutBatchNo(detail.getOutBillNo());
+        result.setDetailId(detail.getTransferBillNo());
+        result.setDetailStatus(detail.getState());
         result.setFailReason(detail.getFailReason());
         return result;
+    }
+
+    private List<TransferBillsRequest.TransferSceneReportInfo> toWxReportInfos(
+            List<WalletTransferCreateRequest.TransferSceneReportInfo> reportInfos) {
+        return reportInfos.stream().map(info ->
+                new TransferBillsRequest.TransferSceneReportInfo(info.getInfoType(), info.getInfoContent())
+        ).collect(Collectors.toList());
     }
 
     private int toFen(BigDecimal amount) {

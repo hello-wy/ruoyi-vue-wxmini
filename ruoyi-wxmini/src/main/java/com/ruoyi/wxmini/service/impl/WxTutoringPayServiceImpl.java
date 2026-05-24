@@ -8,7 +8,10 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
+import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
+import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
@@ -49,9 +52,7 @@ import java.util.List;
 public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCreateOrderBo> implements IWxMiniTutoringService {
 
     private static final String ORDER_PREFIX = "TUTOR";
-    private static final int BINDING_STATUS_PENDING_ORDER = 0;
     private static final int BINDING_STATUS_ORDERED = 1;
-    private static final int BINDING_STATUS_CLOSED = 2;
     private static final int ORDER_STATUS_PENDING = 0;
     private static final int ORDER_STATUS_PAID = 1;
     private static final int ORDER_STATUS_CANCELED = 2;
@@ -92,6 +93,52 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
     }
 
     @Override
+    public WxPayParamVo payPendingOrder(String wxUserId, String orderNo) throws Exception {
+        UserInfo currentUser = requireCurrentUser(wxUserId);
+        if (StringUtils.isBlank(currentUser.getOpenId())) {
+            throw new ServiceException("当前用户缺少openId");
+        }
+        TutoringOrder order = loadOwnedOrder(currentUser.getId(), orderNo);
+        if (order.getStatus() == null || order.getStatus() != ORDER_STATUS_PENDING) {
+            throw new ServiceException("当前订单状态不可支付");
+        }
+        if (order.getTotalAmount() == null || order.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ServiceException("订单金额不合法");
+        }
+        WxPayCreateOrderParam orderParam = new WxPayCreateOrderParam();
+        orderParam.setOrderNo(order.getOrderNo());
+        orderParam.setOrderDesc("家教课时费");
+        orderParam.setAmount(order.getTotalAmount().multiply(new BigDecimal("100")).intValue());
+        orderParam.setOpenId(currentUser.getOpenId());
+        orderParam.setTimeExpire(DateUtil.format(DateUtil.offsetMinute(new Date(), 5), DatePattern.UTC_WITH_XXX_OFFSET_PATTERN));
+
+        WxPayUnifiedOrderV3Request v3Request = new WxPayUnifiedOrderV3Request();
+        v3Request.setAppid(wxPayService.getConfig().getAppId());
+        v3Request.setMchid(wxPayService.getConfig().getMchId());
+        v3Request.setDescription(orderParam.getOrderDesc());
+        v3Request.setOutTradeNo(orderParam.getOrderNo());
+        v3Request.setTimeExpire(orderParam.getTimeExpire());
+        v3Request.setNotifyUrl(getNotifyUrl(null));
+        WxPayUnifiedOrderV3Request.Amount amountObj = new WxPayUnifiedOrderV3Request.Amount();
+        amountObj.setTotal(orderParam.getAmount());
+        v3Request.setAmount(amountObj);
+        WxPayUnifiedOrderV3Request.Payer payer = new WxPayUnifiedOrderV3Request.Payer();
+        payer.setOpenid(orderParam.getOpenId());
+        v3Request.setPayer(payer);
+
+        WxPayUnifiedOrderV3Result.JsapiResult jsapiResult = wxPayService.createOrderV3(TradeTypeEnum.JSAPI, v3Request);
+        order.setWechatOpenId(currentUser.getOpenId());
+        order.setUpdateBy(wxUserId);
+        order.setUpdateTime(DateUtils.getNowDate());
+        tutoringOrderMapper.updateTutoringOrder(order);
+
+        WxPayParamVo payParamVo = new WxPayParamVo();
+        payParamVo.setOrderNo(order.getOrderNo());
+        payParamVo.setPayParam(jsapiResult);
+        return payParamVo;
+    }
+
+    @Override
     public List<TutoringOrder> listMyOrders(String wxUserId) {
         UserInfo currentUser = requireCurrentUser(wxUserId);
         return tutoringOrderMapper.selectMyOrders(currentUser.getId());
@@ -124,7 +171,7 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
             throw new ServiceException("无权操作该课表");
         }
         if (schedule.getStatus() == null || schedule.getStatus() != SCHEDULE_STATUS_PENDING) {
-            throw new ServiceException("当前课表状态不可完课");
+            throw new ServiceException("当前课表状态不可签到");
         }
         schedule.setStatus(SCHEDULE_STATUS_WAIT_PARENT_CONFIRM);
         schedule.setFinishTime(DateUtils.getNowDate());
@@ -149,7 +196,10 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
             throw new ServiceException("当前课表状态不可确认");
         }
         if (schedule.getFinishTime() == null) {
-            throw new ServiceException("教员尚未提交完课");
+            throw new ServiceException("学生尚未上课签到");
+        }
+        if (schedule.getConfirmTime() != null) {
+            throw new ServiceException("家长已提交确认，等待管理员审核");
         }
         schedule.setConfirmTime(DateUtils.getNowDate());
         schedule.setConfirmRemark(StringUtils.defaultString(remark));
@@ -201,7 +251,7 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
         if (parent.getHourlyBudget() == null || parent.getHourlyBudget().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ServiceException("需求时薪预算无效");
         }
-        String snapshot = StringUtils.defaultIfBlank(binding.getServiceTimesSnapshot(), parent.getServiceTimes());
+        String snapshot = resolveOrderServiceTimes(bo, binding, parent);
         JSONArray slots = parseScheduleSnapshot(snapshot);
         int lessonCount = slots.size();
         BigDecimal totalAmount = calculateTotalAmount(parent.getHourlyBudget(), slots);
@@ -315,7 +365,6 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
             binding.setUpdateBy(StringUtils.defaultIfBlank(binding.getUpdateBy(), "system"));
             binding.setUpdateTime(DateUtils.getNowDate());
             tutoringBindingMapper.updateTutoringBinding(binding);
-            tutoringBindingMapper.closeBindingsByParentId(binding.getParentId(), binding.getId(), binding.getUpdateBy());
         }
         createSchedulesForPaidOrder(order, StringUtils.defaultIfBlank(order.getUpdateBy(), "system"));
         return true;
@@ -325,9 +374,6 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
         TutoringOrder latestOrder = tutoringOrderMapper.selectLatestByBindingId(bindingId);
         if (latestOrder == null || latestOrder.getStatus() == null) {
             return;
-        }
-        if (latestOrder.getStatus() == ORDER_STATUS_PAID) {
-            throw new ServiceException("该绑定已完成下单");
         }
         if (latestOrder.getStatus() != ORDER_STATUS_PENDING) {
             return;
@@ -366,10 +412,14 @@ public class WxTutoringPayServiceImpl extends AbsWxPayBaseService<WxTutoringCrea
         if (binding == null || !parentUserId.equals(binding.getParentUserId())) {
             throw new ServiceException("绑定关系不存在");
         }
-        if (binding.getStatus() != null && binding.getStatus() == BINDING_STATUS_CLOSED) {
-            throw new ServiceException("该绑定已关闭");
-        }
         return binding;
+    }
+
+    private String resolveOrderServiceTimes(WxTutoringCreateOrderBo bo, TutoringBinding binding, Parents parent) {
+        if (StringUtils.isNotBlank(bo.getServiceTimes())) {
+            return bo.getServiceTimes();
+        }
+        return StringUtils.defaultIfBlank(binding.getServiceTimesSnapshot(), parent.getServiceTimes());
     }
 
     private UserInfo requireCurrentUser(String wxUserId) {

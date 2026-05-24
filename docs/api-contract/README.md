@@ -89,6 +89,7 @@
 - `system/tradeOrder/{id}.md`
 - `system/tutoring-admin__bindings.md`
 - `system/tutoring-admin__bindings__list.md`
+- `system/tutoring-admin__orders.md`
 - `system/tutoring-admin__payroll__batch-pay.md`
 - `system/tutoring-admin__payroll__list.md`
 - `system/tutoring-admin__schedules__list.md`
@@ -137,6 +138,7 @@
 - `wxmini/tutoring/orders__create.md`
 - `wxmini/tutoring/orders__my.md`
 - `wxmini/tutoring/orders__{orderNo}.md`
+- `wxmini/tutoring/orders__{orderNo}__pay.md`
 - `wxmini/tutoring/parents.md`
 - `wxmini/tutoring/parents__list.md`
 - `wxmini/tutoring/parents__mine.md`

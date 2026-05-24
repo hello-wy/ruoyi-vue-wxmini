@@ -42,3 +42,12 @@ export function delParents(id) {
     method: 'delete'
   })
 }
+
+// 绑定家长需求与教员并生成待支付订单
+export function createTutoringPendingOrder(parentId, tutorId) {
+  return request({
+    url: '/system/tutoring-admin/orders',
+    method: 'post',
+    params: { parentId, tutorId }
+  })
+}

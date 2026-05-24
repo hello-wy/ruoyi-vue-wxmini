@@ -42,6 +42,10 @@ public class WxPayTransferConfigValidator {
         if (StringUtils.isBlank(properties.getApiV3Key())) {
             missingFields.add("wx.pay.apiV3Key");
         }
+        if (StringUtils.isNotBlank(properties.getPublicKeyPath())
+                && StringUtils.isBlank(properties.getPublicKeyId())) {
+            missingFields.add("wx.pay.publicKeyId");
+        }
 
         // 校验转账子配置
         WxPayProperties.Transfer transfer = properties.getTransfer();
@@ -49,10 +53,10 @@ public class WxPayTransferConfigValidator {
             missingFields.add("wx.pay.transfer (entire section)");
         } else {
             if (StringUtils.isBlank(transfer.getNotifyUrl())) {
-                missingFields.add("wx.pay.transfer.notifyUrl");
+                missingFields.add("wx.pay.transfer.notify-url");
             }
             if (StringUtils.isBlank(transfer.getSceneId())) {
-                missingFields.add("wx.pay.transfer.sceneId");
+                missingFields.add("wx.pay.transfer.scene-id");
             }
         }
 

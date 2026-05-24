@@ -235,6 +235,13 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-shopping-cart-full"
+            @click="handleCreateOrder(scope.row)"
+            v-hasPermi="['system:parents:edit']"
+          >生成订单</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:parents:remove']"
@@ -356,11 +363,61 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="生成家教待支付订单" :visible.sync="orderOpen" width="800px" append-to-body>
+      <el-form :model="orderQueryParams" ref="orderQueryForm" size="small" :inline="true" label-width="68px">
+        <el-form-item label="姓名" prop="realName">
+          <el-input
+            v-model="orderQueryParams.realName"
+            placeholder="请输入教员姓名"
+            clearable
+            @keyup.enter.native="getTutorList"
+          />
+        </el-form-item>
+        <el-form-item label="科目" prop="subjects">
+          <el-input
+            v-model="orderQueryParams.subjects"
+            placeholder="请输入科目"
+            clearable
+            @keyup.enter.native="getTutorList"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="getTutorList">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetTutorQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+      <el-table v-loading="orderLoading" :data="tutorList">
+        <el-table-column label="教员ID" align="center" prop="id" width="160" />
+        <el-table-column label="用户ID" align="center" prop="uid" width="120" />
+        <el-table-column label="姓名" align="center" prop="realName" width="100" />
+        <el-table-column label="学校" align="center" prop="school" />
+        <el-table-column label="科目" align="center" prop="subjects" />
+        <el-table-column label="操作" align="center" width="100">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-check"
+              @click="submitTutoringOrder(scope.row)"
+            >选择</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <pagination
+        v-show="tutorTotal>0"
+        :total="tutorTotal"
+        :page.sync="orderQueryParams.pageNum"
+        :limit.sync="orderQueryParams.pageSize"
+        @pagination="getTutorList"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listParents, getParents, delParents, addParents, updateParents } from "@/api/system/parents"
+import { listParents, getParents, delParents, addParents, updateParents, createTutoringPendingOrder } from "@/api/system/parents"
+import { listTutors } from "@/api/system/tutors"
 
 export default {
   name: "Parents",
@@ -381,6 +438,24 @@ export default {
       total: 0,
       // 家教订单表格数据
       parentsList: [],
+      // 是否显示生成订单弹出层
+      orderOpen: false,
+      // 生成订单遮罩层
+      orderLoading: false,
+      // 当前生成订单的家长需求
+      orderParent: null,
+      // 教员表格数据
+      tutorList: [],
+      // 教员总条数
+      tutorTotal: 0,
+      // 教员查询参数
+      orderQueryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        realName: null,
+        subjects: null,
+        status: 1
+      },
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -505,6 +580,42 @@ export default {
         this.form.subject = this.form.subject.split(",")
         this.open = true
         this.title = "修改家教订单"
+      })
+    },
+    /** 生成待支付订单按钮操作 */
+    handleCreateOrder(row) {
+      this.orderParent = row
+      this.orderOpen = true
+      this.orderQueryParams.pageNum = 1
+      this.getTutorList()
+    },
+    /** 查询可绑定教员列表 */
+    getTutorList() {
+      this.orderLoading = true
+      listTutors(this.orderQueryParams).then(response => {
+        this.tutorList = response.rows
+        this.tutorTotal = response.total
+      }).finally(() => {
+        this.orderLoading = false
+      })
+    },
+    /** 重置教员查询 */
+    resetTutorQuery() {
+      this.resetForm("orderQueryForm")
+      this.orderQueryParams.pageNum = 1
+      this.getTutorList()
+    },
+    /** 选择教员并生成待支付订单 */
+    submitTutoringOrder(row) {
+      if (!this.orderParent || !this.orderParent.id) {
+        this.$modal.msgError("请选择家长需求")
+        return
+      }
+      createTutoringPendingOrder(this.orderParent.id, row.id).then(response => {
+        const order = response.data || {}
+        this.$modal.msgSuccess("已生成待支付订单：" + (order.orderNo || ""))
+        this.orderOpen = false
+        this.getList()
       })
     },
     /** 提交按钮 */

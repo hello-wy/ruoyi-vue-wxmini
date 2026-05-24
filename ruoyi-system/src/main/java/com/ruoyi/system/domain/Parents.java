@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -106,6 +107,21 @@ public class Parents extends BaseEntity {
 
     @Excel(name = "请家教订单状态", readConverterExp = "0 正常 1 取消")
     private Long status;
+
+    @TableField(exist = false)
+    private Boolean bound;
+
+    @TableField(exist = false)
+    private String parentName;
+
+    @TableField(exist = false)
+    private String parentPhone;
+
+    @TableField(exist = false)
+    private String tutorName;
+
+    @TableField(exist = false)
+    private String studentPhone;
 
     public void setId(Long id) {
         this.id = id;
@@ -315,6 +331,46 @@ public class Parents extends BaseEntity {
         return status;
     }
 
+    public Boolean getBound() {
+        return bound;
+    }
+
+    public void setBound(Boolean bound) {
+        this.bound = bound;
+    }
+
+    public String getParentName() {
+        return parentName;
+    }
+
+    public void setParentName(String parentName) {
+        this.parentName = parentName;
+    }
+
+    public String getParentPhone() {
+        return parentPhone;
+    }
+
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+
+    public String getTutorName() {
+        return tutorName;
+    }
+
+    public void setTutorName(String tutorName) {
+        this.tutorName = tutorName;
+    }
+
+    public String getStudentPhone() {
+        return studentPhone;
+    }
+
+    public void setStudentPhone(String studentPhone) {
+        this.studentPhone = studentPhone;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -344,6 +400,11 @@ public class Parents extends BaseEntity {
                 .append("createDate", getCreateDate())
                 .append("updateDate", getUpdateDate())
                 .append("status", getStatus())
+                .append("bound", getBound())
+                .append("parentName", getParentName())
+                .append("parentPhone", getParentPhone())
+                .append("tutorName", getTutorName())
+                .append("studentPhone", getStudentPhone())
                 .toString();
     }
 }

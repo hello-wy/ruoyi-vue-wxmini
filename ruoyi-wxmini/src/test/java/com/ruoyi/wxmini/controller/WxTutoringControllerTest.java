@@ -395,6 +395,19 @@ class WxTutoringControllerTest {
     }
 
     @Test
+    void payPendingTutoringOrderShouldReturnWrappedPayParam() throws Exception {
+        WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
+        WxPayParamVo payParamVo = new WxPayParamVo();
+        payParamVo.setOrderNo("TORDER-1");
+        when(wxMiniTutoringService.payPendingOrder(WECHAT_USER_ID, "TORDER-1")).thenReturn(payParamVo);
+
+        AjaxResult result = controller.payPendingTutoringOrder("TORDER-1");
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(payParamVo, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
     void myTutoringSchedulesShouldReturnWrappedList() {
         WxMiniUserContext.setCurrentUserId(WECHAT_USER_ID);
         TutoringSchedule schedule = new TutoringSchedule();

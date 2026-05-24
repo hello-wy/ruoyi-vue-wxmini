@@ -1,6 +1,8 @@
 package com.ruoyi.system.service.dto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WalletTransferCreateRequest {
 
@@ -15,6 +17,8 @@ public class WalletTransferCreateRequest {
     private String transferRemark;
     private String notifyUrl;
     private String transferSceneId;
+    private String userRecvPerception;
+    private List<TransferSceneReportInfo> transferSceneReportInfos = new ArrayList<>();
 
     public String getAppId() {
         return appId;
@@ -102,5 +106,43 @@ public class WalletTransferCreateRequest {
 
     public void setTransferSceneId(String transferSceneId) {
         this.transferSceneId = transferSceneId;
+    }
+
+    public String getUserRecvPerception() {
+        return userRecvPerception;
+    }
+
+    public void setUserRecvPerception(String userRecvPerception) {
+        this.userRecvPerception = userRecvPerception;
+    }
+
+    public List<TransferSceneReportInfo> getTransferSceneReportInfos() {
+        return transferSceneReportInfos;
+    }
+
+    public void setTransferSceneReportInfos(List<TransferSceneReportInfo> transferSceneReportInfos) {
+        this.transferSceneReportInfos = transferSceneReportInfos;
+    }
+
+    public void addTransferSceneReportInfo(String infoType, String infoContent) {
+        this.transferSceneReportInfos.add(new TransferSceneReportInfo(infoType, infoContent));
+    }
+
+    public static class TransferSceneReportInfo {
+        private String infoType;
+        private String infoContent;
+
+        public TransferSceneReportInfo(String infoType, String infoContent) {
+            this.infoType = infoType;
+            this.infoContent = infoContent;
+        }
+
+        public String getInfoType() {
+            return infoType;
+        }
+
+        public String getInfoContent() {
+            return infoContent;
+        }
     }
 }

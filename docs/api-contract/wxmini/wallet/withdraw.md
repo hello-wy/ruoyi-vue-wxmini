@@ -5,6 +5,7 @@
 - `POST`：发起微信提现到当前登录用户的微信零钱。
 - 提现前必须已完成实名认证，并且当前登录小程序账号已绑定微信 `openid`。
 - 同一用户同时只能有一笔处理中的提现，重复提交会被拒绝。
+- 微信商家转账使用升级版接口：`POST /v3/fund-app/mch-transfer/transfer-bills`。
 
 ## 鉴权
 
@@ -20,7 +21,7 @@
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| amount | string | 是 | 提现金额，单位元，最多两位小数，最低 1.00 |
+| amount | string | 是 | 提现金额，单位元，最多两位小数，最低 1.00，最高 2000.00 |
 
 ## 响应结构
 
@@ -55,10 +56,15 @@
     "outBatchNo": "WD20250101120000000123",
     "failType": null,
     "userMessage": null,
-    "msg": "微信提现处理中"
+    "msg": "微信提现处理中",
+    "packageInfo": "package_info_from_wechat",
+    "appId": "wx小程序 appId",
+    "mchId": "微信支付商户号"
   }
 }
 ```
+
+> 当微信返回 `WAIT_USER_CONFIRM` 时，后端会在处理中响应里附带 `packageInfo/appId/mchId`，小程序端需要用这些字段调用 `uni.requestMerchantTransfer` 引导用户确认收款。非确认模式或微信未返回 `package_info` 时，这三个字段为 null 或不存在。
 
 ### 失败响应（code != 200）
 
@@ -91,6 +97,9 @@
 | failType | String / null | 失败类型枚举值，成功/处理中时为 null |
 | userMessage | String / null | 面向用户的中文失败提示，成功/处理中时为 null |
 | msg | String | 兼容旧版的消息字段 |
+| packageInfo | String / null | 微信商家转账确认收款 `package_info`，仅 `WAIT_USER_CONFIRM` 时返回 |
+| appId | String / null | 调用 `uni.requestMerchantTransfer` 所需小程序 appId，仅确认收款时返回 |
+| mchId | String / null | 调用 `uni.requestMerchantTransfer` 所需微信支付商户号，仅确认收款时返回 |
 
 ## failType 枚举值
 
@@ -115,6 +124,7 @@
 
 - 金额为空或格式不正确
 - 金额低于最低限额（默认 1.00 元）
+- 金额高于最高限额（默认 2000.00 元）
 - 金额精度超过两位小数
 - 可用余额不足（`BALANCE_INSUFFICIENT`）
 - 未完成实名认证（`USER_NOT_REALNAME`）
@@ -129,10 +139,22 @@
 | 1 | 已打款 | 资金已到达用户微信零钱 |
 | 2 | 打款失败 | 转账失败，可查看 failType 了解原因 |
 
+## 微信转账状态映射
+
+后端以 `wallet_withdraw.status` 对前端收敛状态，微信升级版商家转账单状态按以下规则处理：
+
+| 微信 state | wallet_withdraw.status | 说明 |
+|------------|------------------------|------|
+| `SUCCESS` | 1 | 已成功到账 |
+| `WAIT_USER_CONFIRM` | 0 | 待用户在微信确认收款，响应中可能返回 `packageInfo/appId/mchId` |
+| `FAILED` | 2 | 转账失败 |
+| 其他状态 | 0 | 处理中，等待回调或轮询同步 |
+
 ## 前端处理建议
 
 - `code === 200 && data.status === 1`：提现成功，关闭弹窗，刷新余额
-- `code === 200 && data.status === 0`：处理中，关闭弹窗，提示"提现处理中"，启动轮询（每 5s，最多 6 次）
+- `code === 200 && data.status === 0 && data.packageInfo`：先调用 `uni.requestMerchantTransfer`，用户确认后关闭弹窗并启动轮询（每 5s，最多 6 次）
+- `code === 200 && data.status === 0 && !data.packageInfo`：关闭弹窗，提示"提现处理中"，启动轮询（每 5s，最多 6 次）
 - `code !== 200`：失败，保持弹窗打开，显示 `data.userMessage` 或 `msg`
 
 ## 实现来源文件

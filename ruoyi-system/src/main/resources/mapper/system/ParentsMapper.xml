@@ -31,55 +31,76 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="serviceTimes" column="service_times"/>
         <result property="startTime" column="start_time"/>
         <result property="endTime" column="end_time"/>
+        <result property="bound" column="bound"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="parentPhone" column="parent_phone"/>
+        <result property="tutorName" column="tutor_name"/>
+        <result property="studentPhone" column="student_phone"/>
     </resultMap>
 
     <sql id="selectParentsVo">
-        select id, wechat_uid, system_uid, baby_id, address_id, location, geo, region, name, phone, grade, subject, methods,
-               demand_items, gender_requirement, hourly_budget, requirements, brief, create_date, update_date, status, day_of_week, service_dates,
-               service_times, start_time, end_time
-        from parents
+        select p.id, p.wechat_uid, p.system_uid, p.baby_id, p.address_id, p.location, p.geo, p.region, p.name, p.phone, p.grade, p.subject, p.methods,
+               p.demand_items, p.gender_requirement, p.hourly_budget, p.requirements, p.brief, p.create_date, p.update_date, p.status, p.day_of_week, p.service_dates,
+               p.service_times, p.start_time, p.end_time,
+               tb_latest.id is not null as bound,
+               coalesce(ui.real_name, ui.user_name) as parent_name,
+               coalesce(ui.phone, p.phone) as parent_phone,
+               coalesce(tui.real_name, tui.user_name) as tutor_name,
+               tui.phone as student_phone
+        from parents p
+                 left join user_info ui on ui.id = p.system_uid
+                 left join tutoring_binding tb_latest on tb_latest.id = (
+                     select tb.id
+                     from tutoring_binding tb
+                     where tb.parent_id = p.id
+                     order by tb.create_time desc, tb.id desc
+                     limit 1
+                 )
+                 left join user_info tui on tui.id = tb_latest.tutor_user_id
     </sql>
 
     <select id="selectParentsList" parameterType="Parents" resultMap="ParentsResult">
         <include refid="selectParentsVo"/>
         <where>
-            <if test="wechatUid != null"> and wechat_uid = #{wechatUid}</if>
-            <if test="systemUid != null"> and system_uid = #{systemUid}</if>
-            <if test="babyId != null"> and baby_id = #{babyId}</if>
-            <if test="addressId != null"> and address_id = #{addressId}</if>
-            <if test="location != null and location != ''"> and location = #{location}</if>
-            <if test="geo != null and geo != ''"> and geo = #{geo}</if>
-            <if test="region != null and region != ''"> and region = #{region}</if>
-            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%')</if>
-            <if test="phone != null and phone != ''"> and phone = #{phone}</if>
-            <if test="grade != null and grade != ''"> and grade = #{grade}</if>
-            <if test="subject != null and subject != ''"> and subject = #{subject}</if>
-            <if test="methods != null"> and methods = #{methods}</if>
-            <if test="demandItems != null and demandItems != ''"> and demand_items = #{demandItems}</if>
-            <if test="genderRequirement != null"> and gender_requirement = #{genderRequirement}</if>
-            <if test="hourlyBudget != null"> and hourly_budget = #{hourlyBudget}</if>
-            <if test="requirements != null and requirements != ''"> and requirements = #{requirements}</if>
-            <if test="brief != null and brief != ''"> and brief = #{brief}</if>
-            <if test="createDate != null"> and create_date = #{createDate}</if>
-            <if test="updateDate != null"> and update_date = #{updateDate}</if>
-            <if test="status != null"> and status = #{status}</if>
-            <if test="dayOfWeek != null and dayOfWeek != ''"> and day_of_week = #{dayOfWeek}</if>
-            <if test="serviceDates != null and serviceDates != ''"> and service_dates = #{serviceDates}</if>
-            <if test="serviceTimes != null and serviceTimes != ''"> and service_times = #{serviceTimes}</if>
-            <if test="startTime != null"> and start_time = #{startTime}</if>
-            <if test="endTime != null"> and end_time = #{endTime}</if>
+            <if test="wechatUid != null"> and p.wechat_uid = #{wechatUid}</if>
+            <if test="systemUid != null"> and p.system_uid = #{systemUid}</if>
+            <if test="babyId != null"> and p.baby_id = #{babyId}</if>
+            <if test="addressId != null"> and p.address_id = #{addressId}</if>
+            <if test="location != null and location != ''"> and p.location = #{location}</if>
+            <if test="geo != null and geo != ''"> and p.geo = #{geo}</if>
+            <if test="region != null and region != ''"> and p.region = #{region}</if>
+            <if test="name != null and name != ''"> and p.name like concat('%', #{name}, '%')</if>
+            <if test="phone != null and phone != ''"> and p.phone = #{phone}</if>
+            <if test="grade != null and grade != ''"> and p.grade = #{grade}</if>
+            <if test="subject != null and subject != ''"> and p.subject = #{subject}</if>
+            <if test="methods != null"> and p.methods = #{methods}</if>
+            <if test="demandItems != null and demandItems != ''"> and p.demand_items = #{demandItems}</if>
+            <if test="genderRequirement != null"> and p.gender_requirement = #{genderRequirement}</if>
+            <if test="hourlyBudget != null"> and p.hourly_budget = #{hourlyBudget}</if>
+            <if test="requirements != null and requirements != ''"> and p.requirements = #{requirements}</if>
+            <if test="brief != null and brief != ''"> and p.brief = #{brief}</if>
+            <if test="createDate != null"> and p.create_date = #{createDate}</if>
+            <if test="updateDate != null"> and p.update_date = #{updateDate}</if>
+            <if test="status != null"> and p.status = #{status}</if>
+            <if test="dayOfWeek != null and dayOfWeek != ''"> and p.day_of_week = #{dayOfWeek}</if>
+            <if test="serviceDates != null and serviceDates != ''"> and p.service_dates = #{serviceDates}</if>
+            <if test="serviceTimes != null and serviceTimes != ''"> and p.service_times = #{serviceTimes}</if>
+            <if test="startTime != null"> and p.start_time = #{startTime}</if>
+            <if test="endTime != null"> and p.end_time = #{endTime}</if>
+            <if test="bound != null and bound == true"> and tb_latest.id is not null</if>
+            <if test="bound != null and bound == false"> and tb_latest.id is null</if>
         </where>
     </select>
 
     <select id="selectParentsById" parameterType="Long" resultMap="ParentsResult">
         <include refid="selectParentsVo"/>
-        where id = #{id}
+        where p.id = #{id}
     </select>
 
     <select id="selectSingleParentByWechatUid" parameterType="String" resultMap="ParentsResult">
         <include refid="selectParentsVo"/>
-        where wechat_uid = #{wechatUid}
-        order by create_date desc, id desc
+        where p.wechat_uid = #{wechatUid}
+        order by p.create_date desc, p.id desc
         limit 1
     </select>
 

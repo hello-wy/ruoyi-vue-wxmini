@@ -312,6 +312,18 @@ public class WxTutoringController extends BaseController {
         }
     }
 
+    @ApiOperation("支付已有待支付家教订单（需登录）")
+    @PostMapping("/orders/{orderNo}/pay")
+    public AjaxResult payPendingTutoringOrder(@PathVariable("orderNo") String orderNo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxMiniTutoringService.payPendingOrder(userId, orderNo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @ApiOperation("查看当前登录用户的家教订单列表（需登录）")
     @GetMapping("/orders/my")
     public AjaxResult myTutoringOrders() {
@@ -350,7 +362,7 @@ public class WxTutoringController extends BaseController {
         }
     }
 
-    @ApiOperation("教员提交完课（需登录）")
+    @ApiOperation("学生上课签到（需登录）")
     @PostMapping("/schedules/{id}/finish")
     public AjaxResult finishTutoringSchedule(@PathVariable("id") Long id, @RequestBody(required = false) WxTutoringScheduleActionBo bo) {
         try {
@@ -363,7 +375,7 @@ public class WxTutoringController extends BaseController {
         }
     }
 
-    @ApiOperation("家长确认完课（需登录）")
+    @ApiOperation("家长提交上课完成（需登录）")
     @PostMapping("/schedules/{id}/confirm")
     public AjaxResult confirmTutoringSchedule(@PathVariable("id") Long id, @RequestBody(required = false) WxTutoringScheduleActionBo bo) {
         try {

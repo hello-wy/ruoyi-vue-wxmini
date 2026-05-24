@@ -41,6 +41,14 @@ public class TutoringAdminController extends BaseController {
         return AjaxResult.success(tutoringAdminService.bindTutor(parentId, tutorId, getUsername()));
     }
 
+    @ApiOperation("绑定家长需求与教员并生成待支付订单")
+    @PreAuthorize("@ss.hasPermi('system:parents:edit')")
+    @Log(title = "家教订单", businessType = BusinessType.INSERT)
+    @PostMapping("/orders")
+    public AjaxResult createPendingOrder(@RequestParam("parentId") Long parentId, @RequestParam("tutorId") Long tutorId) {
+        return AjaxResult.success(tutoringAdminService.createPendingOrder(parentId, tutorId, getUsername()));
+    }
+
     @ApiOperation("家教绑定列表")
     @PreAuthorize("@ss.hasPermi('system:parents:list')")
     @GetMapping("/bindings/list")

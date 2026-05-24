@@ -14,6 +14,7 @@ import com.ruoyi.system.domain.TutoringSchedule;
 import com.ruoyi.system.domain.Tutors;
 import com.ruoyi.system.mapper.ParentsMapper;
 import com.ruoyi.system.mapper.TutoringBindingMapper;
+import com.ruoyi.system.mapper.TutoringOrderMapper;
 import com.ruoyi.system.mapper.TutoringPayrollItemMapper;
 import com.ruoyi.system.mapper.TutoringScheduleMapper;
 import com.ruoyi.system.service.ISysConfigService;
@@ -40,6 +41,8 @@ public class TutoringBindingServiceSupport {
     static final int BINDING_STATUS_PENDING_ORDER = 0;
     static final int BINDING_STATUS_ORDERED = 1;
     static final int BINDING_STATUS_CLOSED = 2;
+    static final int ORDER_STATUS_PENDING = 0;
+    static final int ORDER_STATUS_PAID = 1;
     static final int SCHEDULE_STATUS_PENDING = 0;
     static final int SCHEDULE_STATUS_WAIT_PARENT_CONFIRM = 1;
     static final int SCHEDULE_STATUS_WAIT_SETTLEMENT = 2;
@@ -56,6 +59,8 @@ public class TutoringBindingServiceSupport {
     private TutoringBindingMapper tutoringBindingMapper;
     @Resource
     private TutoringScheduleMapper tutoringScheduleMapper;
+    @Resource
+    private TutoringOrderMapper tutoringOrderMapper;
     @Resource
     private TutoringPayrollItemMapper tutoringPayrollItemMapper;
     @Resource
@@ -99,6 +104,52 @@ public class TutoringBindingServiceSupport {
         binding.setUpdateTime(DateUtils.getNowDate());
         tutoringBindingMapper.insertTutoringBinding(binding);
         return tutoringBindingMapper.selectById(binding.getId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public TutoringOrder createPendingOrder(Long parentId, Long tutorId, String operator) {
+        TutoringBinding binding = bindTutor(parentId, tutorId, operator);
+        if (binding == null || binding.getId() == null) {
+            throw new ServiceException("绑定关系不存在");
+        }
+        TutoringOrder latestOrder = tutoringOrderMapper.selectLatestByBindingId(binding.getId());
+        if (latestOrder != null) {
+            if (latestOrder.getStatus() != null && latestOrder.getStatus() == ORDER_STATUS_PAID) {
+                throw new ServiceException("该绑定已完成下单");
+            }
+            if (latestOrder.getStatus() != null && latestOrder.getStatus() == ORDER_STATUS_PENDING) {
+                return latestOrder;
+            }
+        }
+        Parents parent = parentsMapper.selectParentsById(binding.getParentId());
+        if (parent == null) {
+            throw new ServiceException("家长需求不存在");
+        }
+        if (parent.getHourlyBudget() == null || parent.getHourlyBudget().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ServiceException("需求时薪预算无效");
+        }
+        String snapshot = StringUtils.defaultIfBlank(binding.getServiceTimesSnapshot(), parent.getServiceTimes());
+        JSONArray slots = parseScheduleSnapshot(snapshot);
+        TutoringOrder order = new TutoringOrder();
+        order.setId(SnowflakeIdWorker.nextIdDefault());
+        order.setOrderNo("TUTOR" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + System.currentTimeMillis());
+        order.setBindingId(binding.getId());
+        order.setParentId(binding.getParentId());
+        order.setParentUserId(binding.getParentUserId());
+        order.setTutorId(binding.getTutorId());
+        order.setTutorUserId(binding.getTutorUserId());
+        order.setServiceTimesSnapshot(snapshot);
+        order.setLessonCount(slots.size());
+        order.setHourlyPrice(parent.getHourlyBudget().setScale(2, RoundingMode.HALF_UP));
+        order.setTotalAmount(calculateTotalAmount(parent.getHourlyBudget(), slots));
+        order.setCommissionRate(defaultCommissionRate());
+        order.setStatus(ORDER_STATUS_PENDING);
+        order.setCreateBy(operator);
+        order.setCreateTime(DateUtils.getNowDate());
+        order.setUpdateBy(operator);
+        order.setUpdateTime(DateUtils.getNowDate());
+        tutoringOrderMapper.insertTutoringOrder(order);
+        return order;
     }
 
     public List<TutoringBinding> listBindings(TutoringBinding query) {
@@ -229,6 +280,33 @@ public class TutoringBindingServiceSupport {
             return new BigDecimal("10.00");
         }
         return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private JSONArray parseScheduleSnapshot(String snapshot) {
+        JSONArray array = JSON.parseArray(StringUtils.defaultString(snapshot));
+        if (array == null || array.isEmpty()) {
+            throw new ServiceException("服务时段不能为空");
+        }
+        return array;
+    }
+
+    private BigDecimal calculateTotalAmount(BigDecimal hourlyPrice, JSONArray slots) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (int i = 0; i < slots.size(); i++) {
+            JSONObject slot = slots.getJSONObject(i);
+            LocalTime startTime = LocalTime.parse(slot.getString("startTime"));
+            LocalTime endTime = LocalTime.parse(slot.getString("endTime"));
+            BigDecimal hours = BigDecimal.valueOf(Duration.between(startTime, endTime).toMinutes())
+                    .divide(new BigDecimal("60"), 2, RoundingMode.HALF_UP);
+            if (hours.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ServiceException("服务时段不合法");
+            }
+            total = total.add(hourlyPrice.multiply(hours).setScale(2, RoundingMode.HALF_UP));
+        }
+        if (total.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ServiceException("订单金额不合法");
+        }
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal resolveCommissionRate(TutoringSchedule schedule) {

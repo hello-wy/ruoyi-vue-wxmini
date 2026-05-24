@@ -27,6 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="confirmRemark" column="confirm_remark"/>
         <result property="parentName" column="parent_name"/>
         <result property="tutorName" column="tutor_name"/>
+        <result property="realName" column="real_name"/>
         <result property="parentSubject" column="parent_subject"/>
         <result property="parentGrade" column="parent_grade"/>
         <result property="location" column="location"/>
@@ -65,7 +66,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                p.subject as parent_subject,
                p.grade as parent_grade,
                p.location as location,
-               ui.user_name as tutor_name
+               ui.real_name as real_name,
+               ui.real_name as tutor_name
         from tutoring_schedule s
                  left join parents p on p.id = s.parent_id
                  left join user_info ui on ui.id = s.tutor_user_id
@@ -118,6 +120,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="TutoringScheduleColumns"/>
         <where>
             <if test="status != null">and s.status = #{status}</if>
+            <if test="confirmed != null and confirmed == true">and s.confirm_time is not null</if>
+            <if test="confirmed != null and confirmed == false">and s.confirm_time is null</if>
             <if test="parentUserId != null">and s.parent_user_id = #{parentUserId}</if>
             <if test="tutorUserId != null">and s.tutor_user_id = #{tutorUserId}</if>
             <if test="orderNo != null and orderNo != ''">and s.order_no = #{orderNo}</if>

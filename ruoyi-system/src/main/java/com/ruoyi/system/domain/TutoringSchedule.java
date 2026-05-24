@@ -43,9 +43,11 @@ public class TutoringSchedule extends BaseEntity {
     private String confirmRemark;
     private String parentName;
     private String tutorName;
+    private String realName;
     private String parentSubject;
     private String parentGrade;
     private String location;
+    private Boolean confirmed;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -91,10 +93,14 @@ public class TutoringSchedule extends BaseEntity {
     public void setParentName(String parentName) { this.parentName = parentName; }
     public String getTutorName() { return tutorName; }
     public void setTutorName(String tutorName) { this.tutorName = tutorName; }
+    public String getRealName() { return realName; }
+    public void setRealName(String realName) { this.realName = realName; }
     public String getParentSubject() { return parentSubject; }
     public void setParentSubject(String parentSubject) { this.parentSubject = parentSubject; }
     public String getParentGrade() { return parentGrade; }
     public void setParentGrade(String parentGrade) { this.parentGrade = parentGrade; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
+    public Boolean getConfirmed() { return confirmed; }
+    public void setConfirmed(Boolean confirmed) { this.confirmed = confirmed; }
 }

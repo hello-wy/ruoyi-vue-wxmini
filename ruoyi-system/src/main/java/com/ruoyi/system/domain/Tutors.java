@@ -65,6 +65,9 @@ public class Tutors extends BaseEntity
     @Excel(name = "实名认证真实姓名")
     private String realName;
 
+    @Excel(name = "手机号")
+    private String phone;
+
     @Excel(name = "身份证号码")
     private String idCard;
 
@@ -237,6 +240,16 @@ public class Tutors extends BaseEntity
         return realName;
     }
 
+    public void setPhone(String phone)
+    {
+        this.phone = phone;
+    }
+
+    public String getPhone()
+    {
+        return phone;
+    }
+
     public void setIdCard(String idCard)
     {
         this.idCard = idCard;
@@ -296,6 +309,7 @@ public class Tutors extends BaseEntity
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .append("realName", getRealName())
+            .append("phone", getPhone())
             .append("idCard", getIdCard())
             .append("selfJudge", getSelfJudge())
             .append("certificateList", getCertificateList())
