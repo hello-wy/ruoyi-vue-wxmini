@@ -74,6 +74,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectAvailableBindingsByParentUserId" resultMap="TutoringBindingResult">
         <include refid="TutoringBindingColumns"/>
         where tb.parent_user_id = #{parentUserId}
+          and tb.status != 2
+          and p.id is not null
+          and p.status = 0
         order by tb.create_time desc, tb.id desc
     </select>
 

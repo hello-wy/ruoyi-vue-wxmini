@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.ruoyi.system.mapper.ParentsMapper;
+import com.ruoyi.system.mapper.TutoringBindingMapper;
 import com.ruoyi.system.domain.Parents;
 import com.ruoyi.system.service.IParentsService;
 
@@ -18,8 +20,13 @@ import com.ruoyi.system.service.IParentsService;
 @Service
 public class ParentsServiceImpl implements IParentsService
 {
+    private static final String SYSTEM_OPERATOR = "system";
+
     @Autowired
     private ParentsMapper parentsMapper;
+
+    @Autowired
+    private TutoringBindingMapper tutoringBindingMapper;
 
     /**
      * 查询家教订单
@@ -88,8 +95,10 @@ public class ParentsServiceImpl implements IParentsService
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteParentsById(Long id)
     {
+        tutoringBindingMapper.closeBindingsByParentId(id, null, SYSTEM_OPERATOR);
         return parentsMapper.deleteParentsById(id);
     }
 
