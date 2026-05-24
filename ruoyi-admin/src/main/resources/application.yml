@@ -171,7 +171,7 @@ wx:
       min-amount: 1.00
       max-amount: 2000.00
       batch-name: 钱包提现
-      user-recv-perception: 钱包提现
+      user-recv-perception: 劳务报酬
       scene-report-job-type: 其他
       scene-report-reward-desc: 微信提现
     realname:

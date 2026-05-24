@@ -70,7 +70,7 @@ public class WxPayProperties {
         private String batchName = "钱包提现";
 
         /** 用户收款感知文案 */
-        private String userRecvPerception = "钱包提现";
+        private String userRecvPerception = "劳务报酬";
 
         /** 转账场景报备：岗位类型 */
         private String sceneReportJobType = "其他";

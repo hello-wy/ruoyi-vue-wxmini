@@ -67,7 +67,7 @@ public class WalletServiceImpl implements IWalletService
     @Value("${wx.pay.transfer.batch-name:钱包提现}")
     private String transferBatchName;
 
-    @Value("${wx.pay.transfer.user-recv-perception:钱包提现}")
+    @Value("${wx.pay.transfer.user-recv-perception:劳务报酬}")
     private String transferUserRecvPerception;
 
     @Value("${wx.pay.transfer.scene-report-job-type:其他}")

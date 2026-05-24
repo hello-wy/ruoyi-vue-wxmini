@@ -63,6 +63,7 @@ class WxWalletTransferGatewayImplTest {
         assertEquals("openid-1", wxRequest.getOpenid());
         assertEquals(100, wxRequest.getTransferAmount());
         assertEquals("https://example.com/wallet/notify", wxRequest.getNotifyUrl());
+        assertEquals("劳务报酬", wxRequest.getUserRecvPerception());
         assertNull(wxRequest.getReceiptAuthorizationMode());
         assertNotNull(wxRequest.getTransferSceneReportInfos());
         assertEquals(2, wxRequest.getTransferSceneReportInfos().size());
@@ -81,7 +82,7 @@ class WxWalletTransferGatewayImplTest {
         request.setTransferRemark("微信提现");
         request.setNotifyUrl("https://example.com/wallet/notify");
         request.setTransferSceneId("1005");
-        request.setUserRecvPerception("钱包提现");
+        request.setUserRecvPerception("劳务报酬");
         request.addTransferSceneReportInfo("岗位类型", "其他");
         request.addTransferSceneReportInfo("报酬说明", "微信提现");
         return request;

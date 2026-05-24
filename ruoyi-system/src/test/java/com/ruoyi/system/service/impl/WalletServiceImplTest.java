@@ -5,6 +5,7 @@ import com.ruoyi.system.domain.WalletTransaction;
 import com.ruoyi.system.domain.WalletWithdraw;
 import com.ruoyi.system.mapper.WalletMapper;
 import com.ruoyi.system.service.IWalletTransferGateway;
+import com.ruoyi.system.service.dto.WalletTransferCreateRequest;
 import com.ruoyi.system.service.dto.WalletTransferCreateResult;
 import com.ruoyi.system.service.dto.WalletTransferQueryResult;
 import com.ruoyi.system.service.dto.WithdrawResult;
@@ -52,6 +53,7 @@ class WalletServiceImplTest {
         ReflectionTestUtils.setField(service, "transferNotifyUrl", "https://zhiyujia.xyz/api/wxmini/pay/wallet/notify");
         ReflectionTestUtils.setField(service, "transferSceneId", "1005");
         ReflectionTestUtils.setField(service, "transferBatchName", "钱包提现");
+        ReflectionTestUtils.setField(service, "transferUserRecvPerception", "劳务报酬");
         ReflectionTestUtils.setField(service, "wxPayAppId", "wx-app-1");
         ReflectionTestUtils.setField(service, "wxPayMchId", "mch-1");
     }
@@ -74,6 +76,8 @@ class WalletServiceImplTest {
         assertEquals("${wx.pay.transfer.min-amount:1.00}", valueExpression("transferMinAmount"));
         assertEquals("${wx.pay.transfer.max-amount:2000.00}", valueExpression("transferMaxAmount"));
         assertEquals("${wx.pay.transfer.batch-name:钱包提现}", valueExpression("transferBatchName"));
+        assertEquals("${wx.pay.transfer.user-recv-perception:劳务报酬}",
+                valueExpression("transferUserRecvPerception"));
     }
 
     private String valueExpression(String fieldName) throws Exception {
@@ -146,7 +150,9 @@ class WalletServiceImplTest {
 
         WalletTransferCreateResult createResult = new WalletTransferCreateResult();
         createResult.setBatchId("wx-batch-1");
-        when(walletTransferGateway.createTransfer(any())).thenReturn(createResult);
+        ArgumentCaptor<WalletTransferCreateRequest> transferCaptor =
+                ArgumentCaptor.forClass(WalletTransferCreateRequest.class);
+        when(walletTransferGateway.createTransfer(transferCaptor.capture())).thenReturn(createResult);
 
         WalletTransferQueryResult detail = new WalletTransferQueryResult();
         detail.setBatchId("wx-batch-1");
@@ -206,6 +212,7 @@ class WalletServiceImplTest {
         verify(walletMapper).insertWithdraw(insertCaptor.capture());
         verify(walletMapper, atLeastOnce()).updateWithdrawStatus(any());
         assertTrue(insertCaptor.getValue().getOutBatchNo().startsWith("WD"));
+        assertEquals("劳务报酬", transferCaptor.getValue().getUserRecvPerception());
         verify(walletMapper).updateWallet(any(UserWallet.class));
         verify(walletMapper).insertTransaction(any(WalletTransaction.class));
     }
