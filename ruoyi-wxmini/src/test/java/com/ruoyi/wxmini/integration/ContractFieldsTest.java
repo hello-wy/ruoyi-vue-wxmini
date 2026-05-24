@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -48,23 +50,24 @@ class ContractFieldsTest {
      * The complete set of required fields that must appear in the contract document.
      * This is the union of WxSignupUserVo fields + payrollPaid + payrollItemStatus.
      */
-    private static final Set<String> REQUIRED_FIELDS = Set.of(
-            "userInfoId",
-            "displayName",
-            "phoneMasked",
-            "orderNo",
-            "attendanceStatus",
-            "attendanceStatusLabel",
-            "auditStatus",
-            "auditStatusLabel",
-            "auditRemark",
-            "signTime",
-            "signedCount",
-            "signImageUrl",
-            "submitTime",
-            "payrollPaid",
-            "payrollItemStatus"
-    );
+    private static final Set<String> REQUIRED_FIELDS = Collections.unmodifiableSet(
+            new TreeSet<>(Arrays.asList(
+                    "userInfoId",
+                    "displayName",
+                    "phoneMasked",
+                    "orderNo",
+                    "attendanceStatus",
+                    "attendanceStatusLabel",
+                    "auditStatus",
+                    "auditStatusLabel",
+                    "auditRemark",
+                    "signTime",
+                    "signedCount",
+                    "signImageUrl",
+                    "submitTime",
+                    "payrollPaid",
+                    "payrollItemStatus"
+            )));
 
     @Test
     @DisplayName("Post-fix · canonical contract exists and covers all required fields (P4)")
