@@ -50,6 +50,6 @@ nbdist/
 .worktrees/
 uploadPath
 logs
-doc
+docs/
 
 *.docx
