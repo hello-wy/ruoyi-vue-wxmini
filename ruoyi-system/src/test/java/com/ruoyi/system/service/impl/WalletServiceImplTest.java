@@ -221,7 +221,9 @@ class WalletServiceImplTest {
     void shouldReturnMerchantTransferPackageWhenUserConfirmationRequired() throws Exception {
         UserInfo userInfo = newVerifiedUser();
         when(userInfoService.selectUserInfoByUserId("wx-user-1")).thenReturn(userInfo);
-        when(walletMapper.selectWalletByUid(10L)).thenReturn(walletWithBalance("100.00"));
+        UserWallet wallet = walletWithBalance("100.00");
+        when(walletMapper.selectWalletByUid(10L)).thenReturn(wallet);
+        when(walletMapper.selectWalletByUidForUpdate(10L)).thenReturn(wallet);
 
         WalletTransferCreateResult createResult = new WalletTransferCreateResult();
         createResult.setBatchId("wx-bill-1");

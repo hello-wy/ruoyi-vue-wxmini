@@ -114,6 +114,7 @@ public class WalletServiceImpl implements IWalletService
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public WithdrawResult applyWithdraw(String userId, Long uid, BigDecimal amount)
     {
         // 金额校验
@@ -179,8 +180,9 @@ public class WalletServiceImpl implements IWalletService
                     buildTransferRequest(userInfo, amount, outBatchNo, outDetailNo));
             withdraw.setWxTransferNo(result.getBatchId());
             walletMapper.updateWithdrawStatus(withdraw);
+            boolean deducted = deductWithdrawAmount(withdraw);
 
-            return syncWithdrawStatusForResult(withdraw, result);
+            return syncWithdrawStatusForResult(withdraw, result, deducted);
         }
         catch (Exception e)
         {
@@ -231,7 +233,9 @@ public class WalletServiceImpl implements IWalletService
     @Override
     public List<WalletWithdraw> getWithdrawRecords(Long uid)
     {
-        return walletMapper.selectWithdrawListByUid(uid);
+        List<WalletWithdraw> records = walletMapper.selectWithdrawListByUid(uid);
+        boolean updated = syncProcessingWithdraws(records);
+        return updated ? walletMapper.selectWithdrawListByUid(uid) : records;
     }
 
     @Override
@@ -278,11 +282,12 @@ public class WalletServiceImpl implements IWalletService
     /**
      * SDK 调用成功后同步查询状态，返回结构化 WithdrawResult
      */
-    private WithdrawResult syncWithdrawStatusForResult(WalletWithdraw withdraw, WalletTransferCreateResult createResult)
+    private WithdrawResult syncWithdrawStatusForResult(WalletWithdraw withdraw, WalletTransferCreateResult createResult,
+            boolean deducted)
     {
         try
         {
-            boolean updated = updateWithdrawByDetailQuery(withdraw);
+            boolean updated = updateWithdrawByDetailQuery(withdraw, deducted);
             if (!updated)
             {
                 return buildProcessingResult(withdraw, createResult);
@@ -353,6 +358,11 @@ public class WalletServiceImpl implements IWalletService
     @Transactional(rollbackFor = Exception.class)
     protected boolean updateWithdrawByDetailQuery(WalletWithdraw withdraw) throws Exception
     {
+        return updateWithdrawByDetailQuery(withdraw, false);
+    }
+
+    private boolean updateWithdrawByDetailQuery(WalletWithdraw withdraw, boolean deducted) throws Exception
+    {
         WalletTransferQueryResult detail = walletTransferGateway.queryTransfer(withdraw.getOutBatchNo(), withdraw.getOutDetailNo());
         if (detail == null || StringUtils.isBlank(detail.getDetailStatus()))
         {
@@ -360,7 +370,7 @@ public class WalletServiceImpl implements IWalletService
         }
         if (DETAIL_STATUS_SUCCESS.equals(detail.getDetailStatus()))
         {
-            markWithdrawSuccess(withdraw, detail.getBatchId(), detail.getDetailId());
+            markWithdrawSuccess(withdraw, detail.getBatchId(), detail.getDetailId(), deducted);
             return true;
         }
         if (DETAIL_STATUS_FAILED.equals(detail.getDetailStatus())
@@ -375,6 +385,11 @@ public class WalletServiceImpl implements IWalletService
     @Transactional(rollbackFor = Exception.class)
     protected void markWithdrawSuccess(WalletWithdraw withdraw, String batchId, String detailId)
     {
+        markWithdrawSuccess(withdraw, batchId, detailId, false);
+    }
+
+    private void markWithdrawSuccess(WalletWithdraw withdraw, String batchId, String detailId, boolean deducted)
+    {
         WalletWithdraw latest = walletMapper.selectWithdrawById(withdraw.getId());
         if (latest == null || WITHDRAW_STATUS_SUCCESS.equals(latest.getStatus()))
         {
@@ -384,18 +399,10 @@ public class WalletServiceImpl implements IWalletService
         {
             return;
         }
-        UserWallet wallet = walletMapper.selectWalletByUidForUpdate(latest.getUid());
-        if (wallet == null)
+        if (!deducted)
         {
-            throw new ServiceException("钱包不存在");
+            deductWithdrawAmount(latest);
         }
-        if (wallet.getBalance().compareTo(latest.getAmount()) < 0)
-        {
-            throw new ServiceException("钱包余额不足，无法完成提现扣款");
-        }
-        wallet.setBalance(wallet.getBalance().subtract(latest.getAmount()));
-        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().add(latest.getAmount()));
-        walletMapper.updateWallet(wallet);
 
         latest.setStatus(WITHDRAW_STATUS_SUCCESS);
         latest.setRemark("微信提现成功");
@@ -403,17 +410,6 @@ public class WalletServiceImpl implements IWalletService
         latest.setWxDetailNo(detailId);
         walletMapper.updateWithdrawStatus(latest);
 
-        WalletTransaction transaction = new WalletTransaction();
-        transaction.setId(SnowflakeIdWorker.nextIdDefault());
-        transaction.setUid(latest.getUid());
-        transaction.setBizType(WITHDRAW_BIZ_TYPE);
-        transaction.setBizId(String.valueOf(latest.getId()));
-        transaction.setDirection(DIRECTION_EXPENSE);
-        transaction.setAmount(latest.getAmount());
-        transaction.setBalanceAfter(wallet.getBalance());
-        transaction.setRemark(WITHDRAW_REMARK);
-        transaction.setCreateTime(DateUtils.getNowDate());
-        walletMapper.insertTransaction(transaction);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -443,6 +439,7 @@ public class WalletServiceImpl implements IWalletService
         {
             withdraw.setWxDetailNo(detailId);
         }
+        refundWithdrawAmountIfDeducted(withdraw);
         walletMapper.updateWithdrawStatus(withdraw);
 
         log.error("[Withdraw] markFailed uid={}, outBatchNo={}, failType={}, reason={}",
@@ -488,5 +485,103 @@ public class WalletServiceImpl implements IWalletService
             return value;
         }
         return value.substring(0, maxLength);
+    }
+
+    private boolean syncProcessingWithdraws(List<WalletWithdraw> records)
+    {
+        boolean updated = false;
+        if (records == null)
+        {
+            return false;
+        }
+        for (WalletWithdraw record : records)
+        {
+            if (isSyncableProcessingWithdraw(record))
+            {
+                updated = updateWithdrawByDetailQueryUnchecked(record) || updated;
+            }
+        }
+        return updated;
+    }
+
+    private boolean isSyncableProcessingWithdraw(WalletWithdraw record)
+    {
+        return record != null
+                && WITHDRAW_STATUS_PROCESSING.equals(record.getStatus())
+                && StringUtils.isNoneBlank(record.getOutBatchNo(), record.getOutDetailNo());
+    }
+
+    private boolean updateWithdrawByDetailQueryUnchecked(WalletWithdraw withdraw)
+    {
+        try
+        {
+            return updateWithdrawByDetailQuery(withdraw);
+        }
+        catch (Exception e)
+        {
+            throw new ServiceException("同步微信提现状态失败：" + e.getMessage());
+        }
+    }
+
+    private boolean deductWithdrawAmount(WalletWithdraw withdraw)
+    {
+        if (hasWithdrawTransaction(withdraw.getId()))
+        {
+            return false;
+        }
+        UserWallet wallet = walletMapper.selectWalletByUidForUpdate(withdraw.getUid());
+        if (wallet == null)
+        {
+            throw new ServiceException("钱包不存在");
+        }
+        if (wallet.getBalance().compareTo(withdraw.getAmount()) < 0)
+        {
+            throw new ServiceException("钱包余额不足，无法完成提现扣款");
+        }
+        wallet.setBalance(wallet.getBalance().subtract(withdraw.getAmount()));
+        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().add(withdraw.getAmount()));
+        walletMapper.updateWallet(wallet);
+        insertWithdrawExpense(withdraw, wallet.getBalance());
+        return true;
+    }
+
+    private void insertWithdrawExpense(WalletWithdraw withdraw, BigDecimal balanceAfter)
+    {
+        WalletTransaction transaction = new WalletTransaction();
+        transaction.setId(SnowflakeIdWorker.nextIdDefault());
+        transaction.setUid(withdraw.getUid());
+        transaction.setBizType(WITHDRAW_BIZ_TYPE);
+        transaction.setBizId(String.valueOf(withdraw.getId()));
+        transaction.setDirection(DIRECTION_EXPENSE);
+        transaction.setAmount(withdraw.getAmount());
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setRemark(WITHDRAW_REMARK);
+        transaction.setCreateTime(DateUtils.getNowDate());
+        walletMapper.insertTransaction(transaction);
+    }
+
+    private void refundWithdrawAmountIfDeducted(WalletWithdraw withdraw)
+    {
+        if (!hasWithdrawTransaction(withdraw.getId()))
+        {
+            return;
+        }
+        UserWallet wallet = walletMapper.selectWalletByUidForUpdate(withdraw.getUid());
+        if (wallet == null)
+        {
+            throw new ServiceException("钱包不存在");
+        }
+        wallet.setBalance(wallet.getBalance().add(withdraw.getAmount()));
+        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().subtract(withdraw.getAmount()));
+        walletMapper.updateWallet(wallet);
+    }
+
+    private boolean hasWithdrawTransaction(Long withdrawId)
+    {
+        if (withdrawId == null)
+        {
+            return false;
+        }
+        return walletMapper.selectTransactionByBiz(WITHDRAW_BIZ_TYPE, String.valueOf(withdrawId)) != null;
     }
 }

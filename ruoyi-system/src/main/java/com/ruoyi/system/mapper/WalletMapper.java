@@ -28,6 +28,8 @@ public interface WalletMapper
 
     int insertTransaction(WalletTransaction transaction);
 
+    WalletTransaction selectTransactionByBiz(@Param("bizType") String bizType, @Param("bizId") String bizId);
+
     List<WalletTransaction> selectTransactionListByUid(@Param("uid") Long uid);
 
     int selectPendingWithdrawCountByUid(@Param("uid") Long uid);

@@ -121,6 +121,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         values (#{id}, #{uid}, #{bizType}, #{bizId}, #{direction}, #{amount}, #{balanceAfter}, #{remark}, #{createTime})
     </insert>
 
+    <select id="selectTransactionByBiz" resultMap="WalletTransactionResult">
+        select id, uid, biz_type, biz_id, direction, amount, balance_after, remark, create_time
+        from wallet_transaction
+        where biz_type = #{bizType}
+          and biz_id = #{bizId}
+        limit 1
+    </select>
+
     <select id="selectTransactionListByUid" resultMap="WalletTransactionResult">
         select id, uid, biz_type, biz_id, direction, amount, balance_after, remark, create_time
         from wallet_transaction
