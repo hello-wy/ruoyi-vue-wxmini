@@ -13,6 +13,7 @@ import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,6 +99,70 @@ class WxUserProfileServiceImplTest {
         assertEquals(1, rows);
         assertEquals(2, userInfo.getUserType());
         verify(userInfoService).updateUserInfo(userInfo);
+    }
+
+    @Test
+    void submitMerchantApplicationShouldCreatePendingWhitelistRecord() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("11010519900101123X");
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(null);
+        when(merchantUserTypeWhitelistService.insertMerchantUserTypeWhitelist(any(MerchantUserTypeWhitelist.class))).thenReturn(1);
+
+        int rows = service.submitMerchantApplication(USER_ID, "/profile/merchant-license/user/a.jpg");
+
+        assertEquals(1, rows);
+        ArgumentCaptor<MerchantUserTypeWhitelist> captor = ArgumentCaptor.forClass(MerchantUserTypeWhitelist.class);
+        verify(merchantUserTypeWhitelistService).insertMerchantUserTypeWhitelist(captor.capture());
+        MerchantUserTypeWhitelist saved = captor.getValue();
+        assertEquals("张三", saved.getRealName());
+        assertEquals("11010519900101123X", saved.getIdCard());
+        assertEquals(Integer.valueOf(0), saved.getStatus());
+        assertEquals(USER_ID, saved.getApplyUserId());
+        assertEquals("/profile/merchant-license/user/a.jpg", saved.getBusinessLicenseUrl());
+    }
+
+    @Test
+    void submitMerchantApplicationShouldRejectBlankLicense() {
+        ServiceException error = assertThrows(ServiceException.class, () -> service.submitMerchantApplication(USER_ID, " "));
+
+        assertEquals("请先上传营业执照", error.getMessage());
+    }
+
+    @Test
+    void submitMerchantApplicationShouldRejectMissingRealnameInfo() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> {
+            service.submitMerchantApplication(USER_ID, "/profile/merchant-license/user/a.jpg");
+        });
+
+        assertEquals("请先完成实名认证后再提交商家申请", error.getMessage());
+    }
+
+    @Test
+    void submitMerchantApplicationShouldNotDowngradeApprovedRecord() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(USER_ID);
+        userInfo.setRealName("张三");
+        userInfo.setIdCard("11010519900101123X");
+        MerchantUserTypeWhitelist existing = new MerchantUserTypeWhitelist();
+        existing.setStatus(1);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(merchantUserTypeWhitelistService.selectMerchantUserTypeWhitelistByIdCard("11010519900101123X"))
+                .thenReturn(existing);
+
+        ServiceException error = assertThrows(ServiceException.class, () -> {
+            service.submitMerchantApplication(USER_ID, "/profile/merchant-license/user/a.jpg");
+        });
+
+        assertEquals("商家身份已审核通过，无需重复提交", error.getMessage());
+        verify(merchantUserTypeWhitelistService, never())
+                .updateMerchantUserTypeWhitelistApplication(any(MerchantUserTypeWhitelist.class));
     }
 
     @Test

@@ -213,7 +213,10 @@ class WalletServiceImplTest {
         verify(walletMapper, atLeastOnce()).updateWithdrawStatus(any());
         assertTrue(insertCaptor.getValue().getOutBatchNo().startsWith("WD"));
         assertEquals("劳务报酬", transferCaptor.getValue().getUserRecvPerception());
-        verify(walletMapper).updateWallet(any(UserWallet.class));
+        assertEquals(new BigDecimal("90.00"), wallet.getBalance());
+        assertEquals(0, BigDecimal.ZERO.compareTo(wallet.getFrozen()));
+        assertEquals(new BigDecimal("10.00"), wallet.getTotalWithdrawn());
+        verify(walletMapper, atLeastOnce()).updateWallet(any(UserWallet.class));
         verify(walletMapper).insertTransaction(any(WalletTransaction.class));
     }
 

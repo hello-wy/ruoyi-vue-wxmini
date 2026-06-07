@@ -14,5 +14,9 @@ public interface MerchantUserTypeWhitelistMapper extends BaseMapper<MerchantUser
 
     int insertMerchantUserTypeWhitelist(MerchantUserTypeWhitelist whitelist);
 
+    int updateMerchantUserTypeWhitelistAudit(MerchantUserTypeWhitelist whitelist);
+
+    int updateMerchantUserTypeWhitelistApplication(MerchantUserTypeWhitelist whitelist);
+
     int deleteMerchantUserTypeWhitelistByIds(Long[] ids);
 }

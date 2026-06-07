@@ -35,6 +35,16 @@ public class MerchantUserTypeWhitelistServiceImpl implements IMerchantUserTypeWh
     }
 
     @Override
+    public int updateMerchantUserTypeWhitelistAudit(MerchantUserTypeWhitelist whitelist) {
+        return merchantUserTypeWhitelistMapper.updateMerchantUserTypeWhitelistAudit(whitelist);
+    }
+
+    @Override
+    public int updateMerchantUserTypeWhitelistApplication(MerchantUserTypeWhitelist whitelist) {
+        return merchantUserTypeWhitelistMapper.updateMerchantUserTypeWhitelistApplication(whitelist);
+    }
+
+    @Override
     public int deleteMerchantUserTypeWhitelistByIds(Long[] ids) {
         return merchantUserTypeWhitelistMapper.deleteMerchantUserTypeWhitelistByIds(ids);
     }

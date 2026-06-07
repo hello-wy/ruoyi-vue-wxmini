@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/system/merchant-user-type-whitelist")
 public class MerchantUserTypeWhitelistController extends BaseController {
+
+    private static final int STATUS_PENDING = 0;
+    private static final int STATUS_APPROVED = 1;
+    private static final int STATUS_REJECTED = 2;
 
     @Autowired
     private IMerchantUserTypeWhitelistService whitelistService;
@@ -67,13 +72,28 @@ public class MerchantUserTypeWhitelistController extends BaseController {
         whitelist.setRealName(realName);
         whitelist.setIdCard(idCard);
         whitelist.setRemark(StringUtils.trimToEmpty(whitelist.getRemark()));
-        whitelist.setStatus(whitelist.getStatus() == null ? 1 : whitelist.getStatus());
-        if (whitelist.getStatus() != 0 && whitelist.getStatus() != 1) {
-            return AjaxResult.error("状态值只能为0或1");
+        whitelist.setStatus(whitelist.getStatus() == null ? STATUS_APPROVED : whitelist.getStatus());
+        if (!isValidStatus(whitelist.getStatus())) {
+            return AjaxResult.error("状态值只能为0、1或2");
         }
         whitelist.setCreateBy(resolveCreateBy());
         whitelist.setCreateTime(DateUtils.getNowDate());
         return toAjax(whitelistService.insertMerchantUserTypeWhitelist(whitelist));
+    }
+
+    @ApiOperation("审核商家身份申请")
+    @PreAuthorize("@ss.hasRole('admin')")
+    @Log(title = "商家身份白名单", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/audit")
+    public AjaxResult audit(@PathVariable Long id, @RequestBody MerchantUserTypeWhitelist whitelist) {
+        if (whitelist == null || !isValidStatus(whitelist.getStatus())) {
+            return AjaxResult.error("状态值只能为0、1或2");
+        }
+        whitelist.setId(id);
+        whitelist.setRemark(StringUtils.trimToEmpty(whitelist.getRemark()));
+        whitelist.setUpdateBy(resolveCreateBy());
+        whitelist.setUpdateTime(DateUtils.getNowDate());
+        return toAjax(whitelistService.updateMerchantUserTypeWhitelistAudit(whitelist));
     }
 
     @ApiOperation("删除商家身份白名单")
@@ -95,6 +115,12 @@ public class MerchantUserTypeWhitelistController extends BaseController {
 
     private String normalizeIdCard(String idCard) {
         return StringUtils.upperCase(StringUtils.trimToEmpty(idCard));
+    }
+
+    private boolean isValidStatus(Integer status) {
+        return Integer.valueOf(STATUS_PENDING).equals(status)
+                || Integer.valueOf(STATUS_APPROVED).equals(status)
+                || Integer.valueOf(STATUS_REJECTED).equals(status);
     }
 
     private String resolveCreateBy() {

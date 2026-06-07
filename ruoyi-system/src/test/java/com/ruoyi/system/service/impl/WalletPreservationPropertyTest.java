@@ -24,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -292,7 +291,8 @@ class WalletPreservationPropertyTest {
         // Track state changes across calls
         AtomicReference<Integer> withdrawStatus = new AtomicReference<>(0); // starts PROCESSING
         AtomicReference<BigDecimal> walletBalance = new AtomicReference<>(initialBalance);
-        AtomicInteger transactionInsertCount = new AtomicInteger(0);
+        AtomicReference<BigDecimal> walletFrozen = new AtomicReference<>(amount);
+        AtomicReference<BigDecimal> walletWithdrawn = new AtomicReference<>(BigDecimal.ZERO);
 
         WalletWithdraw withdraw = new WalletWithdraw();
         withdraw.setId(1L);
@@ -327,18 +327,27 @@ class WalletPreservationPropertyTest {
         UserWallet wallet = new UserWallet();
         wallet.setUid(uid);
         wallet.setBalance(initialBalance);
-        wallet.setFrozen(BigDecimal.ZERO);
+        wallet.setFrozen(amount);
         wallet.setTotalEarned(new BigDecimal("500.00"));
         wallet.setTotalWithdrawn(BigDecimal.ZERO);
         when(walletMapper.selectWalletByUidForUpdate(uid)).thenAnswer(inv -> {
             UserWallet w = new UserWallet();
             w.setUid(uid);
             w.setBalance(walletBalance.get());
-            w.setFrozen(BigDecimal.ZERO);
+            w.setFrozen(walletFrozen.get());
             w.setTotalEarned(new BigDecimal("500.00"));
-            w.setTotalWithdrawn(BigDecimal.ZERO);
+            w.setTotalWithdrawn(walletWithdrawn.get());
             return w;
         });
+
+        WalletTransaction existingWithdrawTransaction = new WalletTransaction();
+        existingWithdrawTransaction.setUid(uid);
+        existingWithdrawTransaction.setBizType("WITHDRAW");
+        existingWithdrawTransaction.setBizId("1");
+        existingWithdrawTransaction.setDirection(2);
+        existingWithdrawTransaction.setAmount(amount);
+        existingWithdrawTransaction.setBalanceAfter(initialBalance);
+        when(walletMapper.selectTransactionByBiz("WITHDRAW", "1")).thenReturn(existingWithdrawTransaction);
 
         WalletTransferQueryResult detail = new WalletTransferQueryResult();
         detail.setBatchId("wx-batch-1");
@@ -354,14 +363,11 @@ class WalletPreservationPropertyTest {
         when(walletMapper.updateWallet(any())).thenAnswer(inv -> {
             UserWallet w = inv.getArgument(0);
             walletBalance.set(w.getBalance());
+            walletFrozen.set(w.getFrozen());
+            walletWithdrawn.set(w.getTotalWithdrawn());
             return 1;
         });
-        when(walletMapper.insertTransaction(any())).thenAnswer(inv -> {
-            transactionInsertCount.incrementAndGet();
-            return 1;
-        });
-
-        // First call — should deduct balance
+        // First call — should complete frozen withdraw
         boolean result1 = service.syncWithdrawStatusByOutBatchNo(outBatchNo);
         assertTrue(result1, "First sync should succeed");
 
@@ -369,14 +375,14 @@ class WalletPreservationPropertyTest {
         boolean result2 = service.syncWithdrawStatusByOutBatchNo(outBatchNo);
         assertTrue(result2, "Second sync should return true (already terminal)");
 
-        // Assert: balance deducted exactly once
-        BigDecimal expectedBalance = initialBalance.subtract(amount);
-        assertEquals(0, expectedBalance.compareTo(walletBalance.get()),
-                "Balance should be deducted exactly once. Expected=" + expectedBalance + ", actual=" + walletBalance.get());
+        assertEquals(0, initialBalance.compareTo(walletBalance.get()),
+                "Balance should not be deducted again after the amount has already been frozen");
+        assertEquals(0, BigDecimal.ZERO.compareTo(walletFrozen.get()),
+                "Frozen amount should be released after successful withdraw");
+        assertEquals(0, amount.compareTo(walletWithdrawn.get()),
+                "Successful withdraw should increase totalWithdrawn exactly once");
 
-        // Assert: only one transaction inserted
-        assertEquals(1, transactionInsertCount.get(),
-                "Only one wallet_transaction should be inserted for the same withdraw");
+        verify(walletMapper, never()).insertTransaction(any());
     }
 
     // ========================================================================

@@ -3,6 +3,7 @@ package com.ruoyi.wxmini.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.wxmini.bo.WxMerchantApplicationBo;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
 import com.ruoyi.wxmini.bo.WxUserTypeUpdateBo;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
@@ -84,6 +85,22 @@ public class WxUserProfileController extends BaseController {
         try {
             int rows = wxUserProfileService.switchCurrentUserType(userId, bo.getUserType());
             return rows > 0 ? success() : error("身份切换失败");
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("提交商家身份申请")
+    @PostMapping("/merchant-user-type-application")
+    public AjaxResult submitMerchantApplication(@RequestBody WxMerchantApplicationBo bo) {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            return error("请先登录");
+        }
+        try {
+            String licenseUrl = bo == null ? null : bo.getBusinessLicenseUrl();
+            int rows = wxUserProfileService.submitMerchantApplication(userId, licenseUrl);
+            return rows > 0 ? success() : error("提交失败");
         } catch (ServiceException e) {
             return error(e.getMessage());
         }

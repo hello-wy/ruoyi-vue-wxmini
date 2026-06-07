@@ -79,14 +79,44 @@ class MerchantUserTypeWhitelistControllerTest {
         MerchantUserTypeWhitelist request = new MerchantUserTypeWhitelist();
         request.setRealName("张三");
         request.setIdCard("11010519900101123X");
-        request.setStatus(2);
+        request.setStatus(3);
         when(whitelistService.selectMerchantUserTypeWhitelistByIdCard("11010519900101123X")).thenReturn(null);
 
         AjaxResult result = controller.add(request);
 
         assertEquals(500, result.get(AjaxResult.CODE_TAG));
-        assertEquals("状态值只能为0或1", result.get(AjaxResult.MSG_TAG));
+        assertEquals("状态值只能为0、1或2", result.get(AjaxResult.MSG_TAG));
         verify(whitelistService, never()).insertMerchantUserTypeWhitelist(any(MerchantUserTypeWhitelist.class));
+    }
+
+    @Test
+    void auditShouldAcceptPendingApplication() {
+        MerchantUserTypeWhitelist request = new MerchantUserTypeWhitelist();
+        request.setStatus(1);
+        request.setRemark("通过");
+        when(whitelistService.updateMerchantUserTypeWhitelistAudit(any(MerchantUserTypeWhitelist.class))).thenReturn(1);
+
+        AjaxResult result = controller.audit(10L, request);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        ArgumentCaptor<MerchantUserTypeWhitelist> captor = ArgumentCaptor.forClass(MerchantUserTypeWhitelist.class);
+        verify(whitelistService).updateMerchantUserTypeWhitelistAudit(captor.capture());
+        assertEquals(Long.valueOf(10L), captor.getValue().getId());
+        assertEquals(Integer.valueOf(1), captor.getValue().getStatus());
+        assertEquals("通过", captor.getValue().getRemark());
+        assertNotNull(captor.getValue().getUpdateTime());
+    }
+
+    @Test
+    void auditShouldRejectUnknownStatus() {
+        MerchantUserTypeWhitelist request = new MerchantUserTypeWhitelist();
+        request.setStatus(9);
+
+        AjaxResult result = controller.audit(10L, request);
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("状态值只能为0、1或2", result.get(AjaxResult.MSG_TAG));
+        verify(whitelistService, never()).updateMerchantUserTypeWhitelistAudit(any(MerchantUserTypeWhitelist.class));
     }
 
     @Test

@@ -13,5 +13,9 @@ public interface IMerchantUserTypeWhitelistService {
 
     int insertMerchantUserTypeWhitelist(MerchantUserTypeWhitelist whitelist);
 
+    int updateMerchantUserTypeWhitelistAudit(MerchantUserTypeWhitelist whitelist);
+
+    int updateMerchantUserTypeWhitelistApplication(MerchantUserTypeWhitelist whitelist);
+
     int deleteMerchantUserTypeWhitelistByIds(Long[] ids);
 }

@@ -14,6 +14,12 @@ public class MerchantUserTypeWhitelist extends BaseEntity {
     @Excel(name = "身份证号码")
     private String idCard;
 
+    @Excel(name = "申请用户")
+    private String applyUserId;
+
+    @Excel(name = "营业执照")
+    private String businessLicenseUrl;
+
     @Excel(name = "状态")
     private Integer status;
 
@@ -39,6 +45,22 @@ public class MerchantUserTypeWhitelist extends BaseEntity {
 
     public void setIdCard(String idCard) {
         this.idCard = idCard;
+    }
+
+    public String getApplyUserId() {
+        return applyUserId;
+    }
+
+    public void setApplyUserId(String applyUserId) {
+        this.applyUserId = applyUserId;
+    }
+
+    public String getBusinessLicenseUrl() {
+        return businessLicenseUrl;
+    }
+
+    public void setBusinessLicenseUrl(String businessLicenseUrl) {
+        this.businessLicenseUrl = businessLicenseUrl;
     }
 
     public Integer getStatus() {

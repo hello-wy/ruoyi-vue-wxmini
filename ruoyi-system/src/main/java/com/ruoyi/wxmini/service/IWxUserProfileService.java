@@ -12,4 +12,6 @@ public interface IWxUserProfileService {
     int initCurrentUserType(String userId, Integer userType);
 
     int switchCurrentUserType(String userId, Integer userType);
+
+    int submitMerchantApplication(String userId, String businessLicenseUrl);
 }

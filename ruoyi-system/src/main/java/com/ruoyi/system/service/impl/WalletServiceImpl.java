@@ -180,7 +180,7 @@ public class WalletServiceImpl implements IWalletService
                     buildTransferRequest(userInfo, amount, outBatchNo, outDetailNo));
             withdraw.setWxTransferNo(result.getBatchId());
             walletMapper.updateWithdrawStatus(withdraw);
-            boolean deducted = deductWithdrawAmount(withdraw);
+            boolean deducted = freezeWithdrawAmount(withdraw);
 
             return syncWithdrawStatusForResult(withdraw, result, deducted);
         }
@@ -401,8 +401,9 @@ public class WalletServiceImpl implements IWalletService
         }
         if (!deducted)
         {
-            deductWithdrawAmount(latest);
+            freezeWithdrawAmount(latest);
         }
+        completeFrozenWithdraw(latest);
 
         latest.setStatus(WITHDRAW_STATUS_SUCCESS);
         latest.setRemark("微信提现成功");
@@ -439,7 +440,7 @@ public class WalletServiceImpl implements IWalletService
         {
             withdraw.setWxDetailNo(detailId);
         }
-        refundWithdrawAmountIfDeducted(withdraw);
+        releaseFrozenWithdrawAmount(withdraw);
         walletMapper.updateWithdrawStatus(withdraw);
 
         log.error("[Withdraw] markFailed uid={}, outBatchNo={}, failType={}, reason={}",
@@ -523,7 +524,7 @@ public class WalletServiceImpl implements IWalletService
         }
     }
 
-    private boolean deductWithdrawAmount(WalletWithdraw withdraw)
+    private boolean freezeWithdrawAmount(WalletWithdraw withdraw)
     {
         if (hasWithdrawTransaction(withdraw.getId()))
         {
@@ -539,10 +540,26 @@ public class WalletServiceImpl implements IWalletService
             throw new ServiceException("钱包余额不足，无法完成提现扣款");
         }
         wallet.setBalance(wallet.getBalance().subtract(withdraw.getAmount()));
-        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().add(withdraw.getAmount()));
+        wallet.setFrozen(wallet.getFrozen().add(withdraw.getAmount()));
         walletMapper.updateWallet(wallet);
         insertWithdrawExpense(withdraw, wallet.getBalance());
         return true;
+    }
+
+    private void completeFrozenWithdraw(WalletWithdraw withdraw)
+    {
+        UserWallet wallet = walletMapper.selectWalletByUidForUpdate(withdraw.getUid());
+        if (wallet == null)
+        {
+            throw new ServiceException("钱包不存在");
+        }
+        if (wallet.getFrozen().compareTo(withdraw.getAmount()) < 0)
+        {
+            throw new ServiceException("钱包冻结金额不足，无法完成提现");
+        }
+        wallet.setFrozen(wallet.getFrozen().subtract(withdraw.getAmount()));
+        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().add(withdraw.getAmount()));
+        walletMapper.updateWallet(wallet);
     }
 
     private void insertWithdrawExpense(WalletWithdraw withdraw, BigDecimal balanceAfter)
@@ -560,7 +577,7 @@ public class WalletServiceImpl implements IWalletService
         walletMapper.insertTransaction(transaction);
     }
 
-    private void refundWithdrawAmountIfDeducted(WalletWithdraw withdraw)
+    private void releaseFrozenWithdrawAmount(WalletWithdraw withdraw)
     {
         if (!hasWithdrawTransaction(withdraw.getId()))
         {
@@ -571,8 +588,12 @@ public class WalletServiceImpl implements IWalletService
         {
             throw new ServiceException("钱包不存在");
         }
+        if (wallet.getFrozen().compareTo(withdraw.getAmount()) < 0)
+        {
+            throw new ServiceException("钱包冻结金额不足，无法退回提现冻结金额");
+        }
         wallet.setBalance(wallet.getBalance().add(withdraw.getAmount()));
-        wallet.setTotalWithdrawn(wallet.getTotalWithdrawn().subtract(withdraw.getAmount()));
+        wallet.setFrozen(wallet.getFrozen().subtract(withdraw.getAmount()));
         walletMapper.updateWallet(wallet);
     }
 

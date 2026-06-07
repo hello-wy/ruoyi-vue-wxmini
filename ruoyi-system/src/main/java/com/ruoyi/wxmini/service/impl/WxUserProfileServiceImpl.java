@@ -3,6 +3,7 @@ package com.ruoyi.wxmini.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import com.ruoyi.system.domain.MerchantUserTypeWhitelist;
 import com.ruoyi.system.service.IMerchantUserTypeWhitelistService;
 import com.ruoyi.wxmini.bo.WxUserProfileUpdateBo;
@@ -26,6 +27,8 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     private static final Integer USER_TYPE_STUDENT = 1;
     private static final Integer USER_TYPE_MERCHANT = 2;
     private static final Integer USER_TYPE_AUNT = 3;
+    private static final Integer MERCHANT_AUDIT_PENDING = 0;
+    private static final Integer MERCHANT_AUDIT_APPROVED = 1;
     private static final Integer REALNAME_AUTHED = 1;
     private static final String MERCHANT_USER_TYPE_BLOCKED_MESSAGE = "当前账号暂未开通商家身份";
 
@@ -121,6 +124,30 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
         return userInfoService.updateUserInfo(userInfo);
     }
 
+    @Override
+    public int submitMerchantApplication(String userId, String businessLicenseUrl) {
+        String licenseUrl = StringUtils.trimToEmpty(businessLicenseUrl);
+        if (StringUtils.isBlank(licenseUrl)) {
+            throw new ServiceException("请先上传营业执照");
+        }
+        UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
+        if (!hasRealnameInfo(userInfo)) {
+            throw new ServiceException("请先完成实名认证后再提交商家申请");
+        }
+        MerchantUserTypeWhitelist existing = merchantUserTypeWhitelistService
+                .selectMerchantUserTypeWhitelistByIdCard(userInfo.getIdCard());
+        MerchantUserTypeWhitelist application = buildMerchantApplication(userId, userInfo, licenseUrl);
+        if (existing == null) {
+            application.setId(SnowflakeIdWorker.nextIdDefault());
+            application.setCreateTime(DateUtils.getNowDate());
+            return merchantUserTypeWhitelistService.insertMerchantUserTypeWhitelist(application);
+        }
+        if (MERCHANT_AUDIT_APPROVED.equals(existing.getStatus())) {
+            throw new ServiceException("商家身份已审核通过，无需重复提交");
+        }
+        return merchantUserTypeWhitelistService.updateMerchantUserTypeWhitelistApplication(application);
+    }
+
     private List<Integer> resolveSwitchableUserTypes(String userId) {
         UserInfo userInfo = userInfoService.selectUserInfoByUserId(userId);
         if (canUseMerchantUserType(userInfo)) {
@@ -139,15 +166,35 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
     }
 
     private boolean canUseMerchantUserType(UserInfo userInfo) {
-        if (userInfo == null) {
-            return false;
-        }
-        if (StringUtils.isBlank(userInfo.getIdCard()) || StringUtils.isBlank(userInfo.getRealName())) {
+        if (!hasRealnameInfo(userInfo)) {
             return false;
         }
         MerchantUserTypeWhitelist whitelist = merchantUserTypeWhitelistService
                 .selectEnabledMerchantUserTypeWhitelistByIdCard(userInfo.getIdCard());
         return whitelist != null && StringUtils.equals(whitelist.getRealName(), userInfo.getRealName());
+    }
+
+    private MerchantUserTypeWhitelist buildMerchantApplication(
+            String userId,
+            UserInfo userInfo,
+            String businessLicenseUrl) {
+        MerchantUserTypeWhitelist application = new MerchantUserTypeWhitelist();
+        application.setRealName(StringUtils.trimToEmpty(userInfo.getRealName()));
+        application.setIdCard(StringUtils.upperCase(StringUtils.trimToEmpty(userInfo.getIdCard())));
+        application.setApplyUserId(userId);
+        application.setBusinessLicenseUrl(businessLicenseUrl);
+        application.setStatus(MERCHANT_AUDIT_PENDING);
+        application.setRemark("");
+        application.setCreateBy(userId);
+        application.setUpdateBy(userId);
+        application.setUpdateTime(DateUtils.getNowDate());
+        return application;
+    }
+
+    private boolean hasRealnameInfo(UserInfo userInfo) {
+        return userInfo != null
+                && StringUtils.isNotBlank(userInfo.getIdCard())
+                && StringUtils.isNotBlank(userInfo.getRealName());
     }
 
     private boolean isFrontendAllowedUserType(Integer userType) {
