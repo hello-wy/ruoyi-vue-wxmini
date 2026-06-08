@@ -20,4 +20,12 @@ public interface IWxRefundService {
      * @param reason  退款原因
      */
     void refundSalonOrder(String orderNo, String reason);
+
+    /**
+     * 退款课程报名订单
+     *
+     * @param orderNo 订单号
+     * @param reason  退款原因
+     */
+    void refundCourseOrder(String orderNo, String reason);
 }

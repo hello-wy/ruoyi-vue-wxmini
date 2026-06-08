@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CoursePayOrderMapper">
+    <resultMap id="CoursePayOrderResult" type="com.ruoyi.system.domain.CoursePayOrder">
+        <result property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="phone" column="phone"/>
+        <result property="company" column="company"/>
+        <result property="accommodation" column="accommodation"/>
+        <result property="enrollmentId" column="enrollment_id"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="wechatTransactionId" column="wechat_transaction_id"/>
+        <result property="refundNo" column="refund_no"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="signTime" column="sign_time"/>
+        <result property="refundTime" column="refund_time"/>
+        <result property="requestId" column="request_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectCoursePayOrderColumns">
+        select id, order_no, user_id, course_id, name, gender, phone, company,
+               accommodation, enrollment_id, amount, status, wechat_transaction_id,
+               refund_no, pay_time, sign_time, refund_time, request_id, create_time, update_time
+        from course_pay_order
+    </sql>
+
+    <select id="selectCoursePayOrderByOrderNo" resultMap="CoursePayOrderResult">
+        <include refid="selectCoursePayOrderColumns"/>
+        where order_no = #{orderNo}
+    </select>
+
+    <select id="selectMyCourseOrders" resultMap="CoursePayOrderResult">
+        <include refid="selectCoursePayOrderColumns"/>
+        where user_id = #{userId}
+        order by create_time desc, id desc
+    </select>
+
+    <select id="selectLatestPaidOrder" resultMap="CoursePayOrderResult">
+        <include refid="selectCoursePayOrderColumns"/>
+        where user_id = #{userId} and course_id = #{courseId} and status in (1, 2)
+        order by pay_time desc, id desc
+        limit 1
+    </select>
+
+    <select id="selectLatestPendingOrder" resultMap="CoursePayOrderResult">
+        <include refid="selectCoursePayOrderColumns"/>
+        where user_id = #{userId} and course_id = #{courseId} and status = 0
+        order by create_time desc, id desc
+        limit 1
+    </select>
+
+    <select id="selectLatestByCourseIdAndUserId" resultMap="CoursePayOrderResult">
+        <include refid="selectCoursePayOrderColumns"/>
+        where course_id = #{courseId} and user_id = #{userId} and status in (1, 2, 3)
+        order by create_time desc, id desc
+        limit 1
+    </select>
+
+    <insert id="insertCoursePayOrder" parameterType="com.ruoyi.system.domain.CoursePayOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into course_pay_order
+        (order_no, user_id, course_id, name, gender, phone, company, accommodation,
+         enrollment_id, amount, status, wechat_transaction_id, refund_no, pay_time,
+         sign_time, refund_time, request_id, create_time, update_time)
+        values
+        (#{orderNo}, #{userId}, #{courseId}, #{name}, #{gender}, #{phone}, #{company},
+         #{accommodation}, #{enrollmentId}, #{amount}, #{status}, #{wechatTransactionId},
+         #{refundNo}, #{payTime}, #{signTime}, #{refundTime}, #{requestId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateCoursePayOrder" parameterType="com.ruoyi.system.domain.CoursePayOrder">
+        update course_pay_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="company != null">company = #{company},</if>
+            <if test="accommodation != null">accommodation = #{accommodation},</if>
+            <if test="enrollmentId != null">enrollment_id = #{enrollmentId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="wechatTransactionId != null">wechat_transaction_id = #{wechatTransactionId},</if>
+            <if test="refundNo != null">refund_no = #{refundNo},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="signTime != null">sign_time = #{signTime},</if>
+            <if test="refundTime != null">refund_time = #{refundTime},</if>
+            <if test="requestId != null">request_id = #{requestId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="selectCourseRefundOrders" resultType="com.ruoyi.system.domain.vo.CourseRefundOrderVo">
+        select cpo.id as order_id,
+               cpo.order_no,
+               cpo.user_id,
+               cpo.course_id,
+               l.name as course_name,
+               case
+                   when cpo.name is not null and cpo.name != '' then cpo.name
+                   when ui.real_name is not null and ui.real_name != '' then ui.real_name
+                   when ui.user_name is not null and ui.user_name != '' then ui.user_name
+                   else '未注册用户'
+               end as user_name,
+               cpo.amount,
+               cpo.status,
+               case when cpo.status = 2 then true else false end as signed_in,
+               case when cpo.status = 2 then true else false end as can_refund,
+               cpo.sign_time,
+               cpo.refund_time
+        from course_pay_order cpo
+                 left join lectures l on l.id = cpo.course_id
+                 left join user_info ui on ui.user_id = cpo.user_id
+        where cpo.status in (2, 3)
+        <if test="courseId != null">
+            and cpo.course_id = #{courseId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (cpo.name like concat('%', #{keyword}, '%')
+                or cpo.phone like concat('%', #{keyword}, '%')
+                or cpo.order_no like concat('%', #{keyword}, '%')
+                or ui.user_name like concat('%', #{keyword}, '%'))
+        </if>
+        order by cpo.sign_time desc, cpo.id desc
+    </select>
+</mapper>
