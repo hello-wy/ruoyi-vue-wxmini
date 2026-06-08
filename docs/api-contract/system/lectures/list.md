@@ -40,6 +40,7 @@
     {
       "id": 12,
       "name": "幸福解码",
+      "requiresEnrollment": true,
       "cover": "6",
       "coverId": 9,
       "speakerNames": "黄老师"
@@ -51,6 +52,7 @@
 ### 响应字段补充说明
 
 - `id`：讲座记录主键。
+- `requiresEnrollment`：是否报名前需要该课程学籍；缺省或 `true` 表示需要，`false` 表示不需要。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID。
 

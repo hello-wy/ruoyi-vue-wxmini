@@ -121,6 +121,13 @@
       <el-table-column label="讲师名称" align="center" prop="speaker" />
       <el-table-column label="详细地址" align="center" prop="location" />
       <el-table-column label="经纬度信息 (如: 118.80,32.05)" align="center" prop="geo" />
+      <el-table-column label="是否需要学籍" align="center" prop="requiresEnrollment">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.requiresEnrollment === false ? 'info' : 'success'">
+            {{ scope.row.requiresEnrollment === false ? '不需要' : '需要' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="活动详情" align="center" prop="detail" />
       <el-table-column label="创建时间" align="center" prop="createDate" width="180">
         <template slot-scope="scope">
@@ -186,6 +193,13 @@
         <el-form-item label="活动详情" prop="detail">
           <el-input v-model="form.detail" type="textarea" placeholder="请输入内容" />
         </el-form-item>
+        <el-form-item label="需要学籍" prop="requiresEnrollment">
+          <el-switch
+            v-model="form.requiresEnrollment"
+            active-text="需要"
+            inactive-text="不需要"
+          />
+        </el-form-item>
         <el-form-item label="创建时间" prop="createDate">
           <el-date-picker clearable
             v-model="form.createDate"
@@ -246,6 +260,7 @@ export default {
         location: null,
         geo: null,
         detail: null,
+        requiresEnrollment: null,
         createDate: null,
         updateDate: null
       },
@@ -290,6 +305,7 @@ export default {
         location: null,
         geo: null,
         detail: null,
+        requiresEnrollment: true,
         createDate: null,
         updateDate: null
       }

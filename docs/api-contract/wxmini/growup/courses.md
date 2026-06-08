@@ -40,6 +40,7 @@
       "id": 12,
       "name": "幸福解码",
       "registrationFee": 100.00,
+      "requiresEnrollment": true,
       "cover": "6",
       "coverId": 9,
       "speakerNames": "黄老师"
@@ -52,6 +53,7 @@
 
 - `id`：讲座记录主键。
 - `registrationFee`：课程报名费，默认 `100.00`。
+- `requiresEnrollment`：是否报名前需要当前用户拥有该课程可用学籍；默认 `true`。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID；前端封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 

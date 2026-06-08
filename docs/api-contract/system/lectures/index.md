@@ -27,7 +27,15 @@
 
 ### Body 示例
 
-- 请求体为 `Lectures` JSON 对象，字段以对应 BO / domain 定义为准。
+```json
+{
+  "name": "幸福解码",
+  "time": "2026-06-12",
+  "registrationFee": 100.00,
+  "deposit": 30.00,
+  "requiresEnrollment": true
+}
+```
 
 ### 成功响应示例
 
@@ -51,7 +59,17 @@
 
 ### Body 示例
 
-- 请求体为 `Lectures` JSON 对象，字段以对应 BO / domain 定义为准。
+```json
+{
+  "id": 12,
+  "name": "幸福解码",
+  "requiresEnrollment": false
+}
+```
+
+### 字段说明
+
+- `requiresEnrollment`：是否报名前需要该课程学籍；缺省或 `true` 表示需要，`false` 表示不需要。
 
 ### 成功响应示例
 

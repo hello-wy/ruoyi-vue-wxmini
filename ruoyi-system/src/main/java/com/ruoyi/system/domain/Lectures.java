@@ -72,6 +72,10 @@ public class Lectures extends BaseEntity
     @Excel(name = "席位预定金")
     private BigDecimal deposit;
 
+    /** 是否需要学籍 */
+    @Excel(name = "是否需要学籍")
+    private Boolean requiresEnrollment;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -182,6 +186,16 @@ public class Lectures extends BaseEntity
         return deposit;
     }
 
+    public Boolean getRequiresEnrollment()
+    {
+        return requiresEnrollment;
+    }
+
+    public void setRequiresEnrollment(Boolean requiresEnrollment)
+    {
+        this.requiresEnrollment = requiresEnrollment;
+    }
+
     public void setCover(String cover)
     {
         this.cover = cover;
@@ -237,6 +251,7 @@ public class Lectures extends BaseEntity
             .append("detail", getDetail())
             .append("registrationFee", getRegistrationFee())
             .append("deposit", getDeposit())
+            .append("requiresEnrollment", getRequiresEnrollment())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .toString();

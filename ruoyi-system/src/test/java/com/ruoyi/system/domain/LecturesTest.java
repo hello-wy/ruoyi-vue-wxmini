@@ -12,13 +12,22 @@ class LecturesTest {
 
     @Test
     void exposesCoverIdBeanProperty() throws Exception {
+        assertBeanPropertyExists("coverId");
+    }
+
+    @Test
+    void exposesRequiresEnrollmentBeanProperty() throws Exception {
+        assertBeanPropertyExists("requiresEnrollment");
+    }
+
+    private void assertBeanPropertyExists(String propertyName) throws Exception {
         PropertyDescriptor[] descriptors = Introspector.getBeanInfo(Lectures.class).getPropertyDescriptors();
 
-        boolean hasCoverId = Arrays.stream(descriptors)
-                .anyMatch(descriptor -> "coverId".equals(descriptor.getName())
+        boolean exists = Arrays.stream(descriptors)
+                .anyMatch(descriptor -> propertyName.equals(descriptor.getName())
                         && descriptor.getReadMethod() != null
                         && descriptor.getWriteMethod() != null);
 
-        assertTrue(hasCoverId, "Lectures should expose readable and writable coverId property");
+        assertTrue(exists, "Lectures should expose readable and writable " + propertyName + " property");
     }
 }

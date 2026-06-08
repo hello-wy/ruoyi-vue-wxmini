@@ -77,6 +77,20 @@ public class StudentEnrollmentServiceImpl implements IStudentEnrollmentService
         return studentEnrollmentMapper.selectStudentEnrollmentByUidAndLectureId(uid, lectureId);
     }
 
+    @Override
+    public void assertCourseEnrollmentAvailable(Long uid, Long lectureId)
+    {
+        StudentEnrollment enrollment = selectEnrollmentByUidAndLectureId(uid, lectureId);
+        if (enrollment == null)
+        {
+            throw new ServiceException("未找到对应的学籍记录");
+        }
+        if (enrollment.getRemain() == null || enrollment.getRemain() <= 0)
+        {
+            throw new ServiceException("余额不足，无法核销");
+        }
+    }
+
     /**
      * 核销：将当前用户指定课程的剩余次数减1，余额不足时抛出异常并回滚
      */

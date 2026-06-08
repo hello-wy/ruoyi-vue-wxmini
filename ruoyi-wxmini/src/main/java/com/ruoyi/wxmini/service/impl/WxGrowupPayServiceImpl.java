@@ -54,7 +54,7 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
         UserInfo userInfo = requireUser(userId);
         Lectures course = requireCourse(courseId);
         requireDeposit(course);
-        studentEnrollmentService.decreaseRemain(userInfo.getId(), courseId, 1);
+        decreaseCourseEnrollmentIfRequired(userInfo.getId(), courseId, course);
         WxPayParamVo payParamVo = createOrder(userId, toPayVo(userId, userInfo, course));
         if (payParamVo == null) {
             throw new ServiceException("微信支付订单创建失败");
@@ -183,6 +183,13 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
         if (course.getDeposit() == null) {
             throw new ServiceException("课程押金未配置");
         }
+    }
+
+    private void decreaseCourseEnrollmentIfRequired(Long uid, Long courseId, Lectures course) {
+        if (Boolean.FALSE.equals(course.getRequiresEnrollment())) {
+            return;
+        }
+        studentEnrollmentService.decreaseRemain(uid, courseId, 1);
     }
 
     private WxGrowupCourseOrderVo toPayVo(String userId, UserInfo userInfo, Lectures course) {

@@ -72,6 +72,14 @@ public interface IStudentEnrollmentService
     StudentEnrollment selectEnrollmentByUidAndLectureId(Long uid, Long lectureId);
 
     /**
+     * 校验指定用户指定课程存在可用学籍。
+     *
+     * @param uid 用户ID
+     * @param lectureId 课程ID
+     */
+    void assertCourseEnrollmentAvailable(Long uid, Long lectureId);
+
+    /**
      * 核销：将当前用户指定课程的剩余次数减num，余额不足时抛出异常并回滚事务
      *
      * @param uid       用户ID

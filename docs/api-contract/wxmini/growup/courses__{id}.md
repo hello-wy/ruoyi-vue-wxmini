@@ -35,8 +35,12 @@
   "data": {
     "id": 12,
     "name": "幸福解码",
+    "time": "2026-06-12 09:00",
+    "endDate": "2026-06-13 18:00",
+    "location": "北京",
     "registrationFee": 100.00,
     "deposit": 30.00,
+    "requiresEnrollment": true,
     "cover": "6",
     "coverId": 9,
     "speakers": [
@@ -53,10 +57,14 @@
 ### 响应字段补充说明
 
 - `id`：讲座记录主键。
+- `time`：开课开始时间，格式 `yyyy-MM-dd HH:mm`。
+- `endDate`：开课结束时间，格式 `yyyy-MM-dd HH:mm`。
+- `location`：上课地址。
 - `registrationFee`：课程报名费，默认 `100.00`。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID；顶部封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 - `deposit`：席位预定金/报名押金，报名接口会以后端课程配置中的该字段作为微信支付金额来源；缺失时报名接口返回错误。
+- `requiresEnrollment`：是否报名前需要当前用户拥有该课程可用学籍；默认 `true`。
 
 ### 失败场景或特殊说明
 

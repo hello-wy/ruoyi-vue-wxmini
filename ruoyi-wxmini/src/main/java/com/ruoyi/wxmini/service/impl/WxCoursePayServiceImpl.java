@@ -13,6 +13,7 @@ import com.ruoyi.system.domain.CoursePayOrder;
 import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.system.service.ILecturesService;
+import com.ruoyi.system.service.IStudentEnrollmentService;
 import com.ruoyi.wxmini.bo.WxCoursePayCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxPayCreateOrderParam;
 import com.ruoyi.wxmini.domain.UserInfo;
@@ -42,6 +43,8 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
     private ICoursePayOrderService coursePayOrderService;
     @Autowired
     private IUserInfoService userInfoService;
+    @Autowired
+    private IStudentEnrollmentService studentEnrollmentService;
     @Resource
     private WxPayService wxPayService;
 
@@ -63,6 +66,7 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
         }
         closePendingOrder(userId, bo.getCourseId());
         UserInfo userInfo = requireOpenIdUser(userId);
+        assertCourseEnrollmentAvailable(course, userInfo.getId());
         WxCoursePayOrderDetailVo payVo = buildPayVo(bo, course, userInfo);
         return createOrder(userId, payVo);
     }
@@ -205,6 +209,17 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
             throw new ServiceException("当前用户缺少openId");
         }
         return userInfo;
+    }
+
+    private void assertCourseEnrollmentAvailable(Lectures course, Long uid) {
+        if (!requiresEnrollment(course)) {
+            return;
+        }
+        studentEnrollmentService.assertCourseEnrollmentAvailable(uid, course.getId());
+    }
+
+    private boolean requiresEnrollment(Lectures course) {
+        return !Boolean.FALSE.equals(course.getRequiresEnrollment());
     }
 
     private void closePendingOrder(String userId, Long courseId) throws Exception {
