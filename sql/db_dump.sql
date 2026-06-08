@@ -119,6 +119,7 @@ CREATE TABLE `lectures` (
   `location` varchar(255) DEFAULT NULL COMMENT '详细地址',
   `geo` varchar(100) DEFAULT NULL COMMENT '经纬度信息 (如: 118.80,32.05)',
   `detail` text COMMENT '活动详情',
+  `deposit` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '席位预定金/报名押金',
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_date` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `cover` varchar(30) DEFAULT NULL COMMENT '活动封面图',
@@ -2052,4 +2053,3 @@ INSERT INTO `user_realname_auth` (`id`, `uid`, `real_name`, `id_card`, `auth_sta
 INSERT INTO `user_realname_auth` (`id`, `uid`, `real_name`, `id_card`, `auth_status`, `create_time`, `update_time`) VALUES ('20','2010','郑先生','11010519800110010X','1','2026-03-06 03:46:02','2026-03-06 03:46:02');
 
 INSERT INTO `user_wallet` (`id`, `uid`, `balance`, `frozen`, `total_earned`, `total_withdrawn`, `create_time`, `update_time`) VALUES ('1','1','0.00','0.00','0.00','0.00','2026-03-11 02:05:48','2026-03-11 02:05:48');
-

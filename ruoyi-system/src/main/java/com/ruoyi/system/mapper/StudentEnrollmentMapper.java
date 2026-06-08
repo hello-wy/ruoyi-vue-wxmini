@@ -71,6 +71,16 @@ public interface StudentEnrollmentMapper extends BaseMapper<StudentEnrollment>
     public List<EnrollmentWithLectureVo> selectEnrollmentWithLectureByUid(Long uid);
 
     /**
+     * 根据用户ID和课程ID查询学籍记录
+     *
+     * @param uid       用户ID
+     * @param lectureId 课程ID
+     * @return 学籍信息
+     */
+    public StudentEnrollment selectStudentEnrollmentByUidAndLectureId(@org.apache.ibatis.annotations.Param("uid") Long uid,
+                                                                      @org.apache.ibatis.annotations.Param("lectureId") Long lectureId);
+
+    /**
      * 根据用户ID和课程ID查询学籍记录（加行锁）
      *
      * @param uid       用户ID

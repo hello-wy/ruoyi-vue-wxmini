@@ -4,15 +4,19 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.system.domain.Questionnaire;
+import com.ruoyi.system.domain.StudentEnrollment;
 import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
 import com.ruoyi.system.domain.vo.LecturesDetailVo;
 import com.ruoyi.system.domain.vo.LecturesListVo;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
+import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.service.IWxGrowupPayService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import com.ruoyi.wxmini.vo.WxPayParamVo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +57,8 @@ class WxGrowupControllerTest {
     private IQuestionnaireService questionnaireService;
     @Mock
     private RedisCache redisCache;
+    @Mock
+    private IWxGrowupPayService wxGrowupPayService;
 
     @InjectMocks
     private WxGrowupController controller;
@@ -117,5 +123,38 @@ class WxGrowupControllerTest {
 
         AjaxResult result = controller.myTotalEnrollments();
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void courseEnrollmentShouldReturnCurrentUsersCourseRemain() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(10L);
+        StudentEnrollment enrollment = new StudentEnrollment();
+        enrollment.setId(20L);
+        enrollment.setLectureId(99L);
+        enrollment.setRemain(3);
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        when(userInfoService.selectUserInfoByUserId(USER_ID)).thenReturn(userInfo);
+        when(studentEnrollmentService.selectEnrollmentByUidAndLectureId(10L, 99L)).thenReturn(enrollment);
+
+        AjaxResult result = controller.myCourseEnrollment(99L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(enrollment, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void enrollCourseShouldReturnWxPayParam() throws Exception {
+        WxPayParamVo payParamVo = new WxPayParamVo();
+        payParamVo.setOrderNo("GROWUP202606080001");
+        WxGrowupCourseEnrollBo bo = new WxGrowupCourseEnrollBo();
+        bo.setName("张三");
+        WxMiniUserContext.setCurrentUserId(USER_ID);
+        when(wxGrowupPayService.createCourseOrder(USER_ID, 99L, bo)).thenReturn(payParamVo);
+
+        AjaxResult result = controller.enrollCourse(99L, bo);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(payParamVo, result.get(AjaxResult.DATA_TAG));
     }
 }

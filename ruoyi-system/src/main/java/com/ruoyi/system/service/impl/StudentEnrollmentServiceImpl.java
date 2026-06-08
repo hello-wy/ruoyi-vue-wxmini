@@ -71,6 +71,12 @@ public class StudentEnrollmentServiceImpl implements IStudentEnrollmentService
         return studentEnrollmentMapper.selectEnrollmentWithLectureByUid(uid);
     }
 
+    @Override
+    public StudentEnrollment selectEnrollmentByUidAndLectureId(Long uid, Long lectureId)
+    {
+        return studentEnrollmentMapper.selectStudentEnrollmentByUidAndLectureId(uid, lectureId);
+    }
+
     /**
      * 核销：将当前用户指定课程的剩余次数减1，余额不足时抛出异常并回滚
      */

@@ -36,6 +36,7 @@
     "id": 12,
     "name": "幸福解码",
     "registrationFee": 100.00,
+    "deposit": 30.00,
     "cover": "6",
     "coverId": 9,
     "speakers": [
@@ -55,6 +56,7 @@
 - `registrationFee`：课程报名费，默认 `100.00`。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID；顶部封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
+- `deposit`：席位预定金/报名押金，报名接口会以后端课程配置中的该字段作为微信支付金额来源；缺失时报名接口返回错误。
 
 ### 失败场景或特殊说明
 

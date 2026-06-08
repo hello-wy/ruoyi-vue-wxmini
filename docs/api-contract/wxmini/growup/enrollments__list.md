@@ -36,11 +36,23 @@
   "total": 1,
   "rows": [
     {
-      "id": 1
+      "id": 20,
+      "lectureId": 99,
+      "lectureName": "幸福解码",
+      "total": 5,
+      "remain": 3
     }
   ]
 }
 ```
+
+### 响应字段补充说明
+
+- `id`：学籍记录 ID。
+- `lectureId`：该学籍绑定的课程/讲座 ID。
+- `lectureName`：课程/讲座名称。
+- `total`：该课程总学籍数。
+- `remain`：该课程剩余可用学籍数。
 
 ### 失败场景或特殊说明
 

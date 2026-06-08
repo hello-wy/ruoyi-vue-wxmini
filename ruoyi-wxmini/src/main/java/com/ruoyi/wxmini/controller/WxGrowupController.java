@@ -10,14 +10,17 @@ import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.domain.Questionnaire;
+import com.ruoyi.system.domain.StudentEnrollment;
 import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
 import com.ruoyi.system.domain.vo.LecturesDetailVo;
 import com.ruoyi.system.domain.vo.LecturesListVo;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
+import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import com.ruoyi.wxmini.service.IWxGrowupPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -25,9 +28,12 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,6 +59,9 @@ public class WxGrowupController extends BaseController {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private IWxGrowupPayService wxGrowupPayService;
 
     /**
      * 获取课程/讲座列表（匿名，附带拼接讲师姓名）
@@ -104,6 +113,30 @@ public class WxGrowupController extends BaseController {
         return success(vo);
     }
 
+    @ApiOperation("获取当前登录用户指定课程的学籍余量（需登录）")
+    @GetMapping("/courses/{id}/enrollment")
+    public AjaxResult myCourseEnrollment(@PathVariable("id") Long id) {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("用户不存在");
+        }
+        StudentEnrollment enrollment = studentEnrollmentService.selectEnrollmentByUidAndLectureId(userInfo.getId(), id);
+        return success(enrollment);
+    }
+
+    @ApiOperation("报名课程并创建微信支付订单（需登录）")
+    @PostMapping("/courses/{id}/enroll")
+    public AjaxResult enrollCourse(@PathVariable("id") Long id,
+                                   @RequestBody @Valid WxGrowupCourseEnrollBo bo) {
+        try {
+            String wxUserId = WxMiniUserContext.getCurrentUserId();
+            return success(wxGrowupPayService.createCourseOrder(wxUserId, id, bo));
+        } catch (Exception e) {
+            logger.error("创建成长课程报名支付订单失败", e);
+            return error(e.getMessage());
+        }
+    }
+
     /**
      * 获取当前登录小程序用户的个人学籍列表
      * 通过 WxMiniUserContext 中的 userId（String UUID）查找 user_info.id（Long），
@@ -113,8 +146,7 @@ public class WxGrowupController extends BaseController {
     @GetMapping("/enrollments/list")
     public TableDataInfoVo<EnrollmentWithLectureVo> myEnrollments() {
         startPage();
-        String wxUserId = WxMiniUserContext.getCurrentUserId();
-        UserInfo userInfo = userInfoService.selectUserInfoByUserId(wxUserId);
+        UserInfo userInfo = getCurrentUserInfo();
         if (userInfo == null) {
             return getDataTable(Collections.emptyList());
         }
@@ -129,8 +161,7 @@ public class WxGrowupController extends BaseController {
     @ApiOperation("获取当前登录用户的总学时余量（需登录）")
     @GetMapping("/enrollments/total")
     public AjaxResult myTotalEnrollments() {
-        String wxUserId = WxMiniUserContext.getCurrentUserId();
-        UserInfo userInfo = userInfoService.selectUserInfoByUserId(wxUserId);
+        UserInfo userInfo = getCurrentUserInfo();
         if (userInfo == null) {
             return error("用户不存在");
         }
@@ -141,5 +172,10 @@ public class WxGrowupController extends BaseController {
             total = total + vo.getRemain();
         }
         return success(total);
+    }
+
+    private UserInfo getCurrentUserInfo() {
+        String wxUserId = WxMiniUserContext.getCurrentUserId();
+        return userInfoService.selectUserInfoByUserId(wxUserId);
     }
 }

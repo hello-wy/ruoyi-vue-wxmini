@@ -5,6 +5,12 @@ package com.ruoyi.system.domain.vo;
  */
 public class EnrollmentWithLectureVo {
 
+    /** 学籍记录ID */
+    private Long id;
+
+    /** 讲座ID */
+    private Long lectureId;
+
     /** 讲座名称 */
     private String lectureName;
 
@@ -13,6 +19,22 @@ public class EnrollmentWithLectureVo {
 
     /** 剩余可用学籍数 */
     private Integer remain;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getLectureId() {
+        return lectureId;
+    }
+
+    public void setLectureId(Long lectureId) {
+        this.lectureId = lectureId;
+    }
 
     public String getLectureName() {
         return lectureName;
@@ -38,4 +60,3 @@ public class EnrollmentWithLectureVo {
         this.remain = remain;
     }
 }
-

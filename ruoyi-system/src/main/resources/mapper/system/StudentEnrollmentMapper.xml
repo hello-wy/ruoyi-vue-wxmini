@@ -85,6 +85,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <resultMap type="com.ruoyi.system.domain.vo.EnrollmentWithLectureVo" id="EnrollmentWithLectureResult">
+        <result property="id"          column="id"           />
+        <result property="lectureId"   column="lecture_id"   />
         <result property="lectureName" column="lecture_name" />
         <result property="total"       column="total"        />
         <result property="remain"      column="remain"       />
@@ -93,12 +95,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectEnrollmentWithLectureByUid" parameterType="Long" resultMap="EnrollmentWithLectureResult">
         select
             l.name  as lecture_name,
+            se.id,
+            se.lecture_id,
             se.total,
             se.remain
         from student_enrollment se
         left join lectures l on l.id = se.lecture_id
         where se.uid = #{uid}
           and se.is_deleted = 0
+    </select>
+
+    <select id="selectStudentEnrollmentByUidAndLectureId" resultMap="StudentEnrollmentResult">
+        <include refid="selectStudentEnrollmentVo"/>
+        where uid = #{uid}
+          and lecture_id = #{lectureId}
+          and is_deleted = 0
     </select>
 
     <select id="selectEnrollmentByUidAndLectureId" resultMap="StudentEnrollmentResult">

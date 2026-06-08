@@ -63,6 +63,15 @@ public interface IStudentEnrollmentService
     public List<EnrollmentWithLectureVo> selectMyEnrollment(Long uid);
 
     /**
+     * 查询指定用户指定课程的学籍记录
+     *
+     * @param uid 用户ID
+     * @param lectureId 课程ID
+     * @return 学籍记录
+     */
+    StudentEnrollment selectEnrollmentByUidAndLectureId(Long uid, Long lectureId);
+
+    /**
      * 核销：将当前用户指定课程的剩余次数减num，余额不足时抛出异常并回滚事务
      *
      * @param uid       用户ID
