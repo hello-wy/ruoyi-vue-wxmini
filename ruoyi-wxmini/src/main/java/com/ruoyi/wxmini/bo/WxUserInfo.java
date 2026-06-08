@@ -26,6 +26,8 @@ public class WxUserInfo {
 
     private String apiToken;
 
+    private boolean needPhoneCode;
+
     public void wapper(WxMaJscode2SessionResult wxSession, UserInfo userInfo) {
         this.sessionKey = wxSession.getSessionKey();
         this.openId = wxSession.getOpenid();

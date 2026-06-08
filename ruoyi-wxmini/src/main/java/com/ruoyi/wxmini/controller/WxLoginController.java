@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
 import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -47,14 +48,15 @@ public class WxLoginController {
     /**
      * 登陆接口
      */
-    @ApiOperation("微信小程序登录（通过 code 换取 token，自动注册用户）")
+    @ApiOperation("微信小程序登录（通过 code 换取 token，未注册时可携带手机号 code 注册）")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "appid", value = "小程序 AppID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "code", value = "微信登录临时凭证 code", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class)
+        @ApiImplicitParam(name = "code", value = "微信登录临时凭证 code", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "phoneCode", value = "微信手机号实时验证 code，未注册时必填", dataType = "String", paramType = "query", dataTypeClass = String.class)
     })
     @Anonymous
     @GetMapping("/login")
-    public AjaxResult login(String appid, String code) {
+    public AjaxResult login(String appid, String code, String phoneCode) {
         if (StringUtils.isEmpty(code)) {
             return AjaxResult.error("empty jscode");
         }
@@ -64,8 +66,14 @@ public class WxLoginController {
 
         try {
             WxMaJscode2SessionResult session = wxMaService.getUserService().getSessionInfo(code);
-            UserInfo userInfo = initOrLoadUser(session);
+            UserInfo userInfo = resolveLoginUser(session, phoneCode);
+            if (userInfo == null) {
+                return AjaxResult.success(buildPhoneRequiredResult(session));
+            }
             return AjaxResult.success(buildLoginResult(session, userInfo));
+        } catch (IllegalStateException e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
         } catch (WxErrorException e) {
             log.error(e.getMessage(), e);
             return AjaxResult.error();
@@ -74,7 +82,7 @@ public class WxLoginController {
         }
     }
 
-    private UserInfo initOrLoadUser(WxMaJscode2SessionResult session) {
+    private UserInfo resolveLoginUser(WxMaJscode2SessionResult session, String phoneCode) throws WxErrorException {
         String openId = session.getOpenid();
         UserInfo userInfo = userInfoService.selectUserInfoByOpenId(openId);
         if (userInfo != null) {
@@ -82,12 +90,26 @@ public class WxLoginController {
             return userInfo;
         }
 
+        if (StringUtils.isBlank(phoneCode)) {
+            return null;
+        }
+
         UserInfo createdUser = new UserInfo();
         createdUser.setUserId(UUID.randomUUID().toString());
         createdUser.setOpenId(openId);
         createdUser.setUnionId(session.getUnionid());
+        createdUser.setPhone(resolvePhone(phoneCode));
         userInfoService.insertUserInfo(createdUser);
         return createdUser;
+    }
+
+    private String resolvePhone(String phoneCode) throws WxErrorException {
+        WxMaPhoneNumberInfo phoneNumberInfo = wxMaService.getUserService().getPhoneNumber(phoneCode);
+        String phone = phoneNumberInfo == null ? null : phoneNumberInfo.getPhoneNumber();
+        if (StringUtils.isBlank(phone)) {
+            throw new IllegalStateException("empty phone number");
+        }
+        return phone;
     }
 
     private void updateUnionIdIfNeeded(UserInfo userInfo, String unionId) {
@@ -102,6 +124,14 @@ public class WxLoginController {
         WxUserInfo wxUserInfo = new WxUserInfo();
         wxUserInfo.wapper(session, userInfo);
         wxUserInfo.setApiToken(jwtService.createToken(userInfo.getUserId()));
+        return wxUserInfo;
+    }
+
+    private WxUserInfo buildPhoneRequiredResult(WxMaJscode2SessionResult session) {
+        WxUserInfo wxUserInfo = new WxUserInfo();
+        wxUserInfo.setSessionKey(session.getSessionKey());
+        wxUserInfo.setOpenId(session.getOpenid());
+        wxUserInfo.setNeedPhoneCode(true);
         return wxUserInfo;
     }
 }
