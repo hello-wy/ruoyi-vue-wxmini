@@ -35,6 +35,7 @@
   "data": {
     "id": 12,
     "name": "幸福解码",
+    "registrationFee": 100.00,
     "cover": "6",
     "coverId": 9,
     "speakers": [
@@ -51,6 +52,7 @@
 ### 响应字段补充说明
 
 - `id`：讲座记录主键。
+- `registrationFee`：课程报名费，默认 `100.00`。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID；顶部封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 

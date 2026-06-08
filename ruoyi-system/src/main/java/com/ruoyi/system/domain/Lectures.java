@@ -1,6 +1,7 @@
 package com.ruoyi.system.domain;
 
 import java.util.Date;
+import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -62,6 +63,10 @@ public class Lectures extends BaseEntity
     /** 活动详情 */
     @Excel(name = "活动详情")
     private String detail;
+
+    /** 报名费 */
+    @Excel(name = "报名费")
+    private BigDecimal registrationFee;
 
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -153,6 +158,16 @@ public class Lectures extends BaseEntity
         return detail;
     }
 
+    public BigDecimal getRegistrationFee()
+    {
+        return registrationFee;
+    }
+
+    public void setRegistrationFee(BigDecimal registrationFee)
+    {
+        this.registrationFee = registrationFee;
+    }
+
     public void setCover(String cover)
     {
         this.cover = cover;
@@ -206,6 +221,7 @@ public class Lectures extends BaseEntity
             .append("cover", getCover())
             .append("coverId", getCoverId())
             .append("detail", getDetail())
+            .append("registrationFee", getRegistrationFee())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .toString();

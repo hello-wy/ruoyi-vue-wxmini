@@ -3,8 +3,11 @@ package com.ruoyi.wxmini.service.impl;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.system.domain.CoursePayOrder;
 import com.ruoyi.system.domain.JobSignupOrder;
 import com.ruoyi.system.domain.SalonPayOrder;
+import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.system.service.IJobSignupOrderService;
 import com.ruoyi.system.service.ISalonPayOrderService;
 import com.ruoyi.wxmini.enums.JobSignupOrderStatusEnum;
@@ -23,6 +26,8 @@ public class WxRefundServiceImpl implements IWxRefundService {
     private IJobSignupOrderService jobSignupOrderService;
     @Autowired
     private ISalonPayOrderService salonPayOrderService;
+    @Autowired
+    private ICoursePayOrderService coursePayOrderService;
     @Resource
     private WxPayService wxPayService;
 
@@ -78,6 +83,26 @@ public class WxRefundServiceImpl implements IWxRefundService {
         order.setRefundTime(DateUtils.getNowDate());
         order.setStatus("REFUNDED");
         salonPayOrderService.updateSalonPayOrder(order);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void refundCourseOrder(String orderNo, String reason) {
+        CoursePayOrder order = coursePayOrderService.selectCoursePayOrderByOrderNo(orderNo);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if (!CoursePayOrder.STATUS_SIGNED.equals(order.getStatus())) {
+            throw new ServiceException("只有已签到课程订单可退款");
+        }
+        String refundNo = "REF" + orderNo;
+        try {
+            WxPayRefundV3Request request = buildRefundRequest(orderNo, refundNo, reason, order.getAmount());
+            wxPayService.refundV3(request);
+        } catch (Exception e) {
+            throw new ServiceException("微信退款接口调用失败: " + e.getMessage());
+        }
+        coursePayOrderService.markRefunded(orderNo, refundNo, DateUtils.getNowDate());
     }
 
     private WxPayRefundV3Request buildRefundRequest(String orderNo, String refundNo, String reason, BigDecimal amount) {

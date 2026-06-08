@@ -15,12 +15,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="cover"    column="cover"    />
         <result property="coverId"    column="cover_id"    />
         <result property="detail"    column="detail"    />
+        <result property="registrationFee"    column="registration_fee"    />
         <result property="createDate"    column="create_date"    />
         <result property="updateDate"    column="update_date"    />
     </resultMap>
 
     <sql id="selectLecturesVo">
-        select id, time, end_date, name, speaker, location, geo, cover, cover_id, detail, create_date, update_date from lectures
+        select id, time, end_date, name, speaker, location, geo, cover, cover_id, detail, registration_fee, create_date, update_date from lectures
     </sql>
 
     <select id="selectLecturesList" parameterType="Lectures" resultMap="LecturesResult">
@@ -54,6 +55,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="cover != null">cover,</if>
             <if test="coverId != null">cover_id,</if>
             <if test="detail != null">detail,</if>
+            <if test="registrationFee != null">registration_fee,</if>
             <if test="createDate != null">create_date,</if>
             <if test="updateDate != null">update_date,</if>
          </trim>
@@ -67,6 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="cover != null">#{cover},</if>
             <if test="coverId != null">#{coverId},</if>
             <if test="detail != null">#{detail},</if>
+            <if test="registrationFee != null">#{registrationFee},</if>
             <if test="createDate != null">#{createDate},</if>
             <if test="updateDate != null">#{updateDate},</if>
          </trim>
@@ -84,6 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="cover != null">cover = #{cover},</if>
             <if test="coverId != null">cover_id = #{coverId},</if>
             <if test="detail != null">detail = #{detail},</if>
+            <if test="registrationFee != null">registration_fee = #{registrationFee},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
             <if test="updateDate != null">update_date = #{updateDate},</if>
         </trim>
@@ -113,6 +117,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="cover"        column="cover"        />
         <result property="coverId"      column="cover_id"     />
         <result property="detail"       column="detail"       />
+        <result property="registrationFee" column="registration_fee"/>
         <result property="createDate"   column="create_date"  />
         <result property="updateDate"   column="update_date"  />
         <result property="speakerNames" column="speaker_names"/>
@@ -130,6 +135,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="cover"      column="cover"      />
         <result property="coverId"    column="cover_id"   />
         <result property="detail"     column="detail"     />
+        <result property="registrationFee" column="registration_fee"/>
         <result property="createDate" column="create_date"/>
         <result property="updateDate" column="update_date"/>
         <collection property="speakers" ofType="com.ruoyi.system.domain.vo.SpeakerVo">
@@ -143,7 +149,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectLecturesListVo" parameterType="Lectures" resultMap="LecturesListVoResult">
         SELECT
         l.id, l.time, l.end_date, l.name, l.speaker,
-        l.location, l.geo, l.cover, l.cover_id, l.detail, l.create_date, l.update_date,
+        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.create_date, l.update_date,
         GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
         FROM lectures l
         LEFT JOIN lecturer_profile p ON FIND_IN_SET(p.id, l.speaker)
@@ -159,7 +165,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectLecturesDetailVoById" parameterType="Long" resultMap="LecturesDetailVoResult">
         SELECT
             l.id, l.time, l.end_date, l.name, l.speaker,
-            l.location, l.geo, l.cover, l.cover_id, l.detail, l.create_date, l.update_date,
+            l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.create_date, l.update_date,
             p.id        AS sp_id,
             p.name      AS sp_name,
             p.avatar_url AS sp_avatar_url

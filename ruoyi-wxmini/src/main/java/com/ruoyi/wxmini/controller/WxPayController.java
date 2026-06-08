@@ -9,7 +9,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.service.IWalletService;
 import com.ruoyi.wxmini.bo.WxJobPayrollCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxJobSignupCreateOrderBo;
+import com.ruoyi.wxmini.bo.WxCoursePayCreateOrderBo;
 import com.ruoyi.wxmini.bo.WxSalonPayCreateOrderBo;
+import com.ruoyi.wxmini.service.IWxCoursePayService;
 import com.ruoyi.wxmini.service.IWxJobPayrollPayService;
 import com.ruoyi.wxmini.service.IWxJobSignupPayService;
 import com.ruoyi.wxmini.service.IWxMiniTutoringService;
@@ -43,6 +45,8 @@ public class WxPayController {
     private IWxJobPayrollPayService wxJobPayrollPayService;
     @Resource
     private IWxMiniTutoringService wxMiniTutoringService;
+    @Resource
+    private IWxCoursePayService wxCoursePayService;
     @Resource
     private IWalletService walletService;
 
@@ -120,6 +124,54 @@ public class WxPayController {
         }
     }
 
+    @ApiOperation("查询当前用户课程报名订单列表（需登录）")
+    @GetMapping("/courses/orders/my")
+    public AjaxResult myCourseOrders() {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxCoursePayService.listMyOrders(userId));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("创建课程报名支付订单，返回 JSAPI 支付参数（需登录）")
+    @PostMapping("/courses/orders/create")
+    public AjaxResult createCourseOrder(@RequestBody @Validated WxCoursePayCreateOrderBo bo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxCoursePayService.createCourseOrder(userId, bo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查询当前用户当前课程已支付订单（需登录）")
+    @GetMapping("/courses/orders/paid")
+    public AjaxResult queryPaidCourseOrder(@RequestParam("courseId") Long courseId) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxCoursePayService.queryPaidCourseOrder(userId, courseId));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查询课程报名订单状态（需登录）")
+    @GetMapping("/courses/orders/{orderNo}")
+    public AjaxResult queryCourseOrder(@PathVariable("orderNo") String orderNo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxCoursePayService.queryCourseOrder(userId, orderNo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @ApiOperation("创建兼职工资支付订单，返回 JSAPI 支付参数（需登录）")
     @PostMapping("/payroll/orders/create")
     public AjaxResult createPayrollOrder(@RequestBody @Validated WxJobPayrollCreateOrderBo bo) {
@@ -191,6 +243,31 @@ public class WxPayController {
             }
             String requestId = request.getHeader("Request-ID");
             boolean handled = wxJobSignupPayService.handleJobPaidCallback(result, requestId);
+            return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        }
+    }
+
+    @ApiOperation("微信课程报名支付结果异步回调通知（由微信服务器调用）")
+    @PostMapping("/courses/notify")
+    public String coursePayNotify(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            ServletInputStream inputStream = request.getInputStream();
+            String notifyData = IoUtil.readUtf8(inputStream);
+            SignatureHeader signatureHeader = SignatureHeader.builder()
+                    .serial(request.getHeader("Wechatpay-Serial"))
+                    .signature(request.getHeader("Wechatpay-Signature"))
+                    .nonce(request.getHeader("Wechatpay-Nonce"))
+                    .timeStamp(request.getHeader("Wechatpay-Timestamp"))
+                    .build();
+            WxPayNotifyV3Result result = this.wxPayService.parseOrderNotifyV3Result(notifyData, signatureHeader);
+            boolean isPaySuccess = "SUCCESS".equals(result.getResult().getTradeState());
+            if (!isPaySuccess) {
+                return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+            }
+            boolean handled = wxCoursePayService.handleCoursePaidCallback(result, request.getHeader("Request-ID"));
             return handled ? "<xml><return_code><![CDATA[SUCCESS]]></return_code></xml>" : "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
         } catch (Exception e) {
             log.error(e.getMessage(), e);

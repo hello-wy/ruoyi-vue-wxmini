@@ -15,8 +15,10 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.system.domain.JobSignupOrder;
+import com.ruoyi.system.domain.vo.CourseRefundOrderVo;
 import com.ruoyi.system.domain.vo.JobRefundOrderVo;
 import com.ruoyi.system.domain.vo.SalonRefundOrderVo;
+import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.system.service.IJobSignupOrderService;
 import com.ruoyi.system.service.ISalonPayOrderService;
 import com.ruoyi.wxmini.service.IWxRefundService;
@@ -30,6 +32,8 @@ public class RefundController extends BaseController {
     private IJobSignupOrderService jobSignupOrderService;
     @Autowired
     private ISalonPayOrderService salonPayOrderService;
+    @Autowired
+    private ICoursePayOrderService coursePayOrderService;
     @Autowired
     private IWxRefundService wxRefundService;
     @Autowired
@@ -75,6 +79,29 @@ public class RefundController extends BaseController {
     public AjaxResult refundSalonOrder(@PathVariable("orderNo") String orderNo) {
         try {
             wxRefundService.refundSalonOrder(orderNo, "后台管理员退款");
+            return success("退款成功");
+        } catch (Exception e) {
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("课程退款列表")
+    @PreAuthorize("@ss.hasPermi('system:refund:list')")
+    @GetMapping("/course/list")
+    public TableDataInfoVo<CourseRefundOrderVo> listCourseRefundOrders(
+            @RequestParam(value = "courseId", required = false) Long courseId,
+            @RequestParam(value = "keyword", required = false) String keyword) {
+        startPage();
+        List<CourseRefundOrderVo> list = coursePayOrderService.selectCourseRefundOrders(courseId, keyword);
+        return getDataTable(list);
+    }
+
+    @ApiOperation("课程订单退款")
+    @PreAuthorize("@ss.hasPermi('system:refund:edit')")
+    @PostMapping("/course/{orderNo}")
+    public AjaxResult refundCourseOrder(@PathVariable("orderNo") String orderNo) {
+        try {
+            wxRefundService.refundCourseOrder(orderNo, "后台管理员课程退款");
             return success("退款成功");
         } catch (Exception e) {
             return error(e.getMessage());
