@@ -24,7 +24,7 @@
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "orderNo": "COURSE202606072300001234",
+    "orderNo": "CRS2026060723000012345678901",
     "userId": "wx-user-uuid",
     "courseId": 1,
     "status": 2,

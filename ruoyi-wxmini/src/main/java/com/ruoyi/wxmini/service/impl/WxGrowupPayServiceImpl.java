@@ -35,7 +35,7 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
     private static final long ORDER_TYPE_LECTURE = 2L;
     private static final long PAY_STATUS_PENDING = 0L;
     private static final long PAY_STATUS_PAID = 1L;
-    private static final String ORDER_PREFIX = "GROWUP";
+    private static final String ORDER_PREFIX = "GRW";
     private static final String PAY_METHOD_WECHAT = "wechat_pay";
     private static final String PURPOSE_PREFIX = "课程报名：";
 

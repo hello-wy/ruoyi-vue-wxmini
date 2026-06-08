@@ -33,20 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
-public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrderDetailVo>
-        implements IWxCoursePayService {
-    private static final String ORDER_PREFIX = "COURSE";
+public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrderDetailVo> implements IWxCoursePayService {
+    private static final String ORDER_PREFIX = "CRS";
 
-    @Autowired
-    private ILecturesService lecturesService;
-    @Autowired
-    private ICoursePayOrderService coursePayOrderService;
-    @Autowired
-    private IUserInfoService userInfoService;
-    @Autowired
-    private IStudentEnrollmentService studentEnrollmentService;
-    @Resource
-    private WxPayService wxPayService;
+    @Autowired private ILecturesService lecturesService;
+    @Autowired private ICoursePayOrderService coursePayOrderService;
+    @Autowired private IUserInfoService userInfoService;
+    @Autowired private IStudentEnrollmentService studentEnrollmentService;
+    @Resource private WxPayService wxPayService;
 
     @Override
     public List<WxCoursePayOrderDetailVo> listMyOrders(String userId) {

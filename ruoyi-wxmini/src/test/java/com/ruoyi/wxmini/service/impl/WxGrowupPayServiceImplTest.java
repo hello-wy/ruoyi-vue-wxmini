@@ -81,6 +81,20 @@ class WxGrowupPayServiceImplTest {
     }
 
     @Test
+    void buildOrderParamShouldUseWechatAllowedOutTradeNo() {
+        WxGrowupCourseOrderVo payVo = new WxGrowupCourseOrderVo();
+        payVo.setCourseId(99L);
+        payVo.setCourseName("幸福解码");
+        payVo.setDeposit(new BigDecimal("30.00"));
+        payVo.setOpenId("openid-1");
+
+        String orderNo = service.buildOrderParam("wx-user-1", payVo, new HashMap<>()).getOrderNo();
+
+        assertTrue(orderNo.length() <= 32, "微信商户订单号长度不能超过32位");
+        assertTrue(orderNo.matches("GRW\\d{27}"));
+    }
+
+    @Test
     void createCourseOrderShouldExposeMissingDepositConfiguration() {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(10L);
