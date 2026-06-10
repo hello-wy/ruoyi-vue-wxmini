@@ -109,6 +109,7 @@
 - `wxmini/common__uploadJobSignImage.md`
 - `wxmini/growup/courses.md`
 - `wxmini/growup/courses__{id}.md`
+- `wxmini/growup/courses__{id}__enroll.md`
 - `wxmini/growup/enrollments__list.md`
 - `wxmini/growup/enrollments__total.md`
 - `wxmini/jobs/index.md`
@@ -122,6 +123,7 @@
 - `wxmini/pay/jobs__orders__create.md`
 - `wxmini/pay/jobs__orders__my.md`
 - `wxmini/pay/jobs__orders__{orderNo}.md`
+- `wxmini/pay/growup__notify.md`
 - `wxmini/pay/salon__notify.md`
 - `wxmini/pay/tutoring__notify.md`
 - `wxmini/pay/salon__orders__create.md`

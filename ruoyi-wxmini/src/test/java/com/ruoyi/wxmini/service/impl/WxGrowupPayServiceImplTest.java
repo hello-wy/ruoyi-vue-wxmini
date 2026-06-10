@@ -1,5 +1,6 @@
 package com.ruoyi.wxmini.service.impl;
 
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -26,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,10 +113,70 @@ class WxGrowupPayServiceImplTest {
         assertTrue(error.getMessage().contains("课程押金未配置"));
     }
 
+    @Test
+    void paidCallbackShouldIncreaseCourseEnrollmentCountOnce() {
+        TradeOrder order = pendingOrder();
+        when(tradeOrderService.selectTradeOrderList(any())).thenReturn(java.util.Collections.singletonList(order));
+        when(tradeOrderService.updateTradeOrder(order)).thenReturn(1);
+        when(lecturesService.increaseEnrolledCount(99L)).thenReturn(1);
+
+        boolean handled = service.handleCoursePaidCallback(notifyResult("GRW202606090001"), "req-1");
+
+        assertTrue(handled);
+        verify(lecturesService).increaseEnrolledCount(99L);
+    }
+
+    @Test
+    void paidCallbackShouldNotIncreaseCourseEnrollmentCountAgain() {
+        TradeOrder order = paidOrder();
+        when(tradeOrderService.selectTradeOrderList(any())).thenReturn(java.util.Collections.singletonList(order));
+
+        boolean handled = service.handleCoursePaidCallback(notifyResult("GRW202606090001"), "req-1");
+
+        assertTrue(handled);
+        verify(lecturesService, never()).increaseEnrolledCount(any());
+    }
+
+    @Test
+    void paidCallbackShouldExposeCourseEnrollmentCountUpdateFailure() {
+        TradeOrder order = pendingOrder();
+        when(tradeOrderService.selectTradeOrderList(any())).thenReturn(java.util.Collections.singletonList(order));
+        when(tradeOrderService.updateTradeOrder(order)).thenReturn(1);
+        when(lecturesService.increaseEnrolledCount(99L)).thenReturn(0);
+
+        ServiceException error = assertThrows(ServiceException.class, () ->
+                service.handleCoursePaidCallback(notifyResult("GRW202606090001"), "req-1"));
+
+        assertEquals("课程报名人数更新失败", error.getMessage());
+    }
+
     private WxPayConfig buildWxPayConfig() {
         WxPayConfig wxPayConfig = new WxPayConfig();
         wxPayConfig.setAppId("wx-appid");
         wxPayConfig.setMchId("mch-id");
         return wxPayConfig;
+    }
+
+    private WxPayNotifyV3Result notifyResult(String orderNo) {
+        WxPayNotifyV3Result.DecryptNotifyResult decrypt = new WxPayNotifyV3Result.DecryptNotifyResult();
+        decrypt.setOutTradeNo(orderNo);
+        WxPayNotifyV3Result result = new WxPayNotifyV3Result();
+        result.setResult(decrypt);
+        return result;
+    }
+
+    private TradeOrder pendingOrder() {
+        TradeOrder order = new TradeOrder();
+        order.setOrderNo("GRW202606090001");
+        order.setLectureId(99L);
+        order.setPayStatus(0L);
+        return order;
+    }
+
+    private TradeOrder paidOrder() {
+        TradeOrder order = pendingOrder();
+        order.setPayStatus(1L);
+        order.setPayTime(new java.util.Date());
+        return order;
     }
 }

@@ -20,6 +20,8 @@ public interface ILecturesService
 
     public int updateLectures(Lectures lectures);
 
+    public int increaseEnrolledCount(Long id);
+
     public int deleteLecturesByIds(Long[] ids);
 
     public int deleteLecturesById(Long id);

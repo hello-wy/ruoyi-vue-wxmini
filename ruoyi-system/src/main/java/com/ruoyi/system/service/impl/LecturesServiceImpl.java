@@ -54,6 +54,12 @@ public class LecturesServiceImpl implements ILecturesService
     }
 
     @Override
+    public int increaseEnrolledCount(Long id)
+    {
+        return lecturesMapper.increaseEnrolledCount(id);
+    }
+
+    @Override
     public int deleteLecturesByIds(Long[] ids)
     {
         return lecturesMapper.deleteLecturesByIds(ids);

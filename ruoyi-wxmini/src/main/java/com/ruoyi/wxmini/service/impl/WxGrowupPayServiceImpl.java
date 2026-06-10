@@ -63,6 +63,7 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean handleCoursePaidCallback(WxPayNotifyV3Result result, String requestId) {
         if (result == null || result.getResult() == null) {
             return false;
@@ -121,6 +122,7 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updOrderWithPaySuccess(String orderNo) {
         return markOrderPaid(orderNo);
     }
@@ -150,7 +152,18 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
         }
         order.setPayStatus(PAY_STATUS_PAID);
         order.setPayTime(DateUtils.getNowDate());
-        return tradeOrderService.updateTradeOrder(order) > 0;
+        boolean updated = tradeOrderService.updateTradeOrder(order) > 0;
+        if (updated) {
+            increaseCourseEnrolledCount(order.getLectureId());
+            return true;
+        }
+        return false;
+    }
+
+    private void increaseCourseEnrolledCount(Long courseId) {
+        if (lecturesService.increaseEnrolledCount(courseId) <= 0) {
+            throw new ServiceException("课程报名人数更新失败");
+        }
     }
 
     private TradeOrder selectOrderByNo(String orderNo) {

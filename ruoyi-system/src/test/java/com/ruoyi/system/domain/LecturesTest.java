@@ -20,6 +20,11 @@ class LecturesTest {
         assertBeanPropertyExists("requiresEnrollment");
     }
 
+    @Test
+    void exposesEnrolledCountBeanProperty() throws Exception {
+        assertBeanPropertyExists("enrolledCount");
+    }
+
     private void assertBeanPropertyExists(String propertyName) throws Exception {
         PropertyDescriptor[] descriptors = Introspector.getBeanInfo(Lectures.class).getPropertyDescriptors();
 

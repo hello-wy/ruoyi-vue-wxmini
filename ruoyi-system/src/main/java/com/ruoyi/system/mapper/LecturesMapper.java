@@ -48,6 +48,14 @@ public interface LecturesMapper extends BaseMapper<Lectures>
     public int updateLectures(Lectures lectures);
 
     /**
+     * 已报名人数加一。
+     *
+     * @param id 课程活动/讲座主键
+     * @return 结果
+     */
+    public int increaseEnrolledCount(Long id);
+
+    /**
      * 删除课程活动/讲座
      * 
      * @param id 课程活动/讲座主键

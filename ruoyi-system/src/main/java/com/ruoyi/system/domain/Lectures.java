@@ -76,6 +76,10 @@ public class Lectures extends BaseEntity
     @Excel(name = "是否需要学籍")
     private Boolean requiresEnrollment;
 
+    /** 已报名人数 */
+    @Excel(name = "已报名人数")
+    private Integer enrolledCount;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -196,6 +200,16 @@ public class Lectures extends BaseEntity
         this.requiresEnrollment = requiresEnrollment;
     }
 
+    public Integer getEnrolledCount()
+    {
+        return enrolledCount;
+    }
+
+    public void setEnrolledCount(Integer enrolledCount)
+    {
+        this.enrolledCount = enrolledCount;
+    }
+
     public void setCover(String cover)
     {
         this.cover = cover;
@@ -252,6 +266,7 @@ public class Lectures extends BaseEntity
             .append("registrationFee", getRegistrationFee())
             .append("deposit", getDeposit())
             .append("requiresEnrollment", getRequiresEnrollment())
+            .append("enrolledCount", getEnrolledCount())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())
             .toString();

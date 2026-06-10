@@ -122,6 +122,7 @@ CREATE TABLE `lectures` (
   `registration_fee` decimal(10,2) NOT NULL DEFAULT '100.00' COMMENT '报名费',
   `deposit` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '席位预定金/报名押金',
   `requires_enrollment` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否需要学籍: 1需要, 0不需要',
+  `enrolled_count` int NOT NULL DEFAULT '0' COMMENT '已报名人数',
   `create_date` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_date` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `cover` varchar(30) DEFAULT NULL COMMENT '活动封面图',
