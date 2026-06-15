@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PersonalityTestAttemptMapper">
+    <resultMap id="PersonalityTestAttemptResult" type="com.ruoyi.system.domain.PersonalityTestAttempt">
+        <result property="id" column="id"/>
+        <result property="testId" column="test_id"/>
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="wxUserId" column="wx_user_id"/>
+        <result property="status" column="status"/>
+        <result property="answeredCount" column="answered_count"/>
+        <result property="currentQuestionNo" column="current_question_no"/>
+        <result property="startedAt" column="started_at"/>
+        <result property="completedAt" column="completed_at"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectAttemptColumns">
+        select id, test_id, user_info_id, wx_user_id, status, answered_count,
+               current_question_no, started_at, completed_at, create_time, update_time
+        from personality_test_attempt
+    </sql>
+
+    <select id="selectAttemptById" resultMap="PersonalityTestAttemptResult">
+        <include refid="selectAttemptColumns"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectLatestInProgressAttempt" resultMap="PersonalityTestAttemptResult">
+        <include refid="selectAttemptColumns"/>
+        where test_id = #{testId}
+          and user_info_id = #{userInfoId}
+          and status = 0
+        order by update_time desc, id desc
+        limit 1
+    </select>
+
+    <insert id="insertAttempt" parameterType="com.ruoyi.system.domain.PersonalityTestAttempt" useGeneratedKeys="true" keyProperty="id">
+        insert into personality_test_attempt
+        (test_id, user_info_id, wx_user_id, status, answered_count, current_question_no,
+         started_at, completed_at, create_time, update_time)
+        values
+        (#{testId}, #{userInfoId}, #{wxUserId}, #{status}, #{answeredCount}, #{currentQuestionNo},
+         #{startedAt}, #{completedAt}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateAttempt" parameterType="com.ruoyi.system.domain.PersonalityTestAttempt">
+        update personality_test_attempt
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status != null">status = #{status},</if>
+            <if test="answeredCount != null">answered_count = #{answeredCount},</if>
+            <if test="currentQuestionNo != null">current_question_no = #{currentQuestionNo},</if>
+            <if test="completedAt != null">completed_at = #{completedAt},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>

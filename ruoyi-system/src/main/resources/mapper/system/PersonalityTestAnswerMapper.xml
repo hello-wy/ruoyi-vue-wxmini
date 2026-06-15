@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PersonalityTestAnswerMapper">
+    <resultMap id="PersonalityTestAnswerResult" type="com.ruoyi.system.domain.PersonalityTestAnswer">
+        <result property="id" column="id"/>
+        <result property="attemptId" column="attempt_id"/>
+        <result property="testId" column="test_id"/>
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="questionId" column="question_id"/>
+        <result property="questionNo" column="question_no"/>
+        <result property="answerValue" column="answer_value"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="countAnswersByAttemptId" resultType="int">
+        select count(1)
+        from personality_test_answer
+        where attempt_id = #{attemptId}
+    </select>
+
+    <insert id="insertOrUpdateAnswer" parameterType="com.ruoyi.system.domain.PersonalityTestAnswer">
+        insert into personality_test_answer
+        (attempt_id, test_id, user_info_id, question_id, question_no, answer_value, create_time, update_time)
+        values
+        (#{attemptId}, #{testId}, #{userInfoId}, #{questionId}, #{questionNo}, #{answerValue}, #{createTime}, #{updateTime})
+        on duplicate key update
+            answer_value = values(answer_value),
+            update_time = values(update_time)
+    </insert>
+</mapper>

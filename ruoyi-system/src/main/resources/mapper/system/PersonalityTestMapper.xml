@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PersonalityTestMapper">
+    <resultMap id="PersonalityTestResult" type="com.ruoyi.system.domain.PersonalityTest">
+        <result property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="totalQuestions" column="total_questions"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectPersonalityTestColumns">
+        select id, code, title, description, total_questions, status, create_time, update_time
+        from personality_test
+    </sql>
+
+    <select id="selectEnabledPersonalityTest" resultMap="PersonalityTestResult">
+        <include refid="selectPersonalityTestColumns"/>
+        where status = 1
+        order by id asc
+        limit 1
+    </select>
+</mapper>

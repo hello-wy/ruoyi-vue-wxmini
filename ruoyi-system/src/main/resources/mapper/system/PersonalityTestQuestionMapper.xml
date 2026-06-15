@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.PersonalityTestQuestionMapper">
+    <resultMap id="PersonalityTestQuestionResult" type="com.ruoyi.system.domain.PersonalityTestQuestion">
+        <result property="id" column="id"/>
+        <result property="testId" column="test_id"/>
+        <result property="questionNo" column="question_no"/>
+        <result property="dimensionNo" column="dimension_no"/>
+        <result property="content" column="content"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectQuestionColumns">
+        select id, test_id, question_no, dimension_no, content, status, create_time, update_time
+        from personality_test_question
+    </sql>
+
+    <select id="selectQuestionById" resultMap="PersonalityTestQuestionResult">
+        <include refid="selectQuestionColumns"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectQuestionByNo" resultMap="PersonalityTestQuestionResult">
+        <include refid="selectQuestionColumns"/>
+        where test_id = #{testId}
+          and question_no = #{questionNo}
+          and status = 1
+        limit 1
+    </select>
+
+    <select id="selectFirstUnansweredQuestion" resultMap="PersonalityTestQuestionResult">
+        select q.id, q.test_id, q.question_no, q.dimension_no, q.content, q.status, q.create_time, q.update_time
+        from personality_test_question q
+        left join personality_test_answer a
+          on a.question_id = q.id
+         and a.attempt_id = #{attemptId}
+        where q.test_id = #{testId}
+          and q.status = 1
+          and a.id is null
+        order by q.question_no asc
+        limit 1
+    </select>
+</mapper>
