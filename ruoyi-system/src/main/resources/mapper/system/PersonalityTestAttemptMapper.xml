@@ -36,6 +36,25 @@
         limit 1
     </select>
 
+    <select id="countCompletedAttempts" resultType="int">
+        select count(distinct user_info_id)
+        from personality_test_attempt
+        where test_id = #{testId}
+          and status = 1
+    </select>
+
+    <select id="selectAttemptList" resultMap="PersonalityTestAttemptResult">
+        <include refid="selectAttemptColumns"/>
+        <where>
+            <if test="testId != null">and test_id = #{testId}</if>
+            <if test="userInfoId != null and userInfoId != ''">and user_info_id = #{userInfoId}</if>
+            <if test="status != null">and status = #{status}</if>
+            <if test="startTime != null and startTime != ''">and started_at &gt;= #{startTime}</if>
+            <if test="endTime != null and endTime != ''">and started_at &lt;= #{endTime}</if>
+        </where>
+        order by id desc
+    </select>
+
     <insert id="insertAttempt" parameterType="com.ruoyi.system.domain.PersonalityTestAttempt" useGeneratedKeys="true" keyProperty="id">
         insert into personality_test_attempt
         (test_id, user_info_id, wx_user_id, status, answered_count, current_question_no,

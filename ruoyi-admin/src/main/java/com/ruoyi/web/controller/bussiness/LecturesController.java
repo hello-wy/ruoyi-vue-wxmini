@@ -56,6 +56,17 @@ public class LecturesController extends BaseController
     }
 
     /**
+     * 查询已有课程模板列表。
+     */
+    @ApiOperation("查询已有课程模板列表")
+    @PreAuthorize("@ss.hasPermi('system:lectures:list')")
+    @GetMapping("/templates")
+    public AjaxResult templates()
+    {
+        return success(lecturesService.selectLecturesTemplateList());
+    }
+
+    /**
      * 查询最近一个月课程活动/讲座列表（前端接口）
      */
     @ApiOperation("查询最近一个月课程活动/讲座列表（公开）")

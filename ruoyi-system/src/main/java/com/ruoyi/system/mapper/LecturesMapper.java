@@ -32,6 +32,13 @@ public interface LecturesMapper extends BaseMapper<Lectures>
     public List<Lectures> selectLecturesList(Lectures lectures);
 
     /**
+     * 查询课程模板列表。
+     *
+     * @return 按课程名称去重后的课程配置集合
+     */
+    public List<Lectures> selectLecturesTemplateList();
+
+    /**
      * 新增课程活动/讲座
      * 
      * @param lectures 课程活动/讲座

@@ -48,6 +48,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
+    <select id="selectLecturesTemplateList" resultMap="LecturesResult">
+        SELECT
+            l.id, l.time, l.end_date, l.name, l.speaker,
+            l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee,
+            l.deposit, l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date
+        FROM lectures l
+        INNER JOIN (
+            SELECT name, MAX(id) AS id
+            FROM lectures
+            WHERE name IS NOT NULL AND name != ''
+            GROUP BY name
+        ) latest ON latest.id = l.id
+        ORDER BY l.id DESC
+    </select>
+
     <insert id="insertLectures" parameterType="Lectures" useGeneratedKeys="true" keyProperty="id">
         insert into lectures
         <trim prefix="(" suffix=")" suffixOverrides=",">

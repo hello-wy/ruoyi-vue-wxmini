@@ -3,6 +3,8 @@ package com.ruoyi.system.mapper;
 import com.ruoyi.system.domain.PersonalityTestQuestion;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface PersonalityTestQuestionMapper {
     PersonalityTestQuestion selectQuestionById(@Param("id") Long id);
 
@@ -11,4 +13,6 @@ public interface PersonalityTestQuestionMapper {
 
     PersonalityTestQuestion selectFirstUnansweredQuestion(@Param("testId") Long testId,
                                                           @Param("attemptId") Long attemptId);
+
+    List<PersonalityTestQuestion> selectEnabledQuestionsByTestId(@Param("testId") Long testId);
 }

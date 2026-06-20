@@ -43,4 +43,10 @@
         order by q.question_no asc
         limit 1
     </select>
+    <select id="selectEnabledQuestionsByTestId" resultMap="PersonalityTestQuestionResult">
+        <include refid="selectQuestionColumns"/>
+        where test_id = #{testId}
+          and status = 1
+        order by question_no asc
+    </select>
 </mapper>

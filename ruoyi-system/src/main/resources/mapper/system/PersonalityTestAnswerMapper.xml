@@ -20,6 +20,13 @@
         where attempt_id = #{attemptId}
     </select>
 
+    <select id="selectAnswersByAttemptId" resultMap="PersonalityTestAnswerResult">
+        select id, attempt_id, test_id, user_info_id, question_id, question_no, answer_value, create_time, update_time
+        from personality_test_answer
+        where attempt_id = #{attemptId}
+        order by question_no asc, id asc
+    </select>
+
     <insert id="insertOrUpdateAnswer" parameterType="com.ruoyi.system.domain.PersonalityTestAnswer">
         insert into personality_test_answer
         (attempt_id, test_id, user_info_id, question_id, question_no, answer_value, create_time, update_time)

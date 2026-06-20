@@ -9,6 +9,14 @@ export function listLectures(query) {
   })
 }
 
+// 查询已有课程模板
+export function listLectureTemplates() {
+  return request({
+    url: '/system/lectures/templates',
+    method: 'get'
+  })
+}
+
 // 查询课程活动/讲座详细
 export function getLectures(id) {
   return request({

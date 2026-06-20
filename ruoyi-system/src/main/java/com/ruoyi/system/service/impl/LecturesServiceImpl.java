@@ -42,6 +42,12 @@ public class LecturesServiceImpl implements ILecturesService
     }
 
     @Override
+    public List<Lectures> selectLecturesTemplateList()
+    {
+        return lecturesMapper.selectLecturesTemplateList();
+    }
+
+    @Override
     public int insertLectures(Lectures lectures)
     {
         return lecturesMapper.insertLectures(lectures);

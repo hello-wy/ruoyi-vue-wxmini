@@ -16,6 +16,8 @@ public interface ILecturesService
 
     public List<Lectures> selectLecturesList(Lectures lectures);
 
+    public List<Lectures> selectLecturesTemplateList();
+
     public int insertLectures(Lectures lectures);
 
     public int updateLectures(Lectures lectures);
