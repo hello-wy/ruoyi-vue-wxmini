@@ -10,9 +10,7 @@ import com.ruoyi.system.service.IPersonalityTestService;
 import com.ruoyi.wxmini.bo.WxPersonalityAnswerBo;
 import com.ruoyi.wxmini.bo.WxPersonalityAttemptBo;
 import com.ruoyi.wxmini.domain.UserInfo;
-import com.ruoyi.wxmini.domain.WxAdminBinding;
 import com.ruoyi.wxmini.service.IUserInfoService;
-import com.ruoyi.wxmini.service.IWxAdminBindingService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,9 +34,6 @@ public class WxPersonalityTestController extends BaseController {
 
     @Autowired
     private IUserInfoService userInfoService;
-
-    @Autowired
-    private IWxAdminBindingService wxAdminBindingService;
 
     @ApiOperation("获取性格测试入口状态")
     @GetMapping("/entry")
@@ -111,54 +106,7 @@ public class WxPersonalityTestController extends BaseController {
         }
     }
 
-    @ApiOperation("获取性格测试填写人数")
-    @GetMapping("/count")
-    public AjaxResult count() {
-        if (!isCurrentUserAdmin()) {
-            return error("无权限访问");
-        }
-        try {
-            return success(personalityTestService.countCompletedAttempts());
-        } catch (ServiceException e) {
-            return error(e.getMessage());
-        }
-    }
-
-    @ApiOperation("查询性格测试填写记录列表")
-    @GetMapping("/list")
-    public TableDataInfoVo<PersonalityTestAdminAttemptVo> list(Long testId, String userInfoId, Integer status, String startTime, String endTime) {
-        if (!isCurrentUserAdmin()) {
-            TableDataInfoVo<PersonalityTestAdminAttemptVo> table = new TableDataInfoVo<>();
-            table.setCode(500);
-            table.setMsg("无权限访问");
-            return table;
-        }
-        startPage();
-        return personalityTestService.selectAdminAttemptList(testId, userInfoId, status, startTime, endTime);
-    }
-
-    @ApiOperation("获取性格测试填写记录详情")
-    @GetMapping("/{attemptId}")
-    public AjaxResult detail(@PathVariable Long attemptId) {
-        if (!isCurrentUserAdmin()) {
-            return error("无权限访问");
-        }
-        try {
-            PersonalityTestAdminDetailVo detail = personalityTestService.selectAdminAttemptDetail(attemptId);
-            return success(detail);
-        } catch (ServiceException e) {
-            return error(e.getMessage());
-        }
-    }
-
-    private boolean isCurrentUserAdmin() {
-        String wxUserId = WxMiniUserContext.getCurrentUserId();
-        if (StringUtils.isBlank(wxUserId)) {
-            return false;
-        }
-        WxAdminBinding binding = wxAdminBindingService.selectByWxUserId(wxUserId);
-        return binding != null && "0".equals(binding.getStatus());
-    }
+    // Admin endpoints and helpers removed and migrated to PersonalityTestAdminController
 
     private UserInfo getCurrentUserInfo() {
         String wxUserId = WxMiniUserContext.getCurrentUserId();
