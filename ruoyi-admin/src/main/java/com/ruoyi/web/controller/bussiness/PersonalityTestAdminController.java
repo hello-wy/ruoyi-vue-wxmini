@@ -38,7 +38,6 @@ public class PersonalityTestAdminController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:personality-test:list')")
     @GetMapping("/list")
     public TableDataInfoVo<PersonalityTestAdminAttemptVo> list(Long testId, String userInfoId, Integer status, String startTime, String endTime) {
-        startPage();
         return personalityTestService.selectAdminAttemptList(testId, userInfoId, status, startTime, endTime);
     }
 

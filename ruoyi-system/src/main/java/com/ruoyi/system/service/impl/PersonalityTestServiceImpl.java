@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.system.domain.PersonalityTest;
 import com.ruoyi.system.domain.PersonalityTestAnswer;
 import com.ruoyi.system.domain.PersonalityTestAttempt;
@@ -178,6 +179,7 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
     public TableDataInfoVo<PersonalityTestAdminAttemptVo> selectAdminAttemptList(Long testId, String userInfoId, Integer status, String startTime, String endTime) {
         PersonalityTest test = requireEnabledTest();
         Long actualTestId = testId == null ? test.getId() : testId;
+        PageUtils.startPage();
         List<PersonalityTestAttempt> attempts = personalityTestAttemptMapper.selectAttemptList(actualTestId, userInfoId, status, startTime, endTime);
         PageInfo<PersonalityTestAttempt> pageInfo = new PageInfo<>(attempts);
         List<PersonalityTestAdminAttemptVo> rows = new ArrayList<>();
