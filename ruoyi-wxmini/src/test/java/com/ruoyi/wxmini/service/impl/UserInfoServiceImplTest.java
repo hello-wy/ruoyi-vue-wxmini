@@ -87,4 +87,35 @@ class UserInfoServiceImplTest {
         assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
         verify(redisCache).setCacheObject(eq("wx_user:123"), contains("\"isRealnameAuth\":1"));
     }
+
+    @Test
+    void testFastjsonSerialization() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(12345L);
+        userInfo.setUserId("test-user-id");
+        userInfo.setUserName("test-user-name");
+        userInfo.setIsRealnameAuth(1);
+
+        String json = com.alibaba.fastjson2.JSON.toJSONString(userInfo);
+        System.out.println("Serialized JSON: " + json);
+        UserInfo parsed = com.alibaba.fastjson2.JSON.parseObject(json, UserInfo.class);
+        System.out.println("Parsed ID: " + parsed.getId());
+        assertEquals(12345L, parsed.getId());
+        assertEquals("test-user-id", parsed.getUserId());
+        assertEquals("test-user-name", parsed.getUserName());
+        assertEquals(Integer.valueOf(1), parsed.getIsRealnameAuth());
+    }
+
+    @Test
+    void testCacheHitPath() {
+        String cachedJson = "{\"id\":999,\"userId\":\"123\",\"userName\":\"微信用户\",\"isRealnameAuth\":1}";
+        when(redisCache.getCacheObject("wx_user:123")).thenReturn(cachedJson);
+
+        UserInfo result = service.selectUserInfoByUserId("123");
+
+        assertEquals(999L, result.getId());
+        assertEquals("123", result.getUserId());
+        assertEquals("微信用户", result.getUserName());
+        assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
+    }
 }

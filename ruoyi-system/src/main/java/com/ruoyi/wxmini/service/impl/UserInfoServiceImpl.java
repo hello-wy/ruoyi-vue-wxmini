@@ -6,6 +6,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.mapper.UserInfoMapper;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +65,12 @@ public class UserInfoServiceImpl implements IUserInfoService {
      */
     @Override
     public int updateUserInfo(UserInfo userInfo) {
+        if (userInfo.getId() == null && StringUtils.isNotBlank(userInfo.getUserId())) {
+            UserInfo dbUser = userInfoMapper.selectUserInfoByUserId(userInfo.getUserId());
+            if (dbUser != null) {
+                userInfo.setId(dbUser.getId());
+            }
+        }
         userInfo.setUpdateTime(DateUtils.getNowDate());
         redisCache.setCacheObject(this.getWxUserCacheKey(userInfo.getUserId()), JSON.toJSONString(userInfo));
         return userInfoMapper.updateUserInfo(userInfo);
