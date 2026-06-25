@@ -15,6 +15,8 @@ public interface IPersonalityTestService {
 
     PersonalityTestQuestionVo getCurrentQuestion(Long attemptId, Long userInfoId);
 
+    PersonalityTestQuestionVo getQuestion(Long attemptId, Long userInfoId, Integer questionNo);
+
     PersonalityTestAnswerResultVo saveAnswer(Long attemptId, Long userInfoId, Long questionId, Integer answerValue);
 
     PersonalityTestResultVo getResult(Long attemptId, Long userInfoId);

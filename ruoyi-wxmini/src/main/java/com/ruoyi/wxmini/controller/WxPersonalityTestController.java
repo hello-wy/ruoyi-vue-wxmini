@@ -77,6 +77,21 @@ public class WxPersonalityTestController extends BaseController {
         }
     }
 
+    @ApiOperation("按题号获取性格测试题目")
+    @GetMapping("/attempts/{attemptId}/questions/{questionNo}")
+    public AjaxResult question(@PathVariable("attemptId") Long attemptId,
+                               @PathVariable("questionNo") Integer questionNo) {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("请先登录");
+        }
+        try {
+            return success(personalityTestService.getQuestion(attemptId, userInfo.getId(), questionNo));
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
+    }
+
     @ApiOperation("保存当前题答案并返回下一题")
     @PostMapping("/attempts/{attemptId}/answers")
     public AjaxResult saveAnswer(@PathVariable("attemptId") Long attemptId,

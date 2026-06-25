@@ -99,6 +99,23 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
     }
 
     @Override
+    public PersonalityTestQuestionVo getQuestion(Long attemptId, Long userInfoId, Integer questionNo) {
+        PersonalityTestAttempt attempt = requireOwnedAttempt(attemptId, userInfoId);
+        PersonalityTest test = requireEnabledAttemptTest(attempt);
+        if (questionNo == null || questionNo < 1 || questionNo > test.getTotalQuestions()) {
+            throw new ServiceException("题号不存在");
+        }
+        if (PersonalityTestAttempt.STATUS_COMPLETED.equals(attempt.getStatus())) {
+            return null;
+        }
+        PersonalityTestQuestion question = personalityTestQuestionMapper.selectQuestionByNo(test.getId(), questionNo);
+        if (question == null) {
+            throw new ServiceException("题目不存在");
+        }
+        return toQuestionVo(attempt.getId(), test, question);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public PersonalityTestAnswerResultVo saveAnswer(Long attemptId, Long userInfoId, Long questionId, Integer answerValue) {
         if (!isValidAnswer(answerValue)) {
@@ -254,6 +271,14 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         PersonalityTest test = personalityTestMapper.selectEnabledPersonalityTest();
         if (test == null) {
             throw new ServiceException("性格测试暂未开放");
+        }
+        return test;
+    }
+
+    private PersonalityTest requireEnabledAttemptTest(PersonalityTestAttempt attempt) {
+        PersonalityTest test = requireEnabledTest();
+        if (!test.getId().equals(attempt.getTestId())) {
+            throw new ServiceException("测试记录不存在");
         }
         return test;
     }
