@@ -43,10 +43,26 @@
         order by q.question_no asc
         limit 1
     </select>
+
     <select id="selectEnabledQuestionsByTestId" resultMap="PersonalityTestQuestionResult">
         <include refid="selectQuestionColumns"/>
         where test_id = #{testId}
           and status = 1
         order by question_no asc
+    </select>
+
+    <select id="selectQuestionsByTestId" resultMap="PersonalityTestQuestionResult">
+        <include refid="selectQuestionColumns"/>
+        where test_id = #{testId}
+        order by question_no asc, id asc
+    </select>
+
+    <select id="selectQuestionsByIds" resultMap="PersonalityTestQuestionResult">
+        <include refid="selectQuestionColumns"/>
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by question_no asc, id asc
     </select>
 </mapper>

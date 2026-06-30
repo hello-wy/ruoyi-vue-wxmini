@@ -16,6 +16,7 @@ import com.ruoyi.system.domain.vo.PersonalityTestAnswerResultVo;
 import com.ruoyi.system.domain.vo.PersonalityTestEntryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestOptionVo;
 import com.ruoyi.system.domain.vo.PersonalityTestQuestionVo;
+import com.ruoyi.system.domain.vo.PersonalityTestResultAnswerVo;
 import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
 import com.ruoyi.system.mapper.PersonalityTestAnswerMapper;
 import com.ruoyi.system.mapper.PersonalityTestAttemptMapper;
@@ -24,6 +25,8 @@ import com.ruoyi.system.mapper.PersonalityTestQuestionMapper;
 import com.ruoyi.system.service.IPersonalityTestService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.mapper.UserInfoMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +40,8 @@ import java.util.Map;
 
 @Service
 public class PersonalityTestServiceImpl implements IPersonalityTestService {
+    private static final Logger log = LoggerFactory.getLogger(PersonalityTestServiceImpl.class);
+
     @Autowired
     private PersonalityTestMapper personalityTestMapper;
 
@@ -177,12 +182,31 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         if (!test.getId().equals(attempt.getTestId())) {
             throw new ServiceException("测试记录不存在");
         }
+
+        List<PersonalityTestAnswer> answers = personalityTestAnswerMapper.selectAnswersByAttemptId(attempt.getId());
+        List<Long> questionIds = new ArrayList<>(answers.size());
+        for (PersonalityTestAnswer answer : answers) {
+            questionIds.add(answer.getQuestionId());
+        }
+        List<PersonalityTestQuestion> questions = questionIds.isEmpty()
+                ? new ArrayList<>()
+                : personalityTestQuestionMapper.selectQuestionsByIds(questionIds);
+        List<PersonalityTestResultAnswerVo> answerVos = buildResultAnswers(attempt.getId(), answers, questions);
+        int actualAnsweredCount = answerVos.size();
+
+        if (attempt.getAnsweredCount() != null && !attempt.getAnsweredCount().equals(actualAnsweredCount)) {
+            log.warn("性格测试答题数与记录不一致: attemptId={}, storedAnsweredCount={}, actualAnsweredCount={}",
+                    attempt.getId(), attempt.getAnsweredCount(), actualAnsweredCount);
+        }
+
         PersonalityTestResultVo vo = new PersonalityTestResultVo();
         vo.setAttemptId(attempt.getId());
+        vo.setStatus(attempt.getStatus());
         vo.setCompleted(PersonalityTestAttempt.STATUS_COMPLETED.equals(attempt.getStatus()));
-        vo.setAnsweredCount(attempt.getAnsweredCount());
+        vo.setAnsweredCount(actualAnsweredCount);
         vo.setTotalQuestions(test.getTotalQuestions());
         vo.setCompletedAt(attempt.getCompletedAt());
+        vo.setAnswers(answerVos);
         return vo;
     }
 
@@ -245,7 +269,7 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
                 answerVo.setAnswerLabel("未答");
             } else {
                 answerVo.setAnswerValue(answer.getAnswerValue());
-                answerVo.setAnswerLabel(answerLabel(answer.getAnswerValue()));
+                answerVo.setAnswerLabel(answerLabel(answer.getAnswerValue(), attempt.getId(), answer.getQuestionId()));
             }
             answerVos.add(answerVo);
         }
@@ -283,13 +307,21 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         return test;
     }
 
-    private PersonalityTestAttempt requireOwnedAttempt(Long attemptId, Long userInfoId) {
+    private PersonalityTestAttempt requireAttemptById(Long attemptId) {
         if (attemptId == null) {
             throw new ServiceException("测试记录不能为空");
         }
         PersonalityTestAttempt attempt = personalityTestAttemptMapper.selectAttemptById(attemptId);
-        if (attempt == null || !userInfoId.equals(attempt.getUserInfoId())) {
+        if (attempt == null) {
             throw new ServiceException("测试记录不存在");
+        }
+        return attempt;
+    }
+
+    private PersonalityTestAttempt requireOwnedAttempt(Long attemptId, Long userInfoId) {
+        PersonalityTestAttempt attempt = requireAttemptById(attemptId);
+        if (!userInfoId.equals(attempt.getUserInfoId())) {
+            throw new ServiceException("无权查看该测试记录");
         }
         return attempt;
     }
@@ -360,6 +392,58 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
                 || PersonalityTestAnswer.ANSWER_UNSURE.equals(answerValue);
     }
 
+    private List<PersonalityTestResultAnswerVo> buildResultAnswers(Long attemptId,
+                                                                    List<PersonalityTestAnswer> answers,
+                                                                    List<PersonalityTestQuestion> questions) {
+        Map<Long, PersonalityTestQuestion> questionMap = new HashMap<>();
+        for (PersonalityTestQuestion question : questions) {
+            if (question == null || question.getId() == null) {
+                log.error("性格测试结果题目数据异常: attemptId={}, question={}", attemptId, question);
+                throw new ServiceException("题目数据异常");
+            }
+            if (question.getQuestionNo() == null) {
+                log.error("性格测试结果题号缺失: attemptId={}, questionId={}", attemptId, question.getId());
+                throw new ServiceException("题目数据异常");
+            }
+            if (!isValidDimensionNo(question.getDimensionNo())) {
+                log.error("性格测试题目维度异常: attemptId={}, questionId={}, dimensionNo={}",
+                        attemptId, question.getId(), question.getDimensionNo());
+                throw new ServiceException("题目维度数据异常");
+            }
+            questionMap.put(question.getId(), question);
+        }
+
+        List<PersonalityTestResultAnswerVo> answerVos = new ArrayList<>(answers.size());
+        for (PersonalityTestAnswer answer : answers) {
+            if (answer == null || answer.getQuestionId() == null) {
+                log.error("性格测试答题记录异常: attemptId={}, answer={}", attemptId, answer);
+                throw new ServiceException("答题记录数据异常");
+            }
+            PersonalityTestQuestion question = questionMap.get(answer.getQuestionId());
+            if (question == null) {
+                log.error("性格测试结果缺少题目信息: attemptId={}, questionId={}", attemptId, answer.getQuestionId());
+                throw new ServiceException("答题记录题目信息不存在");
+            }
+            if (answer.getQuestionNo() != null && !answer.getQuestionNo().equals(question.getQuestionNo())) {
+                log.error("性格测试答题题号不一致: attemptId={}, questionId={}, answerQuestionNo={}, actualQuestionNo={}",
+                        attemptId, answer.getQuestionId(), answer.getQuestionNo(), question.getQuestionNo());
+                throw new ServiceException("答题记录题号不一致");
+            }
+            PersonalityTestResultAnswerVo answerVo = new PersonalityTestResultAnswerVo();
+            answerVo.setQuestionId(question.getId());
+            answerVo.setQuestionNo(question.getQuestionNo());
+            answerVo.setDimensionNo(question.getDimensionNo());
+            answerVo.setAnswerValue(answer.getAnswerValue());
+            answerVo.setAnswerLabel(answerLabel(answer.getAnswerValue(), attemptId, question.getId()));
+            answerVos.add(answerVo);
+        }
+        return answerVos;
+    }
+
+    private boolean isValidDimensionNo(Integer dimensionNo) {
+        return dimensionNo != null && dimensionNo >= 1 && dimensionNo <= 9;
+    }
+
     private String statusLabel(Integer status) {
         if (PersonalityTestAttempt.STATUS_IN_PROGRESS.equals(status)) {
             return "进行中";
@@ -373,7 +457,7 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         return "未知";
     }
 
-    private String answerLabel(Integer answerValue) {
+    private String answerLabel(Integer answerValue, Long attemptId, Long questionId) {
         if (PersonalityTestAnswer.ANSWER_YES.equals(answerValue)) {
             return "是";
         }
@@ -383,6 +467,7 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         if (PersonalityTestAnswer.ANSWER_UNSURE.equals(answerValue)) {
             return "不确定";
         }
-        return "否";
+        log.error("性格测试答题值异常: attemptId={}, questionId={}, answerValue={}", attemptId, questionId, answerValue);
+        throw new ServiceException("答题记录答案数据异常");
     }
 }

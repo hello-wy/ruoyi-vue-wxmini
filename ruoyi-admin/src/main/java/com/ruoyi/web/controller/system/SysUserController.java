@@ -1,12 +1,15 @@
 package com.ruoyi.web.controller.system;
 
+import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Validator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,8 +27,10 @@ import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysPostService;
@@ -41,6 +46,12 @@ import com.ruoyi.system.service.ISysUserService;
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController
 {
+    private static final String PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+    private static final int RANDOM_PASSWORD_LENGTH = 10;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     @Autowired
     private ISysUserService userService;
 
@@ -52,6 +63,9 @@ public class SysUserController extends BaseController
 
     @Autowired
     private ISysPostService postService;
+
+    @Autowired
+    protected Validator validator;
 
     /**
      * 获取用户列表
@@ -122,8 +136,11 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:add')")
     @Log(title = "用户管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody SysUser user)
+    public AjaxResult add(@RequestBody SysUser user)
     {
+        applyPhoneLoginName(user);
+        validateAdminUser(user);
+        BeanValidators.validateWithException(validator, user);
         deptService.checkDeptDataScope(user.getDeptId());
         roleService.checkRoleDataScope(user.getRoleIds());
         if (!userService.checkUserNameUnique(user))
@@ -138,9 +155,18 @@ public class SysUserController extends BaseController
         {
             return error("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
+        String plainPassword = randomPassword();
         user.setCreateBy(getUsername());
-        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
-        return toAjax(userService.insertUser(user));
+        user.setPassword(SecurityUtils.encryptPassword(plainPassword));
+        int rows = userService.insertUser(user);
+        if (rows <= 0)
+        {
+            return error();
+        }
+        Map<String, String> credentials = new HashMap<>();
+        credentials.put("phone", user.getPhonenumber());
+        credentials.put("password", plainPassword);
+        return AjaxResult.success(credentials);
     }
 
     /**
@@ -149,8 +175,11 @@ public class SysUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:user:edit')")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody SysUser user)
+    public AjaxResult edit(@RequestBody SysUser user)
     {
+        applyPhoneLoginName(user);
+        validateAdminUser(user);
+        BeanValidators.validateWithException(validator, user);
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
         deptService.checkDeptDataScope(user.getDeptId());
@@ -252,5 +281,36 @@ public class SysUserController extends BaseController
     public AjaxResult deptTree(SysDept dept)
     {
         return success(deptService.selectDeptTreeList(dept));
+    }
+
+    private void applyPhoneLoginName(SysUser user)
+    {
+        if (StringUtils.isEmpty(user.getPhonenumber()))
+        {
+            throw new ServiceException("手机号码不能为空");
+        }
+        user.setUserName(user.getPhonenumber());
+    }
+
+    private void validateAdminUser(SysUser user)
+    {
+        if (StringUtils.isEmpty(user.getNickName()))
+        {
+            throw new ServiceException("用户昵称不能为空");
+        }
+        if (StringUtils.isEmpty(user.getAdminLevel()))
+        {
+            throw new ServiceException("管理员层级不能为空");
+        }
+    }
+
+    private String randomPassword()
+    {
+        StringBuilder password = new StringBuilder(RANDOM_PASSWORD_LENGTH);
+        for (int i = 0; i < RANDOM_PASSWORD_LENGTH; i++)
+        {
+            password.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
+        }
+        return password.toString();
     }
 }

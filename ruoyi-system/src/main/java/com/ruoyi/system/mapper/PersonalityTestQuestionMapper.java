@@ -15,4 +15,8 @@ public interface PersonalityTestQuestionMapper {
                                                           @Param("attemptId") Long attemptId);
 
     List<PersonalityTestQuestion> selectEnabledQuestionsByTestId(@Param("testId") Long testId);
+
+    List<PersonalityTestQuestion> selectQuestionsByTestId(@Param("testId") Long testId);
+
+    List<PersonalityTestQuestion> selectQuestionsByIds(@Param("ids") List<Long> ids);
 }

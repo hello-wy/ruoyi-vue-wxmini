@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.system.domain.vo.PersonalityTestQuestionVo;
+import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
 import com.ruoyi.system.service.IPersonalityTestService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
@@ -52,5 +53,23 @@ class WxPersonalityTestControllerTest {
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         assertEquals(question, result.get(AjaxResult.DATA_TAG));
         verify(personalityTestService).getQuestion(12L, USER_INFO_ID, 37);
+    }
+
+    @Test
+    void resultShouldForwardAttemptResultPayload() {
+        WxMiniUserContext.setCurrentUserId(WX_USER_ID);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(USER_INFO_ID);
+        userInfo.setUserId(WX_USER_ID);
+        PersonalityTestResultVo resultVo = new PersonalityTestResultVo();
+        resultVo.setAttemptId(12L);
+        when(userInfoService.selectUserInfoByUserId(WX_USER_ID)).thenReturn(userInfo);
+        when(personalityTestService.getResult(12L, USER_INFO_ID)).thenReturn(resultVo);
+
+        AjaxResult result = controller.result(12L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(resultVo, result.get(AjaxResult.DATA_TAG));
+        verify(personalityTestService).getResult(12L, USER_INFO_ID);
     }
 }
