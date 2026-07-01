@@ -58,7 +58,7 @@ class WxLoginControllerTest {
         when(userInfoService.selectUserInfoByOpenId(OPEN_ID)).thenReturn(userInfo);
         when(jwtService.createToken(userInfo.getUserId())).thenReturn("jwt-token");
 
-        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, null);
+        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, null, null);
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         WxUserInfo data = (WxUserInfo) result.get(AjaxResult.DATA_TAG);
@@ -81,7 +81,7 @@ class WxLoginControllerTest {
         when(wxMaUserService.getSessionInfo(LOGIN_CODE)).thenReturn(buildSession());
         when(userInfoService.selectUserInfoByOpenId(OPEN_ID)).thenReturn(null);
 
-        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, null);
+        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, null, null);
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         WxUserInfo data = (WxUserInfo) result.get(AjaxResult.DATA_TAG);
@@ -101,7 +101,7 @@ class WxLoginControllerTest {
         when(userInfoService.selectUserInfoByOpenId(OPEN_ID)).thenReturn(null);
         when(jwtService.createToken(any())).thenReturn("jwt-token");
 
-        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, PHONE_CODE);
+        AjaxResult result = controller.login(APP_ID, LOGIN_CODE, PHONE_CODE, null);
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         WxUserInfo data = (WxUserInfo) result.get(AjaxResult.DATA_TAG);
