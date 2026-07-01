@@ -43,4 +43,8 @@ public interface IUserInfoService {
     UserInfo selectUserInfoByOpenId(String openId);
 
     UserInfo selectUserInfoByUserId(String userId);
+
+    UserInfo selectUserInfoByInviteCode(String inviteCode);
+
+    String getOrCreateInviteCode(String userId);
 }

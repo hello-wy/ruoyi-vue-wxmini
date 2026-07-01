@@ -74,6 +74,12 @@ public class UserInfo extends BaseEntity {
     @Excel(name = "是否已实名认证")
     private Integer isRealnameAuth;
 
+    /**
+     * 用户专属邀请码
+     */
+    @Excel(name = "用户专属邀请码")
+    private String inviteCode;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -160,5 +166,13 @@ public class UserInfo extends BaseEntity {
 
     public void setIsRealnameAuth(Integer isRealnameAuth) {
         this.isRealnameAuth = isRealnameAuth;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
     }
 }

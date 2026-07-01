@@ -62,4 +62,6 @@ public interface UserInfoMapper {
     UserInfo selectUserInfoByOpenId(String openId);
 
     UserInfo selectUserInfoByUserId(String userId);
+
+    UserInfo selectUserInfoByInviteCode(String inviteCode);
 }

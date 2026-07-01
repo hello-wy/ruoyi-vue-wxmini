@@ -124,6 +124,57 @@ public class UserInfoServiceImpl implements IUserInfoService {
         return userInfo;
     }
 
+    @Override
+    public UserInfo selectUserInfoByInviteCode(String inviteCode) {
+        return userInfoMapper.selectUserInfoByInviteCode(inviteCode);
+    }
+
+    @Override
+    public String getOrCreateInviteCode(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return null;
+        }
+        UserInfo userInfo = selectUserInfoByUserId(userId);
+        if (userInfo == null) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(userInfo.getInviteCode())) {
+            return userInfo.getInviteCode();
+        }
+
+        // Generate unique invite code
+        String inviteCode = null;
+        int retries = 0;
+        while (retries < 10) {
+            String tempCode = generateRandomInviteCode();
+            UserInfo existing = userInfoMapper.selectUserInfoByInviteCode(tempCode);
+            if (existing == null) {
+                inviteCode = tempCode;
+                break;
+            }
+            retries++;
+        }
+        
+        if (inviteCode == null) {
+            // Fallback to substring of UUID if random fails repeatedly
+            inviteCode = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        }
+
+        userInfo.setInviteCode(inviteCode);
+        updateUserInfo(userInfo);
+        return inviteCode;
+    }
+
+    private String generateRandomInviteCode() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        java.util.Random rnd = new java.util.Random();
+        StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
     private String getWxUserCacheKey(String userId) {
         return REDIS_KEY_WX_USER + userId;
     }

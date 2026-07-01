@@ -13,6 +13,7 @@ import com.ruoyi.wxmini.bo.WxUserInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IWxMiniJwtService;
+import com.ruoyi.wxmini.service.IUserReferralService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -66,6 +67,8 @@ public class WxLoginController {
     private SysPermissionService permissionService;
     @Resource
     private TokenService tokenService;
+    @Resource
+    private IUserReferralService userReferralService;
 
     /**
      * 登陆接口
@@ -74,11 +77,12 @@ public class WxLoginController {
     @ApiImplicitParams({
         @ApiImplicitParam(name = "appid", value = "小程序 AppID", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
         @ApiImplicitParam(name = "code", value = "微信登录临时凭证 code", required = true, dataType = "String", paramType = "query", dataTypeClass = String.class),
-        @ApiImplicitParam(name = "phoneCode", value = "微信手机号实时验证 code，未注册时必填", dataType = "String", paramType = "query", dataTypeClass = String.class)
+        @ApiImplicitParam(name = "phoneCode", value = "微信手机号实时验证 code，未注册时必填", dataType = "String", paramType = "query", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "inviteCode", value = "专属邀请码", dataType = "String", paramType = "query", dataTypeClass = String.class)
     })
     @Anonymous
     @GetMapping("/login")
-    public AjaxResult login(String appid, String code, String phoneCode) {
+    public AjaxResult login(String appid, String code, String phoneCode, String inviteCode) {
         if (StringUtils.isEmpty(code)) {
             return AjaxResult.error("empty jscode");
         }
@@ -88,7 +92,7 @@ public class WxLoginController {
 
         try {
             WxMaJscode2SessionResult session = wxMaService.getUserService().getSessionInfo(code);
-            UserInfo userInfo = resolveLoginUser(session, phoneCode);
+            UserInfo userInfo = resolveLoginUser(session, phoneCode, inviteCode);
             if (userInfo == null) {
                 return AjaxResult.success(buildPhoneRequiredResult(session));
             }
@@ -104,7 +108,7 @@ public class WxLoginController {
         }
     }
 
-    private UserInfo resolveLoginUser(WxMaJscode2SessionResult session, String phoneCode) throws WxErrorException {
+    private UserInfo resolveLoginUser(WxMaJscode2SessionResult session, String phoneCode, String inviteCode) throws WxErrorException {
         String openId = session.getOpenid();
         UserInfo userInfo = userInfoService.selectUserInfoByOpenId(openId);
         if (userInfo != null) {
@@ -122,6 +126,16 @@ public class WxLoginController {
         createdUser.setUnionId(session.getUnionid());
         createdUser.setPhone(resolvePhone(phoneCode));
         userInfoService.insertUserInfo(createdUser);
+
+        // 如果携带了邀请码，进行分销关系绑定
+        if (StringUtils.isNotBlank(inviteCode)) {
+            try {
+                userReferralService.bindReferral(inviteCode, createdUser.getUserId());
+            } catch (Exception e) {
+                log.error("注册用户绑定邀请码失败, inviteCode=" + inviteCode + ", userId=" + createdUser.getUserId(), e);
+            }
+        }
+
         return createdUser;
     }
 

@@ -16,6 +16,7 @@
         <result property="realName" column="real_name"/>
         <result property="idCard" column="id_card"/>
         <result property="isRealnameAuth" column="is_realname_auth"/>
+        <result property="inviteCode" column="invite_code"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -32,6 +33,7 @@
                real_name,
                id_card,
                is_realname_auth,
+               invite_code,
                create_time,
                update_time
         from user_info
@@ -47,6 +49,7 @@
             <if test="openId != null  and openId != ''">and open_id = #{openId}</if>
             <if test="unionId != null  and unionId != ''">and union_id = #{unionId}</if>
             <if test="avatarUrl != null  and avatarUrl != ''">and avatar_url = #{avatarUrl}</if>
+            <if test="inviteCode != null  and inviteCode != ''">and invite_code = #{inviteCode}</if>
         </where>
     </select>
 
@@ -68,6 +71,7 @@
             <if test="realName != null and realName != ''">real_name,</if>
             <if test="idCard != null and idCard != ''">id_card,</if>
             <if test="isRealnameAuth != null">is_realname_auth,</if>
+            <if test="inviteCode != null and inviteCode != ''">invite_code,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
@@ -82,6 +86,7 @@
             <if test="realName != null and realName != ''">#{realName},</if>
             <if test="idCard != null and idCard != ''">#{idCard},</if>
             <if test="isRealnameAuth != null">#{isRealnameAuth},</if>
+            <if test="inviteCode != null and inviteCode != ''">#{inviteCode},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
@@ -100,6 +105,7 @@
             <if test="realName != null and realName != ''">real_name = #{realName},</if>
             <if test="idCard != null and idCard != ''">id_card = #{idCard},</if>
             <if test="isRealnameAuth != null">is_realname_auth = #{isRealnameAuth},</if>
+            <if test="inviteCode != null and inviteCode != ''">invite_code = #{inviteCode},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
         </trim>
@@ -127,5 +133,10 @@
     <select id="selectUserInfoByUserId" parameterType="String" resultMap="UserInfoResult">
         <include refid="selectUserInfoVo"/>
         where user_id = #{userId}
+    </select>
+
+    <select id="selectUserInfoByInviteCode" parameterType="String" resultMap="UserInfoResult">
+        <include refid="selectUserInfoVo"/>
+        where invite_code = #{inviteCode}
     </select>
 </mapper>
