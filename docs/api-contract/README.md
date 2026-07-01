@@ -52,6 +52,7 @@
 - `system/material/export.md`
 - `system/material/index.md`
 - `system/material/list.md`
+- `system/material/upload.md`
 - `system/material/{ids}.md`
 - `system/material/{id}.md`
 - `system/parents/export.md`
@@ -112,6 +113,9 @@
 - `wxmini/growup/courses__{id}__enroll.md`
 - `wxmini/growup/enrollments__list.md`
 - `wxmini/growup/enrollments__total.md`
+- `wxmini/growup/materials.md`
+- `wxmini/growup/materials__files__auth.md`
+- `wxmini/growup/materials__files__{uuid}.md`
 - `wxmini/jobs/index.md`
 - `wxmini/jobs/list.md`
 - `wxmini/jobs/mine__defaults.md`

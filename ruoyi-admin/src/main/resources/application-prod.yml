@@ -1,6 +1,11 @@
 ruoyi:
   profile: /home/zhiyujia/upload
 
+material:
+  file:
+    storage-dir: files
+    public-prefix: ${MATERIAL_FILE_PUBLIC_PREFIX:/files}
+
 # 数据源配置
 spring:
   datasource:

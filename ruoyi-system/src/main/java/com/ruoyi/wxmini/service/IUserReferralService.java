@@ -12,6 +12,15 @@ import java.util.List;
  */
 public interface IUserReferralService {
 
+    public enum ReferralBindResult {
+        SUCCESS,
+        EMPTY_INVITE_CODE,
+        ALREADY_BOUND,
+        INVALID_INVITE_CODE,
+        SELF_INVITE,
+        FAILED
+    }
+
     /**
      * 绑定邀请关系
      *
@@ -20,6 +29,15 @@ public interface IUserReferralService {
      * @return 结果
      */
     public int bindReferral(String inviteCode, String inviteeUserId);
+
+    /**
+     * 绑定邀请关系并返回明确业务结果
+     *
+     * @param inviteCode 邀请码
+     * @param inviteeUserId 被邀请人user_id
+     * @return 绑定结果
+     */
+    public ReferralBindResult bindReferralWithResult(String inviteCode, String inviteeUserId);
 
     /**
      * 查询我的下级Vo列表

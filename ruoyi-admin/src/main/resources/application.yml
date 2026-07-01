@@ -28,6 +28,13 @@ file-storage:
     bucketDomain:
     basePath:
 
+material:
+  file:
+    storage-dir: files
+    public-prefix: ${MATERIAL_FILE_PUBLIC_PREFIX:/wxmini/growup/materials/files}
+    sign-secret: ${MATERIAL_FILE_SIGN_SECRET:zhiyujia-material-file}
+    sign-expire-seconds: 600
+
 server:
   # 服务器的HTTP端口，默认为8080
   port: 8080

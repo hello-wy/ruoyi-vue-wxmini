@@ -3,10 +3,17 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.LectureMaterialMapper">
-    
+
     <resultMap type="LectureMaterial" id="LectureMaterialResult">
         <result property="id"    column="id"    />
         <result property="lectureId"    column="lecture_id"    />
+        <result property="name"    column="name"    />
+        <result property="uuid"    column="uuid"    />
+        <result property="originalName"    column="original_name"    />
+        <result property="relativePath"    column="relative_path"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="fileSize"    column="file_size"    />
+        <result property="tag"    column="tag"    />
         <result property="url"    column="url"    />
         <result property="status"    column="status"    />
         <result property="createTime"    column="create_time"    />
@@ -15,22 +22,52 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectLectureMaterialVo">
-        select id, lecture_id, url, status, create_time, update_time, is_deleted from lecture_material
+        select id, lecture_id, name, uuid, original_name, relative_path, file_type, file_size, tag, url, status, create_time, update_time, is_deleted from lecture_material
+    </sql>
+
+    <sql id="lectureMaterialWhere">
+        <where>
+            <if test="lectureId != null "> and lecture_id = #{lectureId}</if>
+            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="uuid != null and uuid != ''"> and uuid = #{uuid}</if>
+            <if test="originalName != null and originalName != ''"> and original_name like concat('%', #{originalName}, '%')</if>
+            <if test="relativePath != null and relativePath != ''"> and relative_path = #{relativePath}</if>
+            <if test="fileType != null and fileType != ''"> and file_type = #{fileType}</if>
+            <if test="tag != null and tag != ''"> and tag = #{tag}</if>
+            <if test="url != null and url != ''"> and url = #{url}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
+        </where>
     </sql>
 
     <select id="selectLectureMaterialList" parameterType="LectureMaterial" resultMap="LectureMaterialResult">
         <include refid="selectLectureMaterialVo"/>
-        <where>  
-            <if test="lectureId != null "> and lecture_id = #{lectureId}</if>
-            <if test="url != null  and url != ''"> and url = #{url}</if>
-            <if test="status != null "> and status = #{status}</if>
-            <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
-        </where>
+        <include refid="lectureMaterialWhere"/>
+        order by create_time desc, id desc
     </select>
-    
+
+    <select id="selectWxVisibleLectureMaterialList" parameterType="LectureMaterial" resultMap="LectureMaterialResult">
+        <include refid="selectLectureMaterialVo"/>
+        <where>
+            status = 1
+            and is_deleted = 0
+            <if test="lectureId != null "> and lecture_id = #{lectureId}</if>
+            <if test="name != null and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="fileType != null and fileType != ''"> and file_type = #{fileType}</if>
+            <if test="tag != null and tag != ''"> and tag = #{tag}</if>
+        </where>
+        order by create_time desc, id desc
+    </select>
+
     <select id="selectLectureMaterialById" parameterType="Long" resultMap="LectureMaterialResult">
         <include refid="selectLectureMaterialVo"/>
         where id = #{id}
+    </select>
+
+    <select id="selectLectureMaterialByUuid" parameterType="String" resultMap="LectureMaterialResult">
+        <include refid="selectLectureMaterialVo"/>
+        where uuid = #{uuid}
+        limit 1
     </select>
 
     <insert id="insertLectureMaterial" parameterType="LectureMaterial">
@@ -38,6 +75,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
             <if test="lectureId != null">lecture_id,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="uuid != null and uuid != ''">uuid,</if>
+            <if test="originalName != null and originalName != ''">original_name,</if>
+            <if test="relativePath != null and relativePath != ''">relative_path,</if>
+            <if test="fileType != null and fileType != ''">file_type,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="tag != null and tag != ''">tag,</if>
             <if test="url != null and url != ''">url,</if>
             <if test="status != null">status,</if>
             <if test="createTime != null">create_time,</if>
@@ -47,6 +91,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
             <if test="lectureId != null">#{lectureId},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="uuid != null and uuid != ''">#{uuid},</if>
+            <if test="originalName != null and originalName != ''">#{originalName},</if>
+            <if test="relativePath != null and relativePath != ''">#{relativePath},</if>
+            <if test="fileType != null and fileType != ''">#{fileType},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="tag != null and tag != ''">#{tag},</if>
             <if test="url != null and url != ''">#{url},</if>
             <if test="status != null">#{status},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -59,6 +110,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update lecture_material
         <trim prefix="SET" suffixOverrides=",">
             <if test="lectureId != null">lecture_id = #{lectureId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="uuid != null and uuid != ''">uuid = #{uuid},</if>
+            <if test="originalName != null and originalName != ''">original_name = #{originalName},</if>
+            <if test="relativePath != null and relativePath != ''">relative_path = #{relativePath},</if>
+            <if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
+            <if test="fileSize != null">file_size = #{fileSize},</if>
+            <if test="tag != null and tag != ''">tag = #{tag},</if>
             <if test="url != null and url != ''">url = #{url},</if>
             <if test="status != null">status = #{status},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
@@ -73,7 +131,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteLectureMaterialByIds" parameterType="String">
-        delete from lecture_material where id in 
+        delete from lecture_material where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>

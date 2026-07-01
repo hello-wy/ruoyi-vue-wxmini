@@ -13,7 +13,6 @@ import com.ruoyi.wxmini.bo.WxUserInfo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IWxMiniJwtService;
-import com.ruoyi.wxmini.service.IUserReferralService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -67,8 +66,6 @@ public class WxLoginController {
     private SysPermissionService permissionService;
     @Resource
     private TokenService tokenService;
-    @Resource
-    private IUserReferralService userReferralService;
 
     /**
      * 登陆接口
@@ -126,15 +123,6 @@ public class WxLoginController {
         createdUser.setUnionId(session.getUnionid());
         createdUser.setPhone(resolvePhone(phoneCode));
         userInfoService.insertUserInfo(createdUser);
-
-        // 如果携带了邀请码，进行分销关系绑定
-        if (StringUtils.isNotBlank(inviteCode)) {
-            try {
-                userReferralService.bindReferral(inviteCode, createdUser.getUserId());
-            } catch (Exception e) {
-                log.error("注册用户绑定邀请码失败, inviteCode=" + inviteCode + ", userId=" + createdUser.getUserId(), e);
-            }
-        }
 
         return createdUser;
     }

@@ -7,7 +7,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 资料中心数据对象 lecture_material
- * 
+ *
  * @author ruoyi
  * @date 2026-03-07
  */
@@ -22,7 +22,35 @@ public class LectureMaterial extends BaseEntity
     @Excel(name = "关联课程ID")
     private Long lectureId;
 
-    /** 资料/PDF文件OSS链接 */
+    /** 资料展示名 */
+    @Excel(name = "资料展示名")
+    private String name;
+
+    /** 服务器扁平存储文件名 */
+    @Excel(name = "服务器扁平存储文件名")
+    private String uuid;
+
+    /** 上传原始文件名 */
+    @Excel(name = "上传原始文件名")
+    private String originalName;
+
+    /** 服务器相对路径 */
+    @Excel(name = "服务器相对路径")
+    private String relativePath;
+
+    /** 文件类型 */
+    @Excel(name = "文件类型")
+    private String fileType;
+
+    /** 文件大小，单位字节 */
+    @Excel(name = "文件大小")
+    private Long fileSize;
+
+    /** 分类标签 */
+    @Excel(name = "分类标签")
+    private String tag;
+
+    /** 资料/PDF文件OSS链接，兼容旧字段 */
     @Excel(name = "资料/PDF文件OSS链接")
     private String url;
 
@@ -34,52 +62,122 @@ public class LectureMaterial extends BaseEntity
     @Excel(name = "逻辑删除标识")
     private Long isDeleted;
 
-    public void setId(Long id) 
+    public void setId(Long id)
     {
         this.id = id;
     }
 
-    public Long getId() 
+    public Long getId()
     {
         return id;
     }
 
-    public void setLectureId(Long lectureId) 
+    public void setLectureId(Long lectureId)
     {
         this.lectureId = lectureId;
     }
 
-    public Long getLectureId() 
+    public Long getLectureId()
     {
         return lectureId;
     }
 
-    public void setUrl(String url) 
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(String uuid)
+    {
+        this.uuid = uuid;
+    }
+
+    public String getOriginalName()
+    {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName)
+    {
+        this.originalName = originalName;
+    }
+
+    public String getRelativePath()
+    {
+        return relativePath;
+    }
+
+    public void setRelativePath(String relativePath)
+    {
+        this.relativePath = relativePath;
+    }
+
+    public String getFileType()
+    {
+        return fileType;
+    }
+
+    public void setFileType(String fileType)
+    {
+        this.fileType = fileType;
+    }
+
+    public Long getFileSize()
+    {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize)
+    {
+        this.fileSize = fileSize;
+    }
+
+    public String getTag()
+    {
+        return tag;
+    }
+
+    public void setTag(String tag)
+    {
+        this.tag = tag;
+    }
+
+    public void setUrl(String url)
     {
         this.url = url;
     }
 
-    public String getUrl() 
+    public String getUrl()
     {
         return url;
     }
 
-    public void setStatus(Long status) 
+    public void setStatus(Long status)
     {
         this.status = status;
     }
 
-    public Long getStatus() 
+    public Long getStatus()
     {
         return status;
     }
 
-    public void setIsDeleted(Long isDeleted) 
+    public void setIsDeleted(Long isDeleted)
     {
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
+    public Long getIsDeleted()
     {
         return isDeleted;
     }
@@ -89,6 +187,13 @@ public class LectureMaterial extends BaseEntity
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("lectureId", getLectureId())
+            .append("name", getName())
+            .append("uuid", getUuid())
+            .append("originalName", getOriginalName())
+            .append("relativePath", getRelativePath())
+            .append("fileType", getFileType())
+            .append("fileSize", getFileSize())
+            .append("tag", getTag())
             .append("url", getUrl())
             .append("status", getStatus())
             .append("createTime", getCreateTime())

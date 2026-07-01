@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -63,6 +65,30 @@ public class LectureMaterialController extends BaseController
         List<LectureMaterial> list = lectureMaterialService.selectLectureMaterialList(lectureMaterial);
         ExcelUtil<LectureMaterial> util = new ExcelUtil<LectureMaterial>(LectureMaterial.class);
         util.exportExcel(response, list, "资料中心数据数据");
+    }
+
+    /**
+     * 上传资料文件并返回元信息
+     */
+    @ApiOperation("上传资料文件")
+    @PreAuthorize("@ss.hasPermi('system:material:add') or @ss.hasPermi('system:material:edit')")
+    @Log(title = "资料中心文件", businessType = BusinessType.INSERT)
+    @PostMapping("/upload")
+    public AjaxResult upload(@RequestParam("file") MultipartFile file)
+    {
+        if (file == null || file.isEmpty())
+        {
+            return error("上传文件不能为空");
+        }
+        try
+        {
+            return success(lectureMaterialService.uploadMaterialFile(file));
+        }
+        catch (Exception e)
+        {
+            logger.error("上传资料文件失败", e);
+            return error(e.getMessage());
+        }
     }
 
     /**
