@@ -6,6 +6,7 @@ import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.wxmini.domain.WxUserProfile;
 import com.ruoyi.wxmini.domain.vo.WxUserProfileVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface WxUserProfileMapper extends BaseMapper<WxUserProfile> {
     List<StudentListVo> selectAdminStudentList(StudentQueryBo queryBo);
 
     StudentDetailVo selectAdminStudentDetailById(Long id);
+
+    int updateAdminStudentSituation(@Param("id") Long id, @Param("studentSituation") String studentSituation);
 }

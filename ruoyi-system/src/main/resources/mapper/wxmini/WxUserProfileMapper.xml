@@ -51,6 +51,7 @@
         <result property="industry" column="industry"/>
         <result property="workYears" column="work_years"/>
         <result property="personalIntro" column="personal_intro"/>
+        <result property="studentSituation" column="student_situation"/>
     </resultMap>
 
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
@@ -122,6 +123,7 @@
                up.industry,
                up.work_years,
                up.personal_intro,
+               up.student_situation,
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name
@@ -132,4 +134,12 @@
         where ui.id = #{id}
         limit 1
     </select>
+
+    <insert id="updateAdminStudentSituation">
+        insert into wx_user_profile (uid, student_situation)
+        select ui.id, #{studentSituation}
+        from user_info ui
+        where ui.id = #{id}
+        on duplicate key update student_situation = values(student_situation)
+    </insert>
 </mapper>

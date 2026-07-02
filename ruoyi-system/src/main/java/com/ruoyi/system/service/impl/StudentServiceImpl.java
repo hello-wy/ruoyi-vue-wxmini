@@ -3,6 +3,7 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
+import com.ruoyi.system.domain.vo.StudentSituationVo;
 import com.ruoyi.system.service.IStudentService;
 import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,20 @@ public class StudentServiceImpl implements IStudentService {
         }
         detail.setUserTypeLabel(resolveUserTypeLabel(detail.getUserType()));
         return detail;
+    }
+
+    @Override
+    public StudentSituationVo updateStudentSituation(Long id, String studentSituation) {
+        StudentDetailVo detail = wxUserProfileMapper.selectAdminStudentDetailById(id);
+        if (detail == null) {
+            return null;
+        }
+        String normalizedSituation = StringUtils.trimToEmpty(studentSituation);
+        wxUserProfileMapper.updateAdminStudentSituation(id, normalizedSituation);
+        StudentSituationVo result = new StudentSituationVo();
+        result.setId(id);
+        result.setStudentSituation(normalizedSituation);
+        return result;
     }
 
     private String resolveUserTypeLabel(Integer userType) {

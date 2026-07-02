@@ -19,6 +19,7 @@ public class StudentDetailVo {
     private String industry;
     private String workYears;
     private String personalIntro;
+    private String studentSituation;
 
     public Long getId() {
         return id;
@@ -154,5 +155,13 @@ public class StudentDetailVo {
 
     public void setPersonalIntro(String personalIntro) {
         this.personalIntro = personalIntro;
+    }
+
+    public String getStudentSituation() {
+        return studentSituation;
+    }
+
+    public void setStudentSituation(String studentSituation) {
+        this.studentSituation = studentSituation;
     }
 }

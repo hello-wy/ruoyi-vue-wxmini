@@ -3,8 +3,10 @@ package com.ruoyi.web.controller.bussiness;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
+import com.ruoyi.system.domain.bo.StudentSituationUpdateBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
+import com.ruoyi.system.domain.vo.StudentSituationVo;
 import com.ruoyi.system.service.IStudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,6 +68,31 @@ class StudentControllerTest {
         when(studentService.getStudentDetail(99L)).thenReturn(null);
 
         AjaxResult result = controller.getInfo(99L);
+
+        assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
+    }
+
+    @Test
+    void updateSituationShouldReturn200WhenStudentExists() {
+        StudentSituationUpdateBo updateBo = new StudentSituationUpdateBo();
+        updateBo.setStudentSituation("学习主动");
+        StudentSituationVo situation = new StudentSituationVo();
+        situation.setId(8L);
+        situation.setStudentSituation("学习主动");
+        when(studentService.updateStudentSituation(8L, "学习主动")).thenReturn(situation);
+
+        AjaxResult result = controller.updateSituation(8L, updateBo);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void updateSituationShouldReturnNon200WhenStudentMissing() {
+        StudentSituationUpdateBo updateBo = new StudentSituationUpdateBo();
+        updateBo.setStudentSituation("学习主动");
+        when(studentService.updateStudentSituation(99L, "学习主动")).thenReturn(null);
+
+        AjaxResult result = controller.updateSituation(99L, updateBo);
 
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
     }
