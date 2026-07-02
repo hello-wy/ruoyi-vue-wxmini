@@ -111,6 +111,7 @@
 - `wxmini/growup/courses.md`
 - `wxmini/growup/courses__{id}.md`
 - `wxmini/growup/courses__{id}__enroll.md`
+- `wxmini/growup/courses__{id}__reviews__my.md`
 - `wxmini/growup/enrollments__list.md`
 - `wxmini/growup/enrollments__total.md`
 - `wxmini/growup/materials.md`
@@ -127,6 +128,11 @@
 - `wxmini/pay/jobs__orders__create.md`
 - `wxmini/pay/jobs__orders__my.md`
 - `wxmini/pay/jobs__orders__{orderNo}.md`
+- `wxmini/pay/courses__notify.md`
+- `wxmini/pay/courses__orders__create.md`
+- `wxmini/pay/courses__orders__my.md`
+- `wxmini/pay/courses__orders__paid.md`
+- `wxmini/pay/courses__orders__{orderNo}.md`
 - `wxmini/pay/growup__notify.md`
 - `wxmini/pay/salon__notify.md`
 - `wxmini/pay/tutoring__notify.md`

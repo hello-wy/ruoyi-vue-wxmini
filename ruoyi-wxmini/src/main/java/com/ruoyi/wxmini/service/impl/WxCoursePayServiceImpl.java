@@ -262,6 +262,13 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
         vo.setOrderNo(order.getOrderNo());
         vo.setCourseId(order.getCourseId());
         vo.setCourseName(course == null ? null : course.getName());
+        if (course != null) {
+            vo.setCourseTime(course.getTime());
+            vo.setCourseEndDate(course.getEndDate());
+            vo.setCourseLocation(course.getLocation());
+            vo.setCourseCover(course.getCover());
+            vo.setCourseCoverId(course.getCoverId());
+        }
         vo.setName(order.getName());
         vo.setGender(order.getGender());
         vo.setPhone(order.getPhone());

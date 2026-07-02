@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CourseReviewMapper">
+    <resultMap id="CourseReviewResult" type="com.ruoyi.system.domain.CourseReview">
+        <result property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectCourseReviewColumns">
+        select id, order_no, user_id, course_id, content, create_time, update_time
+        from course_review
+    </sql>
+
+    <select id="selectCourseReviewByOrderNo" resultMap="CourseReviewResult">
+        <include refid="selectCourseReviewColumns"/>
+        where order_no = #{orderNo}
+    </select>
+
+    <insert id="insertCourseReview" parameterType="com.ruoyi.system.domain.CourseReview" useGeneratedKeys="true" keyProperty="id">
+        insert into course_review
+        (order_no, user_id, course_id, content, create_time, update_time)
+        values
+        (#{orderNo}, #{userId}, #{courseId}, #{content}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateCourseReview" parameterType="com.ruoyi.system.domain.CourseReview">
+        update course_review
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null">content = #{content},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+</mapper>

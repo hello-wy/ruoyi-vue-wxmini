@@ -18,6 +18,13 @@ public class WxCoursePayOrderDetailVo {
     private BigDecimal amount;
     private Integer status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date courseTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date courseEndDate;
+    private String courseLocation;
+    private String courseCover;
+    private Long courseCoverId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date payTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date signTime;
@@ -48,6 +55,16 @@ public class WxCoursePayOrderDetailVo {
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
+    public Date getCourseTime() { return courseTime; }
+    public void setCourseTime(Date courseTime) { this.courseTime = courseTime; }
+    public Date getCourseEndDate() { return courseEndDate; }
+    public void setCourseEndDate(Date courseEndDate) { this.courseEndDate = courseEndDate; }
+    public String getCourseLocation() { return courseLocation; }
+    public void setCourseLocation(String courseLocation) { this.courseLocation = courseLocation; }
+    public String getCourseCover() { return courseCover; }
+    public void setCourseCover(String courseCover) { this.courseCover = courseCover; }
+    public Long getCourseCoverId() { return courseCoverId; }
+    public void setCourseCoverId(Long courseCoverId) { this.courseCoverId = courseCoverId; }
     public Date getPayTime() { return payTime; }
     public void setPayTime(Date payTime) { this.payTime = payTime; }
     public Date getSignTime() { return signTime; }

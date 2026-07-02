@@ -17,9 +17,11 @@ import com.ruoyi.system.domain.vo.LecturesListVo;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
+import com.ruoyi.wxmini.bo.WxCourseReviewSaveBo;
 import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import com.ruoyi.wxmini.service.IWxCourseReviewService;
 import com.ruoyi.wxmini.service.IWxGrowupPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
 import io.swagger.annotations.Api;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -63,6 +66,9 @@ public class WxGrowupController extends BaseController {
     @Autowired
     private IWxGrowupPayService wxGrowupPayService;
 
+    @Autowired
+    private IWxCourseReviewService wxCourseReviewService;
+
     /**
      * 获取课程/讲座列表（匿名，附带拼接讲师姓名）
      */
@@ -82,8 +88,10 @@ public class WxGrowupController extends BaseController {
 
         startPage();
         List<LecturesListVo> list = lecturesService.selectLecturesListVo(lectures);
-        List<Questionnaire> questionnaires = questionnaireService.selectRecentQuestionnaireList(list.get(0).getId());
-        list.get(0).setQuestionnaire(questionnaires);
+        if (!list.isEmpty()) {
+            List<Questionnaire> questionnaires = questionnaireService.selectRecentQuestionnaireList(list.get(0).getId());
+            list.get(0).setQuestionnaire(questionnaires);
+        }
 //        redisCache.setCacheObject(Constants.LECTURE_KEY_PREFIX, JSON.toJSONString(list), Constants.LECTURE_EXPIRATION, TimeUnit.SECONDS);
         return getDataTable(list);
     }
@@ -133,6 +141,32 @@ public class WxGrowupController extends BaseController {
             return success(wxGrowupPayService.createCourseOrder(wxUserId, id, bo));
         } catch (Exception e) {
             logger.error("创建成长课程报名支付订单失败", e);
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("查询当前用户当前订单的课程评价（需登录）")
+    @GetMapping("/courses/{id}/reviews/my")
+    public AjaxResult myCourseReview(@PathVariable("id") Long id,
+                                     @RequestParam("orderNo") String orderNo) {
+        try {
+            String wxUserId = WxMiniUserContext.getCurrentUserId();
+            return success(wxCourseReviewService.getMyReview(wxUserId, id, orderNo));
+        } catch (Exception e) {
+            logger.error("查询课程评价失败", e);
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("保存当前用户当前订单的课程评价（需登录）")
+    @PostMapping("/courses/{id}/reviews/my")
+    public AjaxResult saveMyCourseReview(@PathVariable("id") Long id,
+                                         @RequestBody @Valid WxCourseReviewSaveBo bo) {
+        try {
+            String wxUserId = WxMiniUserContext.getCurrentUserId();
+            return success(wxCourseReviewService.saveMyReview(wxUserId, id, bo));
+        } catch (Exception e) {
+            logger.error("保存课程评价失败", e);
             return error(e.getMessage());
         }
     }
