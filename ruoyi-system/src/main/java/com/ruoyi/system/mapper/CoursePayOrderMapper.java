@@ -1,6 +1,7 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.system.domain.CoursePayOrder;
+import com.ruoyi.system.domain.vo.CourseLearningRecordVo;
 import com.ruoyi.system.domain.vo.CourseRefundOrderVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -26,4 +27,8 @@ public interface CoursePayOrderMapper {
 
     List<CourseRefundOrderVo> selectCourseRefundOrders(@Param("courseId") Long courseId,
                                                        @Param("keyword") String keyword);
+
+    List<CourseLearningRecordVo> selectStudentCourseEnrollmentRecords(@Param("studentId") Long studentId);
+
+    List<CourseLearningRecordVo> selectStudentCourseSignInRecords(@Param("studentId") Long studentId);
 }

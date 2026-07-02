@@ -256,6 +256,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY s.sign_time DESC
     </select>
 
+    <resultMap type="com.ruoyi.system.domain.vo.CourseLearningRecordVo" id="StudentLectureSignInResult">
+        <result property="orderId" column="order_id" />
+        <result property="orderNo" column="order_no" />
+        <result property="userId" column="user_id" />
+        <result property="courseId" column="course_id" />
+        <result property="courseName" column="course_name" />
+        <result property="courseLocation" column="course_location" />
+        <result property="courseTime" column="course_time" />
+        <result property="status" column="status" />
+        <result property="recordType" column="record_type" />
+        <result property="signStatus" column="sign_status" />
+        <result property="signTime" column="sign_time" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <select id="selectStudentLectureSignInRecords" resultMap="StudentLectureSignInResult">
+        SELECT
+            s.id AS order_id,
+            concat('SIGN-', s.id) AS order_no,
+            ui.user_id,
+            s.lecture_id AS course_id,
+            l.name AS course_name,
+            l.location AS course_location,
+            l.time AS course_time,
+            s.sign_status AS status,
+            s.record_type,
+            s.sign_status,
+            s.sign_time,
+            s.sign_time AS create_time
+        FROM sign_in_record s
+                 LEFT JOIN lectures l ON s.lecture_id = l.id
+                 LEFT JOIN user_info ui ON ui.id = s.uid
+        WHERE s.uid = #{studentId}
+          AND s.record_type = 1
+        ORDER BY s.sign_time DESC, s.id DESC
+    </select>
+
     <!-- 检查用户是否已报名某沙龙 -->
     <select id="countSalonRegistration" resultType="int">
         SELECT COUNT(1)

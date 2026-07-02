@@ -25,6 +25,24 @@
         <result property="updateTime" column="update_time"/>
     </resultMap>
 
+    <resultMap id="CourseLearningRecordResult" type="com.ruoyi.system.domain.vo.CourseLearningRecordVo">
+        <result property="orderId" column="order_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseLocation" column="course_location"/>
+        <result property="courseTime" column="course_time"/>
+        <result property="amount" column="amount"/>
+        <result property="status" column="status"/>
+        <result property="recordType" column="record_type"/>
+        <result property="signStatus" column="sign_status"/>
+        <result property="payTime" column="pay_time"/>
+        <result property="signTime" column="sign_time"/>
+        <result property="refundTime" column="refund_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
     <sql id="selectCoursePayOrderColumns">
         select id, order_no, user_id, course_id, name, gender, phone, company,
                accommodation, enrollment_id, amount, status, wechat_transaction_id,
@@ -130,6 +148,58 @@
                 or cpo.order_no like concat('%', #{keyword}, '%')
                 or ui.user_name like concat('%', #{keyword}, '%'))
         </if>
+        order by cpo.sign_time desc, cpo.id desc
+    </select>
+
+    <select id="selectStudentCourseEnrollmentRecords" resultMap="CourseLearningRecordResult">
+        select cpo.id as order_id,
+               cpo.order_no,
+               cpo.user_id,
+               cpo.course_id,
+               l.name as course_name,
+               l.location as course_location,
+               l.time as course_time,
+               cpo.amount,
+               cpo.status,
+               cpo.pay_time,
+               cpo.sign_time,
+               cpo.refund_time,
+               cpo.create_time
+        from course_pay_order cpo
+                 left join lectures l on l.id = cpo.course_id
+        where cpo.user_id = (
+            select ui.user_id
+            from user_info ui
+            where ui.id = #{studentId}
+            limit 1
+        )
+        order by cpo.create_time desc, cpo.id desc
+    </select>
+
+    <select id="selectStudentCourseSignInRecords" resultMap="CourseLearningRecordResult">
+        select cpo.id as order_id,
+               cpo.order_no,
+               cpo.user_id,
+               cpo.course_id,
+               l.name as course_name,
+               l.location as course_location,
+               l.time as course_time,
+               cpo.amount,
+               cpo.status,
+               cpo.pay_time,
+               cpo.sign_time,
+               cpo.refund_time,
+               cpo.create_time
+        from course_pay_order cpo
+                 left join lectures l on l.id = cpo.course_id
+        where cpo.user_id = (
+            select ui.user_id
+            from user_info ui
+            where ui.id = #{studentId}
+            limit 1
+        )
+          and cpo.status in (2, 3)
+          and cpo.sign_time is not null
         order by cpo.sign_time desc, cpo.id desc
     </select>
 </mapper>

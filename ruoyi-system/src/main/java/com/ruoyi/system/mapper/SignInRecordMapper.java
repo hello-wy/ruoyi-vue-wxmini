@@ -2,6 +2,7 @@ package com.ruoyi.system.mapper;
 
 import java.util.List;
 import com.ruoyi.system.domain.SignInRecord;
+import com.ruoyi.system.domain.vo.CourseLearningRecordVo;
 import com.ruoyi.system.domain.vo.SignInRecordWithLectureVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -80,6 +81,8 @@ public interface SignInRecordMapper
      * @return 报名记录（含沙龙信息）列表
      */
     List<SignInRecordWithLectureVo> selectSalonRegistrationByUid(Long uid);
+
+    List<CourseLearningRecordVo> selectStudentLectureSignInRecords(@Param("studentId") Long studentId);
 
     SignInRecord selectJobSignInRecordByOrderId(@Param("jobOrderId") Long jobOrderId);
 

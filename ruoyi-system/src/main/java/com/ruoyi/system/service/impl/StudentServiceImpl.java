@@ -2,8 +2,11 @@ package com.ruoyi.system.service.impl;
 
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
+import com.ruoyi.system.mapper.CoursePayOrderMapper;
+import com.ruoyi.system.mapper.SignInRecordMapper;
 import com.ruoyi.system.service.IStudentService;
 import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +25,12 @@ public class StudentServiceImpl implements IStudentService {
 
     @Resource
     private WxUserProfileMapper wxUserProfileMapper;
+
+    @Resource
+    private CoursePayOrderMapper coursePayOrderMapper;
+
+    @Resource
+    private SignInRecordMapper signInRecordMapper;
 
     @Override
     public List<StudentListVo> listStudents(StudentQueryBo queryBo) {
@@ -43,6 +52,18 @@ public class StudentServiceImpl implements IStudentService {
         }
         detail.setUserTypeLabel(resolveUserTypeLabel(detail.getUserType()));
         return detail;
+    }
+
+    @Override
+    public StudentLearningRecordsVo getStudentLearningRecords(Long id) {
+        if (wxUserProfileMapper.selectAdminStudentDetailById(id) == null) {
+            return null;
+        }
+        StudentLearningRecordsVo records = new StudentLearningRecordsVo();
+        records.setEnrollmentRecords(coursePayOrderMapper.selectStudentCourseEnrollmentRecords(id));
+        records.setSignInRecords(coursePayOrderMapper.selectStudentCourseSignInRecords(id));
+        records.addSignInRecords(signInRecordMapper.selectStudentLectureSignInRecords(id));
+        return records;
     }
 
     @Override

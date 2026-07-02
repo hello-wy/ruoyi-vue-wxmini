@@ -8,6 +8,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.bo.StudentSituationUpdateBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
 import com.ruoyi.system.service.IStudentService;
@@ -50,6 +51,15 @@ public class StudentController extends BaseController {
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         StudentDetailVo detail = studentService.getStudentDetail(id);
         return detail == null ? error("学员不存在") : success(detail);
+    }
+
+    @ApiOperation("查询学员学习情况")
+    @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @PreAuthorize("@ss.hasPermi('system:student:query')")
+    @GetMapping("/{id}/learning-records")
+    public AjaxResult learningRecords(@PathVariable("id") Long id) {
+        StudentLearningRecordsVo records = studentService.getStudentLearningRecords(id);
+        return records == null ? error("学员不存在") : success(records);
     }
 
     @ApiOperation("保存学员情况")
