@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.StudentEnrollmentMapper">
-    
+
     <resultMap type="StudentEnrollment" id="StudentEnrollmentResult">
         <result property="id"    column="id"    />
         <result property="uid"    column="uid"    />
@@ -13,15 +13,51 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createTime"    column="create_time"    />
         <result property="updateTime"    column="update_time"    />
         <result property="isDeleted"    column="is_deleted"    />
+        <result property="studentName" column="student_name" />
+        <result property="phone" column="phone" />
+        <result property="lectureName" column="lecture_name" />
+        <result property="lectureTime" column="lecture_time" />
+        <result property="location" column="location" />
+        <result property="sharedCount" column="shared_count" />
     </resultMap>
 
     <sql id="selectStudentEnrollmentVo">
         select id, uid, lecture_id, total, remain, create_time, update_time, is_deleted from student_enrollment
     </sql>
 
+    <sql id="selectAdminStudentEnrollmentVo">
+        select se.id,
+               se.uid,
+               se.lecture_id,
+               se.total,
+               se.remain,
+               se.create_time,
+               se.update_time,
+               se.is_deleted,
+               case
+                   when up.real_name is not null and up.real_name != '' then up.real_name
+                   when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                   else ui.user_name
+               end as student_name,
+               ui.phone,
+               l.name as lecture_name,
+               l.time as lecture_time,
+               l.location,
+               COALESCE(sr.shared_count, 0) as shared_count
+        from student_enrollment se
+        left join user_info ui on ui.id = se.uid
+        left join wx_user_profile up on up.uid = ui.id
+        left join lectures l on l.id = se.lecture_id
+        left join (
+            select source_uid, lecture_id, sum(count) as shared_count
+            from student_enrollment_share_record
+            group by source_uid, lecture_id
+        ) sr on sr.source_uid = se.uid and sr.lecture_id = se.lecture_id
+    </sql>
+
     <select id="selectStudentEnrollmentList" parameterType="StudentEnrollment" resultMap="StudentEnrollmentResult">
         <include refid="selectStudentEnrollmentVo"/>
-        <where>  
+        <where>
             <if test="uid != null "> and uid = #{uid}</if>
             <if test="lectureId != null "> and lecture_id = #{lectureId}</if>
             <if test="total != null "> and total = #{total}</if>
@@ -29,10 +65,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>
         </where>
     </select>
-    
+
+    <select id="selectAdminStudentEnrollmentList" parameterType="StudentEnrollment" resultMap="StudentEnrollmentResult">
+        <include refid="selectAdminStudentEnrollmentVo"/>
+        <where>
+            se.is_deleted = 0
+            <if test="uid != null "> and se.uid = #{uid}</if>
+            <if test="lectureId != null "> and se.lecture_id = #{lectureId}</if>
+            <if test="total != null "> and se.total = #{total}</if>
+            <if test="remain != null "> and se.remain = #{remain}</if>
+            <if test="studentName != null and studentName != ''">
+                and (
+                    up.real_name like concat('%', #{studentName}, '%')
+                    or up.nick_name like concat('%', #{studentName}, '%')
+                    or ui.user_name like concat('%', #{studentName}, '%')
+                )
+            </if>
+            <if test="phone != null and phone != ''"> and ui.phone like concat('%', #{phone}, '%')</if>
+            <if test="lectureName != null and lectureName != ''"> and l.name like concat('%', #{lectureName}, '%')</if>
+        </where>
+        order by se.create_time desc, se.id desc
+    </select>
+
     <select id="selectStudentEnrollmentById" parameterType="Long" resultMap="StudentEnrollmentResult">
-        <include refid="selectStudentEnrollmentVo"/>
-        where id = #{id}
+        <include refid="selectAdminStudentEnrollmentVo"/>
+        where se.id = #{id}
+        limit 1
     </select>
 
     <insert id="insertStudentEnrollment" parameterType="StudentEnrollment">
@@ -73,29 +131,68 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </update>
 
+    <update id="reactivateStudentEnrollment" parameterType="StudentEnrollment">
+        update student_enrollment
+        set total = #{total},
+            remain = #{remain},
+            update_time = #{updateTime},
+            is_deleted = 0
+        where id = #{id}
+    </update>
+
+    <update id="updateEnrollmentCounts">
+        update student_enrollment
+        set total = #{total},
+            remain = #{remain},
+            update_time = #{updateTime}
+        where id = #{id}
+    </update>
+
     <delete id="deleteStudentEnrollmentById" parameterType="Long">
         delete from student_enrollment where id = #{id}
     </delete>
 
     <delete id="deleteStudentEnrollmentByIds" parameterType="String">
-        delete from student_enrollment where id in 
+        delete from student_enrollment where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
 
+    <update id="softDeleteStudentEnrollmentByIds" parameterType="String">
+        update student_enrollment
+        set is_deleted = 1,
+            update_time = sysdate()
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
     <resultMap type="com.ruoyi.system.domain.vo.EnrollmentWithLectureVo" id="EnrollmentWithLectureResult">
         <result property="id"          column="id"           />
+        <result property="uid"         column="uid"          />
+        <result property="studentName" column="student_name" />
+        <result property="phone"       column="phone"        />
         <result property="lectureId"   column="lecture_id"   />
         <result property="lectureName" column="lecture_name" />
+        <result property="lectureTime" column="lecture_time" />
+        <result property="endDate"     column="end_date"     />
+        <result property="location"    column="location"     />
         <result property="total"       column="total"        />
         <result property="remain"      column="remain"       />
+        <result property="usedCount"   column="used_count"   />
+        <result property="sharedCount" column="shared_count" />
+        <result property="availableShareCount" column="available_share_count" />
+        <result property="createTime"  column="create_time"  />
+        <result property="updateTime"  column="update_time"  />
     </resultMap>
 
     <select id="selectEnrollmentWithLectureByUid" parameterType="Long" resultMap="EnrollmentWithLectureResult">
         select
-            l.name  as lecture_name,
+            l.name as lecture_name,
             se.id,
+            se.uid,
             se.lecture_id,
             se.total,
             se.remain
@@ -103,6 +200,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left join lectures l on l.id = se.lecture_id
         where se.uid = #{uid}
           and se.is_deleted = 0
+    </select>
+
+    <select id="selectAdminEnrollmentWithLectureByUid" parameterType="Long" resultMap="EnrollmentWithLectureResult">
+        select
+            se.id,
+            se.uid,
+            case
+                when up.real_name is not null and up.real_name != '' then up.real_name
+                when up.nick_name is not null and up.nick_name != '' then up.nick_name
+                else ui.user_name
+            end as student_name,
+            ui.phone,
+            se.lecture_id,
+            l.name as lecture_name,
+            l.time as lecture_time,
+            l.end_date,
+            l.location,
+            se.total,
+            se.remain,
+            greatest(COALESCE(se.total, 0) - COALESCE(se.remain, 0), 0) as used_count,
+            COALESCE(sr.shared_count, 0) as shared_count,
+            COALESCE(se.remain, 0) as available_share_count,
+            se.create_time,
+            se.update_time
+        from student_enrollment se
+        left join user_info ui on ui.id = se.uid
+        left join wx_user_profile up on up.uid = ui.id
+        left join lectures l on l.id = se.lecture_id
+        left join (
+            select source_uid, lecture_id, sum(count) as shared_count
+            from student_enrollment_share_record
+            group by source_uid, lecture_id
+        ) sr on sr.source_uid = se.uid and sr.lecture_id = se.lecture_id
+        where se.uid = #{uid}
+          and se.is_deleted = 0
+        order by l.name asc, se.create_time desc, se.id desc
     </select>
 
     <select id="selectStudentEnrollmentByUidAndLectureId" resultMap="StudentEnrollmentResult">
@@ -118,5 +251,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and lecture_id = #{lectureId}
           and is_deleted = 0
         FOR UPDATE
+    </select>
+
+    <select id="selectAnyStudentEnrollmentByUidAndLectureId" resultMap="StudentEnrollmentResult">
+        <include refid="selectStudentEnrollmentVo"/>
+        where uid = #{uid}
+          and lecture_id = #{lectureId}
+        limit 1
     </select>
 </mapper>

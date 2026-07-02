@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -37,6 +38,30 @@ public class StudentEnrollment extends BaseEntity
     /** 逻辑删除标识 */
     @Excel(name = "逻辑删除标识")
     private Long isDeleted;
+
+    /** 学员显示名称 */
+    @TableField(exist = false)
+    private String studentName;
+
+    /** 学员手机号 */
+    @TableField(exist = false)
+    private String phone;
+
+    /** 课程名称 */
+    @TableField(exist = false)
+    private String lectureName;
+
+    /** 课程时间 */
+    @TableField(exist = false)
+    private java.util.Date lectureTime;
+
+    /** 课程地点 */
+    @TableField(exist = false)
+    private String location;
+
+    /** 已分享学籍数 */
+    @TableField(exist = false)
+    private Integer sharedCount;
 
     public void setId(Long id) 
     {
@@ -93,9 +118,69 @@ public class StudentEnrollment extends BaseEntity
         this.isDeleted = isDeleted;
     }
 
-    public Long getIsDeleted() 
+    public Long getIsDeleted()
     {
         return isDeleted;
+    }
+
+    public String getStudentName()
+    {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName)
+    {
+        this.studentName = studentName;
+    }
+
+    public String getPhone()
+    {
+        return phone;
+    }
+
+    public void setPhone(String phone)
+    {
+        this.phone = phone;
+    }
+
+    public String getLectureName()
+    {
+        return lectureName;
+    }
+
+    public void setLectureName(String lectureName)
+    {
+        this.lectureName = lectureName;
+    }
+
+    public java.util.Date getLectureTime()
+    {
+        return lectureTime;
+    }
+
+    public void setLectureTime(java.util.Date lectureTime)
+    {
+        this.lectureTime = lectureTime;
+    }
+
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+    public Integer getSharedCount()
+    {
+        return sharedCount;
+    }
+
+    public void setSharedCount(Integer sharedCount)
+    {
+        this.sharedCount = sharedCount;
     }
 
     @Override
@@ -109,6 +194,12 @@ public class StudentEnrollment extends BaseEntity
             .append("createTime", getCreateTime())
             .append("updateTime", getUpdateTime())
             .append("isDeleted", getIsDeleted())
+            .append("studentName", getStudentName())
+            .append("phone", getPhone())
+            .append("lectureName", getLectureName())
+            .append("lectureTime", getLectureTime())
+            .append("location", getLocation())
+            .append("sharedCount", getSharedCount())
             .toString();
     }
 }

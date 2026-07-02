@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.StudentEnrollment;
+import com.ruoyi.system.domain.bo.StudentEnrollmentShareBo;
 import com.ruoyi.system.service.IStudentEnrollmentService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfoVo;
@@ -48,7 +50,7 @@ public class StudentEnrollmentController extends BaseController
     public TableDataInfoVo<StudentEnrollment> list(StudentEnrollment studentEnrollment)
     {
         startPage();
-        List<StudentEnrollment> list = studentEnrollmentService.selectStudentEnrollmentList(studentEnrollment);
+        List<StudentEnrollment> list = studentEnrollmentService.selectAdminStudentEnrollmentList(studentEnrollment);
         return getDataTable(list);
     }
 
@@ -100,6 +102,19 @@ public class StudentEnrollmentController extends BaseController
     public AjaxResult edit(@RequestBody StudentEnrollment studentEnrollment)
     {
         return toAjax(studentEnrollmentService.updateStudentEnrollment(studentEnrollment));
+    }
+
+    /**
+     * 分享学籍信息
+     */
+    @ApiOperation("分享学籍信息")
+    @PreAuthorize("@ss.hasPermi('system:enrollment:edit')")
+    @Log(title = "学籍信息", businessType = BusinessType.UPDATE)
+    @PostMapping("/share")
+    public AjaxResult share(@Validated @RequestBody StudentEnrollmentShareBo shareBo)
+    {
+        studentEnrollmentService.shareEnrollment(shareBo, getUsername());
+        return success();
     }
 
     /**

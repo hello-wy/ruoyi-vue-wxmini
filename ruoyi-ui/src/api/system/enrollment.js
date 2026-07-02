@@ -42,3 +42,12 @@ export function delEnrollment(id) {
     method: 'delete'
   })
 }
+
+// 分享学籍信息
+export function shareEnrollment(data) {
+  return request({
+    url: '/system/enrollment/share',
+    method: 'post',
+    data: data
+  })
+}

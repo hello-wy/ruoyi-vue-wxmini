@@ -5,6 +5,7 @@ import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.bo.StudentSituationUpdateBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.domain.vo.StudentEnrollmentSummaryVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
 import com.ruoyi.system.service.IStudentService;
@@ -68,6 +69,26 @@ class StudentControllerTest {
         when(studentService.getStudentDetail(99L)).thenReturn(null);
 
         AjaxResult result = controller.getInfo(99L);
+
+        assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
+    }
+
+    @Test
+    void enrollmentsShouldReturn200WhenStudentExists() {
+        StudentEnrollmentSummaryVo summary = new StudentEnrollmentSummaryVo();
+        summary.setTotal(1);
+        when(studentService.getStudentEnrollments(8L)).thenReturn(summary);
+
+        AjaxResult result = controller.enrollments(8L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+    }
+
+    @Test
+    void enrollmentsShouldReturnNon200WhenStudentMissing() {
+        when(studentService.getStudentEnrollments(99L)).thenReturn(null);
+
+        AjaxResult result = controller.enrollments(99L);
 
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
     }

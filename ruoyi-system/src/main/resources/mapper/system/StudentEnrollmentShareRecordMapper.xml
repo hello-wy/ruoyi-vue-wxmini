@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.StudentEnrollmentShareRecordMapper">
+
+    <resultMap type="StudentEnrollmentShareRecord" id="StudentEnrollmentShareRecordResult">
+        <result property="id" column="id" />
+        <result property="sourceUid" column="source_uid" />
+        <result property="targetUid" column="target_uid" />
+        <result property="lectureId" column="lecture_id" />
+        <result property="count" column="count" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <insert id="insertStudentEnrollmentShareRecord" parameterType="StudentEnrollmentShareRecord">
+        insert into student_enrollment_share_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="sourceUid != null">source_uid,</if>
+            <if test="targetUid != null">target_uid,</if>
+            <if test="lectureId != null">lecture_id,</if>
+            <if test="count != null">count,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="sourceUid != null">#{sourceUid},</if>
+            <if test="targetUid != null">#{targetUid},</if>
+            <if test="lectureId != null">#{lectureId},</if>
+            <if test="count != null">#{count},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <select id="sumSharedCountBySourceAndLecture" resultType="int">
+        select COALESCE(sum(count), 0)
+        from student_enrollment_share_record
+        where source_uid = #{sourceUid}
+          and lecture_id = #{lectureId}
+    </select>
+</mapper>

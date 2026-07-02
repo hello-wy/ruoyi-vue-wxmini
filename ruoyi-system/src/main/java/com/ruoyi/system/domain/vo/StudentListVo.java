@@ -6,6 +6,7 @@ public class StudentListVo {
     private String userId;
     private String displayName;
     private String realName;
+    private String phone;
     private Integer userType;
     private String userTypeLabel;
 
@@ -39,6 +40,14 @@ public class StudentListVo {
 
     public void setRealName(String realName) {
         this.realName = realName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Integer getUserType() {

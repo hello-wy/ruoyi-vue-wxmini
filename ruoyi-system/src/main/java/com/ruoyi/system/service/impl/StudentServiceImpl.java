@@ -3,10 +3,14 @@ package com.ruoyi.system.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.domain.StudentFollowUpRecord;
 import com.ruoyi.system.domain.bo.StudentFollowUpRecordBo;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
+import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.domain.vo.StudentEnrollmentGroupVo;
+import com.ruoyi.system.domain.vo.StudentEnrollmentSummaryVo;
 import com.ruoyi.system.domain.vo.StudentFollowUpRecordVo;
 import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
@@ -14,13 +18,18 @@ import com.ruoyi.system.domain.vo.StudentSituationVo;
 import com.ruoyi.system.mapper.CoursePayOrderMapper;
 import com.ruoyi.system.mapper.SignInRecordMapper;
 import com.ruoyi.system.mapper.StudentFollowUpRecordMapper;
+import com.ruoyi.system.service.ILecturesService;
+import com.ruoyi.system.service.IStudentEnrollmentService;
 import com.ruoyi.system.service.IStudentService;
 import com.ruoyi.wxmini.mapper.WxUserProfileMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StudentServiceImpl implements IStudentService {
@@ -42,6 +51,12 @@ public class StudentServiceImpl implements IStudentService {
     @Resource
     private StudentFollowUpRecordMapper studentFollowUpRecordMapper;
 
+    @Resource
+    private IStudentEnrollmentService studentEnrollmentService;
+
+    @Resource
+    private ILecturesService lecturesService;
+
     @Override
     public List<StudentListVo> listStudents(StudentQueryBo queryBo) {
         List<StudentListVo> list = wxUserProfileMapper.selectAdminStudentList(queryBo);
@@ -62,6 +77,55 @@ public class StudentServiceImpl implements IStudentService {
         }
         detail.setUserTypeLabel(resolveUserTypeLabel(detail.getUserType()));
         return detail;
+    }
+
+    @Override
+    public StudentEnrollmentSummaryVo getStudentEnrollments(Long id) {
+        StudentDetailVo detail = wxUserProfileMapper.selectAdminStudentDetailById(id);
+        if (detail == null) {
+            return null;
+        }
+        List<EnrollmentWithLectureVo> enrollments = studentEnrollmentService.selectAdminEnrollmentWithLectureByUid(id);
+        StudentEnrollmentSummaryVo summary = new StudentEnrollmentSummaryVo();
+        Map<String, StudentEnrollmentGroupVo> groupMap = buildLectureGroups();
+        int total = 0;
+        int remain = 0;
+        int usedCount = 0;
+        int sharedCount = 0;
+        for (EnrollmentWithLectureVo enrollment : enrollments) {
+            int itemTotal = safeInt(enrollment.getTotal());
+            int itemRemain = safeInt(enrollment.getRemain());
+            int itemUsed = safeInt(enrollment.getUsedCount());
+            int itemShared = safeInt(enrollment.getSharedCount());
+            total += itemTotal;
+            remain += itemRemain;
+            usedCount += itemUsed;
+            sharedCount += itemShared;
+
+            String lectureName = StringUtils.defaultIfBlank(enrollment.getLectureName(), "未命名课程");
+            StudentEnrollmentGroupVo group = groupMap.get(lectureName);
+            if (group == null) {
+                group = new StudentEnrollmentGroupVo();
+                group.setLectureName(lectureName);
+                group.setTotal(0);
+                group.setRemain(0);
+                group.setUsedCount(0);
+                group.setSharedCount(0);
+                groupMap.put(lectureName, group);
+            }
+            group.setTotal(safeInt(group.getTotal()) + itemTotal);
+            group.setRemain(safeInt(group.getRemain()) + itemRemain);
+            group.setUsedCount(safeInt(group.getUsedCount()) + itemUsed);
+            group.setSharedCount(safeInt(group.getSharedCount()) + itemShared);
+            removeZeroPlaceholder(group);
+            group.getItems().add(enrollment);
+        }
+        summary.setTotal(total);
+        summary.setRemain(remain);
+        summary.setUsedCount(usedCount);
+        summary.setSharedCount(sharedCount);
+        summary.setGroups(new ArrayList<>(groupMap.values()));
+        return summary;
     }
 
     @Override
@@ -123,6 +187,54 @@ public class StudentServiceImpl implements IStudentService {
         return result;
     }
 
+    private Map<String, StudentEnrollmentGroupVo> buildLectureGroups() {
+        Map<String, StudentEnrollmentGroupVo> groupMap = new LinkedHashMap<>();
+        Lectures query = new Lectures();
+        List<Lectures> lectures = lecturesService.selectLecturesTemplateList();
+        if (lectures == null || lectures.isEmpty()) {
+            lectures = lecturesService.selectLecturesList(query);
+        }
+        for (Lectures lecture : lectures) {
+            if (lecture == null) {
+                continue;
+            }
+            String lectureName = StringUtils.defaultIfBlank(lecture.getName(), "未命名课程");
+            if (groupMap.containsKey(lectureName)) {
+                continue;
+            }
+            StudentEnrollmentGroupVo group = new StudentEnrollmentGroupVo();
+            group.setLectureName(lectureName);
+            group.setTotal(0);
+            group.setRemain(0);
+            group.setUsedCount(0);
+            group.setSharedCount(0);
+            group.getItems().add(buildZeroEnrollmentItem(lecture));
+            groupMap.put(lectureName, group);
+        }
+        return groupMap;
+    }
+
+    private EnrollmentWithLectureVo buildZeroEnrollmentItem(Lectures lecture) {
+        EnrollmentWithLectureVo item = new EnrollmentWithLectureVo();
+        item.setLectureId(lecture.getId());
+        item.setLectureName(StringUtils.defaultIfBlank(lecture.getName(), "未命名课程"));
+        item.setLectureTime(lecture.getTime());
+        item.setEndDate(lecture.getEndDate());
+        item.setLocation(lecture.getLocation());
+        item.setTotal(0);
+        item.setRemain(0);
+        item.setUsedCount(0);
+        item.setSharedCount(0);
+        item.setAvailableShareCount(0);
+        return item;
+    }
+
+    private void removeZeroPlaceholder(StudentEnrollmentGroupVo group) {
+        if (group.getItems().size() == 1 && group.getItems().get(0).getId() == null) {
+            group.getItems().clear();
+        }
+    }
+
     private String normalizeFormData(String formData) {
         if (StringUtils.isBlank(formData)) {
             return null;
@@ -148,5 +260,9 @@ public class StudentServiceImpl implements IStudentService {
             return "阿姨";
         }
         return "未知";
+    }
+
+    private int safeInt(Integer value) {
+        return value == null ? 0 : value;
     }
 }

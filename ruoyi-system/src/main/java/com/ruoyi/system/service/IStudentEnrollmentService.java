@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import java.util.List;
 import com.ruoyi.system.domain.StudentEnrollment;
+import com.ruoyi.system.domain.bo.StudentEnrollmentShareBo;
 import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
 
 /**
@@ -22,11 +23,19 @@ public interface IStudentEnrollmentService
 
     /**
      * 查询学籍信息列表
-     * 
+     *
      * @param studentEnrollment 学籍信息
      * @return 学籍信息集合
      */
     public List<StudentEnrollment> selectStudentEnrollmentList(StudentEnrollment studentEnrollment);
+
+    /**
+     * 查询管理端学籍信息列表。
+     *
+     * @param studentEnrollment 学籍筛选条件
+     * @return 学籍信息集合
+     */
+    public List<StudentEnrollment> selectAdminStudentEnrollmentList(StudentEnrollment studentEnrollment);
 
     /**
      * 新增学籍信息
@@ -61,6 +70,21 @@ public interface IStudentEnrollmentService
     public int deleteStudentEnrollmentById(Long id);
 
     public List<EnrollmentWithLectureVo> selectMyEnrollment(Long uid);
+
+    /**
+     * 查询管理端指定学员的学籍列表。
+     *
+     * @param uid 用户ID（user_info.id）
+     * @return 学籍列表
+     */
+    public List<EnrollmentWithLectureVo> selectAdminEnrollmentWithLectureByUid(Long uid);
+
+    /**
+     * 分享学籍。
+     *
+     * @param shareBo 分享请求
+     */
+    void shareEnrollment(StudentEnrollmentShareBo shareBo, String operator);
 
     /**
      * 查询指定用户指定课程的学籍记录

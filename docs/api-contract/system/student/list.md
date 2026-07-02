@@ -23,7 +23,8 @@
 
 - `pageNum`：若依标准分页页码。
 - `pageSize`：若依标准分页每页条数。
-- 其余筛选字段沿用 `StudentQueryBo` 对象。
+- `realName`：学员姓名/昵称/用户名，模糊匹配。
+- `phone`：手机号，模糊匹配。
 
 ### Body 示例
 
@@ -42,6 +43,7 @@
       "userId": "uuid-1",
       "displayName": "张三",
       "realName": "张三",
+      "phone": "13800000000",
       "userType": 1,
       "userTypeLabel": "学生"
     }

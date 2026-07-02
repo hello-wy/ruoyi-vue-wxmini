@@ -31,6 +31,7 @@
         <result property="userId" column="user_id"/>
         <result property="displayName" column="display_name"/>
         <result property="realName" column="real_name"/>
+        <result property="phone" column="phone"/>
         <result property="userType" column="user_type"/>
     </resultMap>
 
@@ -91,6 +92,7 @@
         select ui.id,
                ui.user_id,
                ui.user_type,
+               ui.phone,
                up.real_name,
                case
                    when up.real_name is not null and up.real_name != '' then up.real_name
@@ -101,7 +103,14 @@
                  left join wx_user_profile up on up.uid = ui.id
         <where>
             <if test="realName != null and realName != ''">
-                and up.real_name like concat('%', #{realName}, '%')
+                and (
+                    up.real_name like concat('%', #{realName}, '%')
+                    or up.nick_name like concat('%', #{realName}, '%')
+                    or ui.user_name like concat('%', #{realName}, '%')
+                )
+            </if>
+            <if test="phone != null and phone != ''">
+                and ui.phone like concat('%', #{phone}, '%')
             </if>
         </where>
         order by ui.create_time desc, ui.id desc
