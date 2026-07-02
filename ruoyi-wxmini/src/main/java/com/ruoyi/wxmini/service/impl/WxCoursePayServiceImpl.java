@@ -6,6 +6,7 @@ import cn.hutool.core.lang.UUID;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyV3Result;
 import com.github.binarywang.wxpay.bean.request.WxPayOrderQueryV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
+import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
@@ -75,6 +76,23 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
     public WxCoursePayOrderDetailVo queryPaidCourseOrder(String userId, Long courseId) {
         CoursePayOrder order = coursePayOrderService.selectLatestPaidOrder(userId, courseId);
         return order == null ? null : toDetailVo(order);
+    }
+
+    @Override
+    public WxCoursePayOrderDetailVo cancelCourseOrder(String userId, String orderNo) {
+        CoursePayOrder order = loadOwnedCourseOrder(userId, orderNo);
+        if (CoursePayOrder.STATUS_CANCELED.equals(order.getStatus())) {
+            return toDetailVo(order);
+        }
+        if (!CoursePayOrder.STATUS_PENDING.equals(order.getStatus())) {
+            throw new ServiceException("只有待支付课程订单可取消");
+        }
+        try {
+            cancelOrder(userId, orderNo);
+        } catch (WxPayException e) {
+            throw new ServiceException("取消课程订单失败: " + e.getMessage());
+        }
+        return queryCourseOrder(userId, orderNo);
     }
 
     @Override

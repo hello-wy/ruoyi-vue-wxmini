@@ -175,6 +175,18 @@ public class WxPayController {
         }
     }
 
+    @ApiOperation("取消课程报名订单（需登录）")
+    @PostMapping("/courses/orders/{orderNo}/cancel")
+    public AjaxResult cancelCourseOrder(@PathVariable("orderNo") String orderNo) {
+        try {
+            String userId = WxMiniUserContext.getCurrentUserId();
+            return AjaxResult.success(wxCoursePayService.cancelCourseOrder(userId, orderNo));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @ApiOperation("创建兼职工资支付订单，返回 JSAPI 支付参数（需登录）")
     @PostMapping("/payroll/orders/create")
     public AjaxResult createPayrollOrder(@RequestBody @Validated WxJobPayrollCreateOrderBo bo) {

@@ -133,6 +133,7 @@
 - `wxmini/pay/courses__orders__my.md`
 - `wxmini/pay/courses__orders__paid.md`
 - `wxmini/pay/courses__orders__{orderNo}.md`
+- `wxmini/pay/courses__orders__{orderNo}__cancel.md`
 - `wxmini/pay/growup__notify.md`
 - `wxmini/pay/salon__notify.md`
 - `wxmini/pay/tutoring__notify.md`

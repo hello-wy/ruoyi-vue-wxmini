@@ -16,5 +16,7 @@ public interface IWxCoursePayService {
 
     WxCoursePayOrderDetailVo queryPaidCourseOrder(String userId, Long courseId);
 
+    WxCoursePayOrderDetailVo cancelCourseOrder(String userId, String orderNo);
+
     boolean handleCoursePaidCallback(WxPayNotifyV3Result result, String requestId);
 }
