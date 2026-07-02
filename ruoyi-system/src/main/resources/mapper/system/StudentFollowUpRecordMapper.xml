@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.StudentFollowUpRecordMapper">
+
+    <resultMap type="com.ruoyi.system.domain.vo.StudentFollowUpRecordVo" id="StudentFollowUpRecordVoResult">
+        <result property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="followUpTime" column="follow_up_time"/>
+        <result property="followUpMethod" column="follow_up_method"/>
+        <result property="followUpResult" column="follow_up_result"/>
+        <result property="content" column="content"/>
+        <result property="formData" column="form_data"/>
+        <result property="nextFollowUpTime" column="next_follow_up_time"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectStudentFollowUpRecordVo">
+        select id,
+               student_id,
+               follow_up_time,
+               follow_up_method,
+               follow_up_result,
+               content,
+               cast(form_data as char) as form_data,
+               next_follow_up_time,
+               operator_id,
+               operator_name,
+               remark,
+               create_by,
+               create_time,
+               update_by,
+               update_time
+        from student_follow_up_record
+    </sql>
+
+    <select id="selectStudentFollowUpRecordsByStudentId" resultMap="StudentFollowUpRecordVoResult">
+        <include refid="selectStudentFollowUpRecordVo"/>
+        where student_id = #{studentId}
+          and is_deleted = 0
+        order by follow_up_time desc, id desc
+    </select>
+
+    <select id="selectStudentFollowUpRecordById" resultMap="StudentFollowUpRecordVoResult">
+        <include refid="selectStudentFollowUpRecordVo"/>
+        where id = #{id}
+          and is_deleted = 0
+        limit 1
+    </select>
+
+    <insert id="insertStudentFollowUpRecord" parameterType="com.ruoyi.system.domain.StudentFollowUpRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into student_follow_up_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            student_id,
+            <if test="followUpTime != null">follow_up_time,</if>
+            <if test="followUpMethod != null">follow_up_method,</if>
+            <if test="followUpResult != null">follow_up_result,</if>
+            <if test="content != null">content,</if>
+            <if test="formData != null">form_data,</if>
+            <if test="nextFollowUpTime != null">next_follow_up_time,</if>
+            <if test="operatorId != null">operator_id,</if>
+            <if test="operatorName != null">operator_name,</if>
+            <if test="remark != null">remark,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{studentId},
+            <if test="followUpTime != null">#{followUpTime},</if>
+            <if test="followUpMethod != null">#{followUpMethod},</if>
+            <if test="followUpResult != null">#{followUpResult},</if>
+            <if test="content != null">#{content},</if>
+            <if test="formData != null">#{formData},</if>
+            <if test="nextFollowUpTime != null">#{nextFollowUpTime},</if>
+            <if test="operatorId != null">#{operatorId},</if>
+            <if test="operatorName != null">#{operatorName},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+</mapper>

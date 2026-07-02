@@ -66,7 +66,7 @@
 - `coverId`：讲座封面资源目录 ID；顶部封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 - `deposit`：席位预定金/报名押金，报名接口会以后端课程配置中的该字段作为微信支付金额来源；缺失时报名接口返回错误。
 - `requiresEnrollment`：是否报名前需要当前用户拥有该课程可用学籍；默认 `true`。
-- `enrolledCount`：课程已报名人数，来源于 `lectures.enrolled_count`；成长课程支付成功首次回调后加 `1`。
+- `enrolledCount`：课程已报名人数，统计 `course_pay_order` 中当前课程 `status in (1, 2)` 的订单数量；`1` 为已报名/待签到，`2` 为已签到，退款、取消、待支付订单不计入。
 
 ### 失败场景或特殊说明
 

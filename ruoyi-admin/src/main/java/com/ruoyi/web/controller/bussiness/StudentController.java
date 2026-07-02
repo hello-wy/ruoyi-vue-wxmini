@@ -5,9 +5,11 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.system.domain.bo.StudentFollowUpRecordBo;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.bo.StudentSituationUpdateBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
+import com.ruoyi.system.domain.vo.StudentFollowUpRecordVo;
 import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
@@ -19,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,6 +63,26 @@ public class StudentController extends BaseController {
     public AjaxResult learningRecords(@PathVariable("id") Long id) {
         StudentLearningRecordsVo records = studentService.getStudentLearningRecords(id);
         return records == null ? error("学员不存在") : success(records);
+    }
+
+    @ApiOperation("查询学员回访记录")
+    @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @PreAuthorize("@ss.hasPermi('system:student:query')")
+    @GetMapping("/{id}/follow-up-records")
+    public AjaxResult followUpRecords(@PathVariable("id") Long id) {
+        List<StudentFollowUpRecordVo> records = studentService.listStudentFollowUpRecords(id);
+        return records == null ? error("学员不存在") : success(records);
+    }
+
+    @ApiOperation("新增学员回访记录")
+    @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @PreAuthorize("@ss.hasPermi('system:student:edit')")
+    @Log(title = "学员回访", businessType = BusinessType.INSERT)
+    @PostMapping("/{id}/follow-up-records")
+    public AjaxResult addFollowUpRecord(@PathVariable("id") Long id,
+                                        @Validated @RequestBody StudentFollowUpRecordBo bo) {
+        StudentFollowUpRecordVo record = studentService.addStudentFollowUpRecord(id, bo, getUserId(), getUsername());
+        return record == null ? error("学员不存在") : success(record);
     }
 
     @ApiOperation("保存学员情况")

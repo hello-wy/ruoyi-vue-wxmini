@@ -208,7 +208,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT
             l.id, l.time, l.end_date, l.name, l.speaker,
             l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit,
-            l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date,
+            l.requires_enrollment,
+            (
+                SELECT COUNT(1)
+                FROM course_pay_order cpo
+                WHERE cpo.course_id = l.id
+                  AND cpo.status IN (1, 2)
+            ) AS enrolled_count,
+            l.create_date, l.update_date,
             p.id        AS sp_id,
             p.name      AS sp_name,
             p.avatar_url AS sp_avatar_url
