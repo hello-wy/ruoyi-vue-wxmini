@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.system;
 
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -46,11 +46,7 @@ import com.ruoyi.system.service.ISysUserService;
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController
 {
-    private static final String PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-
-    private static final int RANDOM_PASSWORD_LENGTH = 10;
-
-    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String PASSWORD_ILLEGAL_CHARS = "<>\"'\\|";
 
     @Autowired
     private ISysUserService userService;
@@ -155,7 +151,7 @@ public class SysUserController extends BaseController
         {
             return error("新增用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
-        String plainPassword = randomPassword();
+        String plainPassword = validateLoginPassword(user.getRawPassword());
         user.setCreateBy(getUsername());
         user.setPassword(SecurityUtils.encryptPassword(plainPassword));
         int rows = userService.insertUser(user);
@@ -196,6 +192,7 @@ public class SysUserController extends BaseController
         {
             return error("修改用户'" + user.getUserName() + "'失败，邮箱账号已存在");
         }
+        user.setPassword(null);
         user.setUpdateBy(getUsername());
         return toAjax(userService.updateUser(user));
     }
@@ -225,7 +222,8 @@ public class SysUserController extends BaseController
     {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
-        user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+        String plainPassword = validateLoginPassword(user.getPassword());
+        user.setPassword(SecurityUtils.encryptPassword(plainPassword));
         user.setUpdateBy(getUsername());
         return toAjax(userService.resetPwd(user));
     }
@@ -304,13 +302,25 @@ public class SysUserController extends BaseController
         }
     }
 
-    private String randomPassword()
+    private String validateLoginPassword(String password)
     {
-        StringBuilder password = new StringBuilder(RANDOM_PASSWORD_LENGTH);
-        for (int i = 0; i < RANDOM_PASSWORD_LENGTH; i++)
+        String plainPassword = StringUtils.trim(password);
+        if (StringUtils.isEmpty(plainPassword))
         {
-            password.append(PASSWORD_CHARS.charAt(RANDOM.nextInt(PASSWORD_CHARS.length())));
+            throw new ServiceException("登录密码不能为空");
         }
-        return password.toString();
+        if (plainPassword.length() < UserConstants.PASSWORD_MIN_LENGTH
+                || plainPassword.length() > UserConstants.PASSWORD_MAX_LENGTH)
+        {
+            throw new ServiceException("密码长度必须在5到20个字符之间");
+        }
+        for (int i = 0; i < PASSWORD_ILLEGAL_CHARS.length(); i++)
+        {
+            if (plainPassword.indexOf(PASSWORD_ILLEGAL_CHARS.charAt(i)) >= 0)
+            {
+                throw new ServiceException("密码不能包含非法字符：< > \" ' \\ |");
+            }
+        }
+        return plainPassword;
     }
 }
