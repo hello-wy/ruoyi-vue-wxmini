@@ -121,6 +121,9 @@ public class StudentAccessServiceImpl implements IStudentAccessService {
         if (!ADMIN_LEVEL_EMPLOYEE.equals(target.getAdminLevel())) {
             throw new ServiceException("只能绑定员工级别的系统用户");
         }
+        if (target.getDeptId() == null || target.getDeptId() == 0L) {
+            throw new ServiceException("绑定员工未配置所属部门，无法绑定学员");
+        }
         if (!scope.isFullAccess() && !safeContains(scope.getVisibleUserIds(), targetUserId)) {
             throw new ServiceException("无权限绑定该员工", HttpStatus.FORBIDDEN);
         }
