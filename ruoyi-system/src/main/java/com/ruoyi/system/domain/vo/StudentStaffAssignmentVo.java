@@ -1,15 +1,16 @@
 package com.ruoyi.system.domain.vo;
 
-public class StudentListVo {
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-    private Long id;
-    private String userId;
-    private String displayName;
-    private String realName;
-    private String phone;
-    private Integer userType;
-    private String userTypeLabel;
+import java.util.Date;
+
+/**
+ * 学员员工绑定视图对象。
+ */
+public class StudentStaffAssignmentVo {
+
     private Long assignmentId;
+    private Long studentId;
     private Long ownerDeptId;
     private String ownerDeptName;
     private Long boundUserId;
@@ -18,65 +19,15 @@ public class StudentListVo {
     private String boundUserPhone;
     private String boundUserAdminLevel;
     private String boundDeptName;
+    private Long bindBy;
+    private String bindByName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date bindTime;
+
     private Boolean bound;
     private Boolean canBind;
     private Boolean canClaim;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getRealName() {
-        return realName;
-    }
-
-    public void setRealName(String realName) {
-        this.realName = realName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Integer getUserType() {
-        return userType;
-    }
-
-    public void setUserType(Integer userType) {
-        this.userType = userType;
-    }
-
-    public String getUserTypeLabel() {
-        return userTypeLabel;
-    }
-
-    public void setUserTypeLabel(String userTypeLabel) {
-        this.userTypeLabel = userTypeLabel;
-    }
 
     public Long getAssignmentId() {
         return assignmentId;
@@ -84,6 +35,14 @@ public class StudentListVo {
 
     public void setAssignmentId(Long assignmentId) {
         this.assignmentId = assignmentId;
+    }
+
+    public Long getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
     }
 
     public Long getOwnerDeptId() {
@@ -148,6 +107,30 @@ public class StudentListVo {
 
     public void setBoundDeptName(String boundDeptName) {
         this.boundDeptName = boundDeptName;
+    }
+
+    public Long getBindBy() {
+        return bindBy;
+    }
+
+    public void setBindBy(Long bindBy) {
+        this.bindBy = bindBy;
+    }
+
+    public String getBindByName() {
+        return bindByName;
+    }
+
+    public void setBindByName(String bindByName) {
+        this.bindByName = bindByName;
+    }
+
+    public Date getBindTime() {
+        return bindTime;
+    }
+
+    public void setBindTime(Date bindTime) {
+        this.bindTime = bindTime;
     }
 
     public Boolean getBound() {

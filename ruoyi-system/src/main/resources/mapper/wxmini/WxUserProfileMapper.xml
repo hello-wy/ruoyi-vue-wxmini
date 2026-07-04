@@ -33,6 +33,15 @@
         <result property="realName" column="real_name"/>
         <result property="phone" column="phone"/>
         <result property="userType" column="user_type"/>
+        <result property="assignmentId" column="assignment_id"/>
+        <result property="ownerDeptId" column="owner_dept_id"/>
+        <result property="ownerDeptName" column="owner_dept_name"/>
+        <result property="boundUserId" column="bound_user_id"/>
+        <result property="boundUserName" column="bound_user_name"/>
+        <result property="boundUserNickName" column="bound_nick_name"/>
+        <result property="boundUserPhone" column="bound_phone"/>
+        <result property="boundUserAdminLevel" column="bound_admin_level"/>
+        <result property="boundDeptName" column="bound_dept_name"/>
     </resultMap>
 
     <resultMap id="StudentDetailVoResult" type="com.ruoyi.system.domain.vo.StudentDetailVo">
@@ -54,6 +63,61 @@
         <result property="personalIntro" column="personal_intro"/>
         <result property="studentSituation" column="student_situation"/>
     </resultMap>
+
+    <sql id="AdminStudentAccessScope">
+        <choose>
+            <when test="accessScope == null or accessScope.fullAccess">
+                1 = 1
+            </when>
+            <when test="accessScope.employeeAccess">
+                sa.id is not null
+                and (
+                    sa.employee_user_id = #{accessScope.currentUserId}
+                    or (
+                        sa.employee_user_id is null
+                        <choose>
+                            <when test="accessScope.visibleDeptIds != null and accessScope.visibleDeptIds.size() > 0">
+                                and sa.owner_dept_id in
+                                <foreach collection="accessScope.visibleDeptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                )
+            </when>
+            <otherwise>
+                sa.id is not null
+                and (
+                    (
+                        sa.employee_user_id is not null
+                        <choose>
+                            <when test="accessScope.visibleUserIds != null and accessScope.visibleUserIds.size() > 0">
+                                and sa.employee_user_id in
+                                <foreach collection="accessScope.visibleUserIds" item="userId" open="(" separator="," close=")">#{userId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                    or (
+                        sa.employee_user_id is null
+                        <choose>
+                            <when test="accessScope.visibleDeptIds != null and accessScope.visibleDeptIds.size() > 0">
+                                and sa.owner_dept_id in
+                                <foreach collection="accessScope.visibleDeptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                )
+            </otherwise>
+        </choose>
+    </sql>
 
     <select id="selectProfileDetailByUserId" parameterType="String" resultMap="WxUserProfileVoResult">
         select ui.id as uid,
@@ -98,10 +162,24 @@
                    when up.real_name is not null and up.real_name != '' then up.real_name
                    when up.nick_name is not null and up.nick_name != '' then up.nick_name
                    else ui.user_name
-               end as display_name
+               end as display_name,
+               sa.id as assignment_id,
+               sa.owner_dept_id,
+               owner_dept.dept_name as owner_dept_name,
+               su.user_id as bound_user_id,
+               su.user_name as bound_user_name,
+               su.nick_name as bound_nick_name,
+               su.phonenumber as bound_phone,
+               su.admin_level as bound_admin_level,
+               bound_dept.dept_name as bound_dept_name
         from user_info ui
                  left join wx_user_profile up on up.uid = ui.id
+                 left join student_staff_assignment sa on sa.student_id = ui.id
+                 left join sys_dept owner_dept on owner_dept.dept_id = sa.owner_dept_id
+                 left join sys_user su on su.user_id = sa.employee_user_id
+                 left join sys_dept bound_dept on bound_dept.dept_id = su.dept_id
         <where>
+            <include refid="AdminStudentAccessScope"/>
             <if test="realName != null and realName != ''">
                 and (
                     up.real_name like concat('%', #{realName}, '%')
@@ -111,6 +189,23 @@
             </if>
             <if test="phone != null and phone != ''">
                 and ui.phone like concat('%', #{phone}, '%')
+            </if>
+            <if test="assignmentStatus == 'bound'">
+                and sa.employee_user_id is not null
+            </if>
+            <if test="assignmentStatus == 'unbound'">
+                <choose>
+                    <when test="accessScope != null and accessScope.fullAccess">
+                        and (sa.id is null or sa.employee_user_id is null)
+                    </when>
+                    <otherwise>
+                        and sa.id is not null
+                        and sa.employee_user_id is null
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="boundUserId != null">
+                and sa.employee_user_id = #{boundUserId}
             </if>
         </where>
         order by ui.create_time desc, ui.id desc
@@ -142,6 +237,10 @@
                  left join wx_user_profile up on up.uid = ui.id
         where ui.id = #{id}
         limit 1
+    </select>
+
+    <select id="countAdminStudentById" resultType="int">
+        select count(1) from user_info where id = #{id}
     </select>
 
     <insert id="updateAdminStudentSituation">

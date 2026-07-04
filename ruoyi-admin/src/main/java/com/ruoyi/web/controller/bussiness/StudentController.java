@@ -5,15 +5,19 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.system.domain.bo.StudentBindingBo;
 import com.ruoyi.system.domain.bo.StudentFollowUpRecordBo;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
 import com.ruoyi.system.domain.bo.StudentSituationUpdateBo;
+import com.ruoyi.system.domain.bo.StudentStaffCandidateQueryBo;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentEnrollmentSummaryVo;
 import com.ruoyi.system.domain.vo.StudentFollowUpRecordVo;
 import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
+import com.ruoyi.system.domain.vo.StudentStaffAssignmentVo;
+import com.ruoyi.system.domain.vo.StudentStaffCandidateVo;
 import com.ruoyi.system.service.IStudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,6 +52,15 @@ public class StudentController extends BaseController {
         return getDataTable(list);
     }
 
+    @ApiOperation("查询学员绑定员工候选人")
+    @PreAuthorize("@ss.hasPermi('system:student:bind')")
+    @GetMapping("/staff-candidates")
+    public TableDataInfoVo<StudentStaffCandidateVo> staffCandidates(StudentStaffCandidateQueryBo queryBo) {
+        startPage();
+        List<StudentStaffCandidateVo> list = studentService.listStaffCandidates(queryBo);
+        return getDataTable(list);
+    }
+
     @ApiOperation("查询学员详情")
     @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
     @PreAuthorize("@ss.hasPermi('system:student:query')")
@@ -55,6 +68,17 @@ public class StudentController extends BaseController {
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         StudentDetailVo detail = studentService.getStudentDetail(id);
         return detail == null ? error("学员不存在") : success(detail);
+    }
+
+    @ApiOperation("绑定学员负责人")
+    @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @PreAuthorize("@ss.hasPermi('system:student:bind')")
+    @Log(title = "学员绑定", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/binding")
+    public AjaxResult bindStaff(@PathVariable("id") Long id,
+                                @RequestBody(required = false) StudentBindingBo bo) {
+        StudentStaffAssignmentVo result = studentService.bindStudentStaff(id, bo, getUserId(), getUsername());
+        return result == null ? error("学员不存在") : success(result);
     }
 
     @ApiOperation("查询学员学籍信息")

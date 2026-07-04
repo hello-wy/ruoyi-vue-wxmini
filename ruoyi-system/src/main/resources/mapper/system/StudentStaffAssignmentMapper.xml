@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.StudentStaffAssignmentMapper">
+
+    <resultMap id="StudentStaffAssignmentResult" type="com.ruoyi.system.domain.StudentStaffAssignment">
+        <id property="id" column="id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="ownerDeptId" column="owner_dept_id"/>
+        <result property="employeeUserId" column="employee_user_id"/>
+        <result property="bindBy" column="bind_by"/>
+        <result property="bindByName" column="bind_by_name"/>
+        <result property="bindTime" column="bind_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap id="StudentStaffAssignmentVoResult" type="com.ruoyi.system.domain.vo.StudentStaffAssignmentVo">
+        <id property="assignmentId" column="assignment_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="ownerDeptId" column="owner_dept_id"/>
+        <result property="ownerDeptName" column="owner_dept_name"/>
+        <result property="boundUserId" column="bound_user_id"/>
+        <result property="boundUserName" column="bound_user_name"/>
+        <result property="boundUserNickName" column="bound_nick_name"/>
+        <result property="boundUserPhone" column="bound_phone"/>
+        <result property="boundUserAdminLevel" column="bound_admin_level"/>
+        <result property="boundDeptName" column="bound_dept_name"/>
+        <result property="bindBy" column="bind_by"/>
+        <result property="bindByName" column="bind_by_name"/>
+        <result property="bindTime" column="bind_time"/>
+    </resultMap>
+
+    <resultMap id="StudentStaffCandidateVoResult" type="com.ruoyi.system.domain.vo.StudentStaffCandidateVo">
+        <id property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="phonenumber" column="phonenumber"/>
+        <result property="adminLevel" column="admin_level"/>
+    </resultMap>
+
+    <sql id="AccessibleAssignmentScope">
+        <choose>
+            <when test="scope == null or scope.fullAccess">
+                1 = 1
+            </when>
+            <when test="scope.employeeAccess">
+                (
+                    sa.employee_user_id = #{scope.currentUserId}
+                    or (
+                        sa.employee_user_id is null
+                        <choose>
+                            <when test="scope.visibleDeptIds != null and scope.visibleDeptIds.size() > 0">
+                                and sa.owner_dept_id in
+                                <foreach collection="scope.visibleDeptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                )
+            </when>
+            <otherwise>
+                (
+                    (
+                        sa.employee_user_id is not null
+                        <choose>
+                            <when test="scope.visibleUserIds != null and scope.visibleUserIds.size() > 0">
+                                and sa.employee_user_id in
+                                <foreach collection="scope.visibleUserIds" item="userId" open="(" separator="," close=")">#{userId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                    or (
+                        sa.employee_user_id is null
+                        <choose>
+                            <when test="scope.visibleDeptIds != null and scope.visibleDeptIds.size() > 0">
+                                and sa.owner_dept_id in
+                                <foreach collection="scope.visibleDeptIds" item="deptId" open="(" separator="," close=")">#{deptId}</foreach>
+                            </when>
+                            <otherwise>
+                                and 1 = 0
+                            </otherwise>
+                        </choose>
+                    )
+                )
+            </otherwise>
+        </choose>
+    </sql>
+
+    <select id="selectByStudentId" resultMap="StudentStaffAssignmentResult">
+        select * from student_staff_assignment where student_id = #{studentId} limit 1
+    </select>
+
+    <select id="selectByStudentIdForUpdate" resultMap="StudentStaffAssignmentResult">
+        select * from student_staff_assignment where student_id = #{studentId} limit 1 for update
+    </select>
+
+    <insert id="upsertAssignment" parameterType="com.ruoyi.system.domain.StudentStaffAssignment" useGeneratedKeys="true" keyProperty="id">
+        insert into student_staff_assignment (
+            student_id, owner_dept_id, employee_user_id, bind_by, bind_by_name, bind_time,
+            create_by, create_time, update_by, update_time, remark
+        ) values (
+            #{studentId}, #{ownerDeptId}, #{employeeUserId}, #{bindBy}, #{bindByName}, #{bindTime},
+            #{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark}
+        )
+        on duplicate key update
+            owner_dept_id = values(owner_dept_id),
+            employee_user_id = values(employee_user_id),
+            bind_by = values(bind_by),
+            bind_by_name = values(bind_by_name),
+            bind_time = values(bind_time),
+            update_by = values(update_by),
+            update_time = values(update_time),
+            remark = values(remark)
+    </insert>
+
+    <select id="selectAssignmentVoByStudentId" resultMap="StudentStaffAssignmentVoResult">
+        select sa.id as assignment_id,
+               sa.student_id,
+               sa.owner_dept_id,
+               owner_dept.dept_name as owner_dept_name,
+               su.user_id as bound_user_id,
+               su.user_name as bound_user_name,
+               su.nick_name as bound_nick_name,
+               su.phonenumber as bound_phone,
+               su.admin_level as bound_admin_level,
+               bound_dept.dept_name as bound_dept_name,
+               sa.bind_by,
+               sa.bind_by_name,
+               sa.bind_time
+        from student_staff_assignment sa
+                 left join sys_dept owner_dept on owner_dept.dept_id = sa.owner_dept_id
+                 left join sys_user su on su.user_id = sa.employee_user_id
+                 left join sys_dept bound_dept on bound_dept.dept_id = su.dept_id
+        where sa.student_id = #{studentId}
+        limit 1
+    </select>
+
+    <select id="selectStaffCandidates" parameterType="com.ruoyi.system.domain.bo.StudentStaffCandidateQueryBo" resultMap="StudentStaffCandidateVoResult">
+        select u.user_id,
+               u.dept_id,
+               d.dept_name,
+               u.user_name,
+               u.nick_name,
+               u.phonenumber,
+               u.admin_level
+        from sys_user u
+                 left join sys_dept d on d.dept_id = u.dept_id
+        <where>
+            u.del_flag = '0'
+            and u.status = '0'
+            <if test="adminLevel != null and adminLevel != ''">
+                and u.admin_level = #{adminLevel}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (
+                    u.phonenumber like concat('%', #{keyword}, '%')
+                    or u.nick_name like concat('%', #{keyword}, '%')
+                    or u.user_name like concat('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="accessScope != null and !accessScope.fullAccess">
+                <choose>
+                    <when test="accessScope.visibleUserIds != null and accessScope.visibleUserIds.size() > 0">
+                        and u.user_id in
+                        <foreach collection="accessScope.visibleUserIds" item="userId" open="(" separator="," close=")">#{userId}</foreach>
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        order by u.create_time desc, u.user_id desc
+    </select>
+
+    <select id="countAccessibleStudent" resultType="int">
+        select count(1)
+        from user_info ui
+                 left join student_staff_assignment sa on sa.student_id = ui.id
+        where ui.id = #{studentId}
+          and (
+            <choose>
+                <when test="scope == null or scope.fullAccess">
+                    1 = 1
+                </when>
+                <otherwise>
+                    sa.id is not null and <include refid="AccessibleAssignmentScope"/>
+                </otherwise>
+            </choose>
+          )
+    </select>
+</mapper>

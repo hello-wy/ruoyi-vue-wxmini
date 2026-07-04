@@ -18,5 +18,7 @@ public interface WxUserProfileMapper extends BaseMapper<WxUserProfile> {
 
     StudentDetailVo selectAdminStudentDetailById(Long id);
 
+    int countAdminStudentById(@Param("id") Long id);
+
     int updateAdminStudentSituation(@Param("id") Long id, @Param("studentSituation") String studentSituation);
 }
