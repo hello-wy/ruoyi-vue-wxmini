@@ -292,6 +292,10 @@ public class SysUserController extends BaseController
 
     private void validateAdminUser(SysUser user)
     {
+        if (StringUtils.isNull(user.getDeptId()))
+        {
+            throw new ServiceException("请选择部门");
+        }
         if (StringUtils.isEmpty(user.getNickName()))
         {
             throw new ServiceException("用户昵称不能为空");

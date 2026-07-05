@@ -78,6 +78,7 @@ public class WxMiniJwtFilter extends OncePerRequestFilter {
     private boolean checkIsExcludeUri(String method, String path) {
         if (path.startsWith("/wxmini/login")
                 || path.startsWith("/wxmini/portal")
+                || path.startsWith("/wxmini/dept/list")
                 || path.startsWith("/wxmini/pay/notify")
                 || path.startsWith("/wxmini/pay/salon/notify")
                 || path.startsWith("/wxmini/pay/jobs/notify")
