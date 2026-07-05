@@ -1,0 +1,10 @@
+allowBuilds:
+  core-js: true
+  fsevents: true
+  highlight.js: true
+  yorkie: true
+
+overrides:
+  cssnano-preset-default: 4.0.7
+  postcss-svgo: 4.0.2
+  svgo: 1.3.2

@@ -79,9 +79,10 @@
     "svg-sprite-loader": "5.1.1",
     "vue-template-compiler": "2.6.12"
   },
+  "packageManager": "pnpm@11.9.0",
   "engines": {
     "node": ">=8.9",
-    "npm": ">= 3.0.0"
+    "pnpm": ">=11.9.0"
   },
   "browserslist": [
     "> 1%",
