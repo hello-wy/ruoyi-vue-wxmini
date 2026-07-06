@@ -107,6 +107,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.5.15</version>
                 <configuration>
+                    <skip>false</skip>
                     <fork>true</fork> <!-- 如果没有该配置，devtools不会生效 -->
                 </configuration>
                 <executions>

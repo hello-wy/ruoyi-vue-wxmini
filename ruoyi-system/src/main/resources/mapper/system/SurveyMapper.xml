@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SurveyMapper">
+    <resultMap id="SurveyFormVoResult" type="com.ruoyi.system.domain.vo.SurveyFormVo">
+        <result property="formId" column="form_id"/>
+        <result property="code" column="code"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="closingText" column="closing_text"/>
+        <result property="totalQuestions" column="total_questions"/>
+        <result property="status" column="status"/>
+        <result property="sentCount" column="sent_count"/>
+        <result property="answeredCount" column="answered_count"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="SurveyQuestionResult" type="com.ruoyi.system.domain.SurveyQuestion">
+        <result property="id" column="id"/>
+        <result property="formId" column="form_id"/>
+        <result property="parentQuestionId" column="parent_question_id"/>
+        <result property="questionNo" column="question_no"/>
+        <result property="sectionTitle" column="section_title"/>
+        <result property="questionType" column="question_type"/>
+        <result property="content" column="content"/>
+        <result property="inputPlaceholder" column="input_placeholder"/>
+        <result property="requiredFlag" column="required_flag"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <resultMap id="SurveyQuestionOptionResult" type="com.ruoyi.system.domain.SurveyQuestionOption">
+        <result property="id" column="id"/>
+        <result property="questionId" column="question_id"/>
+        <result property="optionValue" column="option_value"/>
+        <result property="optionLabel" column="option_label"/>
+        <result property="allowTextInput" column="allow_text_input"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <resultMap id="SurveyAssignmentResult" type="com.ruoyi.system.domain.SurveyAssignment">
+        <result property="id" column="id"/>
+        <result property="formId" column="form_id"/>
+        <result property="lectureId" column="lecture_id"/>
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="wxUserId" column="wx_user_id"/>
+        <result property="status" column="status"/>
+        <result property="submissionId" column="submission_id"/>
+        <result property="assignedBy" column="assigned_by"/>
+        <result property="assignedAt" column="assigned_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="SurveyCourseGroupVoResult" type="com.ruoyi.system.domain.vo.SurveyCourseGroupVo">
+        <result property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="courseTime" column="course_time"/>
+    </resultMap>
+
+    <resultMap id="SurveyAssignmentVoResult" type="com.ruoyi.system.domain.vo.SurveyAssignmentVo">
+        <result property="assignmentId" column="assignment_id"/>
+        <result property="formId" column="form_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="totalQuestions" column="total_questions"/>
+        <result property="status" column="status"/>
+        <result property="statusLabel" column="status_label"/>
+        <result property="assignedAt" column="assigned_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
+    <resultMap id="SurveyUserVoResult" type="com.ruoyi.system.domain.vo.SurveyUserVo">
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="realName" column="real_name"/>
+        <result property="phone" column="phone"/>
+    </resultMap>
+
+    <resultMap id="SurveyAssignmentListVoResult" type="com.ruoyi.system.domain.vo.SurveyAssignmentListVo">
+        <result property="assignmentId" column="assignment_id"/>
+        <result property="formId" column="form_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="courseName" column="course_name"/>
+        <result property="userInfoId" column="user_info_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="realName" column="real_name"/>
+        <result property="phone" column="phone"/>
+        <result property="status" column="status"/>
+        <result property="statusLabel" column="status_label"/>
+        <result property="assignedAt" column="assigned_at"/>
+        <result property="submittedAt" column="submitted_at"/>
+    </resultMap>
+
+    <resultMap id="SurveyAnswerVoResult" type="com.ruoyi.system.domain.vo.SurveyAnswerVo">
+        <result property="questionId" column="question_id"/>
+        <result property="questionNo" column="question_no"/>
+        <result property="sectionTitle" column="section_title"/>
+        <result property="questionType" column="question_type"/>
+        <result property="questionContent" column="question_content"/>
+        <result property="answerValue" column="answer_value"/>
+        <result property="answerText" column="answer_text"/>
+    </resultMap>
+
+    <select id="selectSurveyForms" resultMap="SurveyFormVoResult">
+        select f.id as form_id, f.code, f.title, f.description, f.closing_text, f.total_questions, f.status, f.create_time,
+               count(a.id) as sent_count,
+               sum(case when a.status = 1 then 1 else 0 end) as answered_count
+        from survey_form f
+        left join survey_assignment a on a.form_id = f.id
+        <where>
+            <if test="title != null and title != ''">and f.title like concat('%', #{title}, '%')</if>
+            <if test="status != null">and f.status = #{status}</if>
+        </where>
+        group by f.id, f.code, f.title, f.description, f.closing_text, f.total_questions, f.status, f.create_time
+        order by f.id desc
+    </select>
+
+    <select id="selectSurveyFormById" resultMap="SurveyFormVoResult">
+        select f.id as form_id, f.code, f.title, f.description, f.closing_text, f.total_questions, f.status, f.create_time,
+               count(a.id) as sent_count,
+               sum(case when a.status = 1 then 1 else 0 end) as answered_count
+        from survey_form f
+        left join survey_assignment a on a.form_id = f.id
+        where f.id = #{formId}
+        group by f.id, f.code, f.title, f.description, f.closing_text, f.total_questions, f.status, f.create_time
+    </select>
+
+    <select id="countSurveyFormById" resultType="int">
+        select count(1) from survey_form where id = #{formId} and status = 1
+    </select>
+
+    <select id="countLectureById" resultType="int">
+        select count(1) from lectures where id = #{lectureId}
+    </select>
+
+    <select id="selectQuestionsByFormId" resultMap="SurveyQuestionResult">
+        select id, form_id, parent_question_id, question_no, section_title, question_type, content,
+               input_placeholder, required_flag, sort_order, status
+        from survey_question
+        where form_id = #{formId} and status = 1
+        order by sort_order, id
+    </select>
+
+    <select id="selectOptionsByFormId" resultMap="SurveyQuestionOptionResult">
+        select o.id, o.question_id, o.option_value, o.option_label, o.allow_text_input, o.sort_order, o.status
+        from survey_question_option o
+        join survey_question q on q.id = o.question_id
+        where q.form_id = #{formId} and o.status = 1
+        order by o.question_id, o.sort_order, o.id
+    </select>
+
+    <select id="selectWxSurveyCourseGroups" resultMap="SurveyCourseGroupVoResult">
+        select distinct l.id as course_id, l.name as course_name, l.time as course_time
+        from survey_assignment a
+        join lectures l on l.id = a.lecture_id
+        join survey_form f on f.id = a.form_id and f.status = 1
+        where a.user_info_id = #{userInfoId}
+        order by l.time desc, l.id desc
+    </select>
+
+    <select id="selectWxAssignmentsByCourse" resultMap="SurveyAssignmentVoResult">
+        select a.id as assignment_id, f.id as form_id, f.title, f.description, f.total_questions,
+               a.status, case when a.status = 1 then '已提交' else '未提交' end as status_label,
+               a.assigned_at, a.submitted_at
+        from survey_assignment a
+        join survey_form f on f.id = a.form_id and f.status = 1
+        where a.user_info_id = #{userInfoId} and a.lecture_id = #{courseId}
+        order by a.id desc
+    </select>
+
+    <select id="selectAssignmentById" resultMap="SurveyAssignmentResult">
+        select id, form_id, lecture_id, user_info_id, wx_user_id, status, submission_id,
+               assigned_by, assigned_at, submitted_at, create_time, update_time
+        from survey_assignment
+        where id = #{assignmentId}
+    </select>
+
+    <select id="countAssignment" resultType="int">
+        select count(1)
+        from survey_assignment
+        where form_id = #{formId} and lecture_id = #{lectureId} and user_info_id = #{userInfoId}
+    </select>
+
+    <insert id="insertAssignment" parameterType="com.ruoyi.system.domain.SurveyAssignment" useGeneratedKeys="true" keyProperty="id">
+        insert into survey_assignment
+        (form_id, lecture_id, user_info_id, wx_user_id, status, assigned_by, assigned_at, create_time, update_time)
+        values
+        (#{formId}, #{lectureId}, #{userInfoId}, #{wxUserId}, #{status}, #{assignedBy}, #{assignedAt}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertSubmission" parameterType="com.ruoyi.system.domain.SurveySubmission" useGeneratedKeys="true" keyProperty="id">
+        insert into survey_submission
+        (form_id, user_info_id, wx_user_id, status, submitted_at, create_time, update_time)
+        values
+        (#{formId}, #{userInfoId}, #{wxUserId}, #{status}, #{submittedAt}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertAnswer" parameterType="com.ruoyi.system.domain.SurveyAnswer">
+        insert into survey_answer
+        (submission_id, question_id, answer_value, answer_text, create_time, update_time)
+        values
+        (#{submissionId}, #{questionId}, #{answerValue}, #{answerText}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateAssignmentSubmitted">
+        update survey_assignment
+        set status = 1, submission_id = #{submissionId}, submitted_at = #{submittedAt}, update_time = #{submittedAt}
+        where id = #{assignmentId}
+    </update>
+
+    <select id="selectWxUsers" resultMap="SurveyUserVoResult">
+        select id as user_info_id, user_id, user_name, real_name, phone
+        from user_info
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (phone like concat('%', #{keyword}, '%') or real_name like concat('%', #{keyword}, '%') or user_name like concat('%', #{keyword}, '%'))
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectAssignmentList" resultMap="SurveyAssignmentListVoResult">
+        select a.id as assignment_id, a.form_id, l.id as course_id, l.name as course_name,
+               u.id as user_info_id, u.user_name, u.real_name, u.phone,
+               a.status, case when a.status = 1 then '已提交' else '未提交' end as status_label,
+               a.assigned_at, a.submitted_at
+        from survey_assignment a
+        join lectures l on l.id = a.lecture_id
+        join user_info u on u.id = a.user_info_id
+        where a.form_id = #{formId}
+        <if test="lectureId != null">and a.lecture_id = #{lectureId}</if>
+        <if test="status != null">and a.status = #{status}</if>
+        <if test="keyword != null and keyword != ''">
+            and (u.phone like concat('%', #{keyword}, '%') or u.real_name like concat('%', #{keyword}, '%') or u.user_name like concat('%', #{keyword}, '%'))
+        </if>
+        order by a.id desc
+    </select>
+
+    <select id="selectAssignmentListVoById" resultMap="SurveyAssignmentListVoResult">
+        select a.id as assignment_id, a.form_id, l.id as course_id, l.name as course_name,
+               u.id as user_info_id, u.user_id, u.user_name, u.real_name, u.phone,
+               a.status, case when a.status = 1 then '已提交' else '未提交' end as status_label,
+               a.assigned_at, a.submitted_at
+        from survey_assignment a
+        join lectures l on l.id = a.lecture_id
+        join user_info u on u.id = a.user_info_id
+        where a.id = #{assignmentId}
+    </select>
+
+    <select id="selectAnswerVosBySubmissionId" resultMap="SurveyAnswerVoResult">
+        select q.id as question_id, q.question_no, q.section_title, q.question_type,
+               q.content as question_content, cast(a.answer_value as char) as answer_value, a.answer_text
+        from survey_answer a
+        join survey_question q on q.id = a.question_id
+        where a.submission_id = #{submissionId}
+        order by q.sort_order, q.id
+    </select>
+</mapper>
