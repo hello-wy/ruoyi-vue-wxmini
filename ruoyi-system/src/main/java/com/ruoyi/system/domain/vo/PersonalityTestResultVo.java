@@ -12,6 +12,8 @@ public class PersonalityTestResultVo {
     private Integer answeredCount;
     private Integer totalQuestions;
     private List<PersonalityTestResultAnswerVo> answers;
+    private List<PersonalityTestScoreVo> scores;
+    private List<PersonalityTestReportItemVo> reports;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date completedAt;
 
@@ -61,6 +63,22 @@ public class PersonalityTestResultVo {
 
     public void setAnswers(List<PersonalityTestResultAnswerVo> answers) {
         this.answers = answers;
+    }
+
+    public List<PersonalityTestScoreVo> getScores() {
+        return scores;
+    }
+
+    public void setScores(List<PersonalityTestScoreVo> scores) {
+        this.scores = scores;
+    }
+
+    public List<PersonalityTestReportItemVo> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<PersonalityTestReportItemVo> reports) {
+        this.reports = reports;
     }
 
     public Date getCompletedAt() {

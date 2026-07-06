@@ -71,6 +71,43 @@ class PersonalityTestServiceImplTest {
         assertEquals(Integer.valueOf(180), result.getTotalQuestions());
         assertEquals(180, result.getAnswers().size());
         assertTrue(result.getAnswers().stream().allMatch(item -> item.getDimensionNo() != null));
+        assertEquals(9, result.getScores().size());
+        assertEquals(3, result.getReports().size());
+        assertEquals("人格高：极致高", result.getReports().get(0).getCategory());
+        assertEquals("人格低：极致低", result.getReports().get(2).getCategory());
+    }
+
+    @Test
+    void getResultShouldReturnAtMostTwoYesReportsAndOneNoReport() {
+        when(personalityTestMapper.selectEnabledPersonalityTest()).thenReturn(enabledTest());
+        when(personalityTestAttemptMapper.selectAttemptById(ATTEMPT_ID)).thenReturn(completedAttempt(180));
+        when(personalityTestAnswerMapper.selectAnswersByAttemptId(ATTEMPT_ID)).thenReturn(buildScoredAnswers(new int[]{18, 17, 16}, new int[]{0, 0, 0, 19, 18}));
+        when(personalityTestQuestionMapper.selectQuestionsByIds(anyList())).thenReturn(buildQuestions(180));
+
+        PersonalityTestResultVo result = service.getResult(ATTEMPT_ID, USER_INFO_ID);
+
+        assertEquals(3, result.getReports().size());
+        assertEquals("人格高：极致高", result.getReports().get(0).getCategory());
+        assertEquals(Integer.valueOf(1), result.getReports().get(0).getType());
+        assertEquals(Integer.valueOf(18), result.getReports().get(0).getScore());
+        assertEquals(Integer.valueOf(2), result.getReports().get(1).getType());
+        assertEquals("人格低：极致低", result.getReports().get(2).getCategory());
+        assertEquals(Integer.valueOf(4), result.getReports().get(2).getType());
+    }
+
+    @Test
+    void getResultShouldReturnTopNoReportWhenNoNoScoreExceedsThreshold() {
+        when(personalityTestMapper.selectEnabledPersonalityTest()).thenReturn(enabledTest());
+        when(personalityTestAttemptMapper.selectAttemptById(ATTEMPT_ID)).thenReturn(completedAttempt(9));
+        when(personalityTestAnswerMapper.selectAnswersByAttemptId(ATTEMPT_ID)).thenReturn(buildAnswers(9));
+        when(personalityTestQuestionMapper.selectQuestionsByIds(anyList())).thenReturn(buildQuestions(9));
+
+        PersonalityTestResultVo result = service.getResult(ATTEMPT_ID, USER_INFO_ID);
+
+        assertEquals(1, result.getReports().size());
+        assertEquals("人格低：极致低", result.getReports().get(0).getCategory());
+        assertEquals(Integer.valueOf(2), result.getReports().get(0).getType());
+        assertEquals(Integer.valueOf(1), result.getReports().get(0).getScore());
     }
 
     @Test
@@ -177,6 +214,31 @@ class PersonalityTestServiceImplTest {
             answer.setQuestionNo(i);
             answer.setAnswerValue(answerValueForIndex(i));
             answers.add(answer);
+        }
+        return answers;
+    }
+
+    private List<PersonalityTestAnswer> buildScoredAnswers(int[] yesCounts, int[] noCounts) {
+        List<PersonalityTestAnswer> answers = buildAnswers(180);
+        int[] remainingYes = new int[10];
+        int[] remainingNo = new int[10];
+        for (int i = 0; i < yesCounts.length; i++) {
+            remainingYes[i + 1] = yesCounts[i];
+        }
+        for (int i = 0; i < noCounts.length; i++) {
+            remainingNo[i + 1] = noCounts[i];
+        }
+        for (PersonalityTestAnswer answer : answers) {
+            int type = ((answer.getQuestionNo() - 1) % 9) + 1;
+            if (remainingYes[type] > 0) {
+                answer.setAnswerValue(PersonalityTestAnswer.ANSWER_YES);
+                remainingYes[type]--;
+            } else if (remainingNo[type] > 0) {
+                answer.setAnswerValue(PersonalityTestAnswer.ANSWER_NO);
+                remainingNo[type]--;
+            } else {
+                answer.setAnswerValue(PersonalityTestAnswer.ANSWER_UNSURE);
+            }
         }
         return answers;
     }
