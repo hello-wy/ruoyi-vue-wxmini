@@ -96,6 +96,27 @@ class PersonalityTestServiceImplTest {
     }
 
     @Test
+    void getResultShouldMatchScreenshotInterpretationSelection() {
+        when(personalityTestMapper.selectEnabledPersonalityTest()).thenReturn(enabledTest());
+        when(personalityTestAttemptMapper.selectAttemptById(ATTEMPT_ID)).thenReturn(completedAttempt(180));
+        when(personalityTestAnswerMapper.selectAnswersByAttemptId(ATTEMPT_ID)).thenReturn(buildScoredAnswers(
+                new int[]{9, 8, 14, 12, 7, 15, 8, 9, 13},
+                new int[]{10, 8, 6, 8, 12, 5, 11, 10, 4}));
+        when(personalityTestQuestionMapper.selectQuestionsByIds(anyList())).thenReturn(buildQuestions(180));
+
+        PersonalityTestResultVo result = service.getResult(ATTEMPT_ID, USER_INFO_ID);
+
+        assertEquals(2, result.getReports().size());
+        assertEquals("人格高：极致高", result.getReports().get(0).getCategory());
+        assertEquals(Integer.valueOf(6), result.getReports().get(0).getType());
+        assertEquals(Integer.valueOf(15), result.getReports().get(0).getScore());
+        assertEquals("人格低：极致低", result.getReports().get(1).getCategory());
+        assertEquals(Integer.valueOf(5), result.getReports().get(1).getType());
+        assertEquals(Integer.valueOf(12), result.getReports().get(1).getScore());
+        assertTrue(result.getReports().stream().noneMatch(report -> Integer.valueOf(3).equals(report.getType())));
+    }
+
+    @Test
     void getResultShouldReturnTopNoReportWhenNoNoScoreExceedsThreshold() {
         when(personalityTestMapper.selectEnabledPersonalityTest()).thenReturn(enabledTest());
         when(personalityTestAttemptMapper.selectAttemptById(ATTEMPT_ID)).thenReturn(completedAttempt(9));
@@ -104,10 +125,13 @@ class PersonalityTestServiceImplTest {
 
         PersonalityTestResultVo result = service.getResult(ATTEMPT_ID, USER_INFO_ID);
 
-        assertEquals(1, result.getReports().size());
-        assertEquals("人格低：极致低", result.getReports().get(0).getCategory());
-        assertEquals(Integer.valueOf(2), result.getReports().get(0).getType());
+        assertEquals(2, result.getReports().size());
+        assertEquals("人格高：极致高", result.getReports().get(0).getCategory());
+        assertEquals(Integer.valueOf(1), result.getReports().get(0).getType());
         assertEquals(Integer.valueOf(1), result.getReports().get(0).getScore());
+        assertEquals("人格低：极致低", result.getReports().get(1).getCategory());
+        assertEquals(Integer.valueOf(2), result.getReports().get(1).getType());
+        assertEquals(Integer.valueOf(1), result.getReports().get(1).getScore());
     }
 
     @Test

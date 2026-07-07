@@ -479,27 +479,22 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
     private List<PersonalityTestReportItemVo> buildReports(int[][] counts) {
         List<PersonalityTestReportItemVo> reports = new ArrayList<>(3);
         List<Integer> yesTypes = sortedTypesByCount(counts[PersonalityTestAnswer.ANSWER_YES]);
-        int yesAdded = 0;
-        for (Integer type : yesTypes) {
-            if (counts[PersonalityTestAnswer.ANSWER_YES][type] <= EXTREME_THRESHOLD || yesAdded >= 2) {
-                break;
+        for (int i = 0; i < yesTypes.size() && i < 2; i++) {
+            Integer type = yesTypes.get(i);
+            if (counts[PersonalityTestAnswer.ANSWER_YES][type] >= EXTREME_THRESHOLD) {
+                reports.add(toReportItem(type, counts[PersonalityTestAnswer.ANSWER_YES][type], REPORT_COPIES[0][type]));
             }
-            reports.add(toReportItem(type, counts[PersonalityTestAnswer.ANSWER_YES][type], REPORT_COPIES[0][type]));
-            yesAdded++;
+        }
+        if (reports.isEmpty() && !yesTypes.isEmpty()) {
+            Integer type = yesTypes.get(0);
+            if (counts[PersonalityTestAnswer.ANSWER_YES][type] > 0) {
+                reports.add(toReportItem(type, counts[PersonalityTestAnswer.ANSWER_YES][type], REPORT_COPIES[0][type]));
+            }
         }
 
         List<Integer> noTypes = sortedTypesByCount(counts[PersonalityTestAnswer.ANSWER_NO]);
-        Integer noType = null;
-        for (Integer type : noTypes) {
-            if (counts[PersonalityTestAnswer.ANSWER_NO][type] > EXTREME_THRESHOLD) {
-                noType = type;
-                break;
-            }
-        }
-        if (noType == null && !noTypes.isEmpty()) {
-            noType = noTypes.get(0);
-        }
-        if (noType != null) {
+        if (!noTypes.isEmpty()) {
+            Integer noType = noTypes.get(0);
             reports.add(toReportItem(noType, counts[PersonalityTestAnswer.ANSWER_NO][noType], REPORT_COPIES[1][noType]));
         }
         return reports;
