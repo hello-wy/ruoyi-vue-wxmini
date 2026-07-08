@@ -71,9 +71,16 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public PersonalityTestEntryVo startAttempt(Long userInfoId, String wxUserId) {
+    public PersonalityTestEntryVo startAttempt(Long userInfoId, String wxUserId, boolean restart) {
         PersonalityTest test = requireEnabledTest();
         PersonalityTestAttempt attempt = personalityTestAttemptMapper.selectLatestInProgressAttempt(test.getId(), userInfoId);
+        if (attempt != null && restart) {
+            Date now = DateUtils.getNowDate();
+            attempt.setStatus(PersonalityTestAttempt.STATUS_CANCELED);
+            attempt.setUpdateTime(now);
+            personalityTestAttemptMapper.updateAttempt(attempt);
+            attempt = null;
+        }
         if (attempt == null) {
             Date now = DateUtils.getNowDate();
             attempt = new PersonalityTestAttempt();

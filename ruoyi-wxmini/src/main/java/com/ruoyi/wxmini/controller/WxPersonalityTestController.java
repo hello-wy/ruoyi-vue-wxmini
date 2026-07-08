@@ -57,7 +57,8 @@ public class WxPersonalityTestController extends BaseController {
             return error("请先登录");
         }
         try {
-            return success(personalityTestService.startAttempt(userInfo.getId(), userInfo.getUserId()));
+            boolean restart = bo != null && "restart".equals(bo.getMode());
+            return success(personalityTestService.startAttempt(userInfo.getId(), userInfo.getUserId(), restart));
         } catch (ServiceException e) {
             return error(e.getMessage());
         }

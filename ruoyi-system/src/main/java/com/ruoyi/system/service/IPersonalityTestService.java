@@ -11,7 +11,7 @@ import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
 public interface IPersonalityTestService {
     PersonalityTestEntryVo getEntry(Long userInfoId);
 
-    PersonalityTestEntryVo startAttempt(Long userInfoId, String wxUserId);
+    PersonalityTestEntryVo startAttempt(Long userInfoId, String wxUserId, boolean restart);
 
     PersonalityTestQuestionVo getCurrentQuestion(Long attemptId, Long userInfoId);
 
