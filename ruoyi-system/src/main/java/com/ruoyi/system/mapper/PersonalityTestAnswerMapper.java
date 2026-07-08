@@ -10,5 +10,7 @@ public interface PersonalityTestAnswerMapper {
 
     int insertOrUpdateAnswer(PersonalityTestAnswer answer);
 
+    int deleteAnswersByAttemptId(@Param("attemptId") Long attemptId);
+
     List<PersonalityTestAnswer> selectAnswersByAttemptId(@Param("attemptId") Long attemptId);
 }

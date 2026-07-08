@@ -9,6 +9,9 @@ public class PersonalityTestQuestionVo {
     private Integer questionNo;
     private Integer totalQuestions;
     private String content;
+    private Integer answerValue;
+    private Integer selectedOptionId;
+    private Integer answerOptionId;
     private List<PersonalityTestOptionVo> options;
 
     public Long getAttemptId() {
@@ -57,6 +60,30 @@ public class PersonalityTestQuestionVo {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Integer getAnswerValue() {
+        return answerValue;
+    }
+
+    public void setAnswerValue(Integer answerValue) {
+        this.answerValue = answerValue;
+    }
+
+    public Integer getSelectedOptionId() {
+        return selectedOptionId;
+    }
+
+    public void setSelectedOptionId(Integer selectedOptionId) {
+        this.selectedOptionId = selectedOptionId;
+    }
+
+    public Integer getAnswerOptionId() {
+        return answerOptionId;
+    }
+
+    public void setAnswerOptionId(Integer answerOptionId) {
+        this.answerOptionId = answerOptionId;
     }
 
     public List<PersonalityTestOptionVo> getOptions() {

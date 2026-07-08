@@ -36,4 +36,9 @@
             answer_value = values(answer_value),
             update_time = values(update_time)
     </insert>
+
+    <delete id="deleteAnswersByAttemptId">
+        delete from personality_test_answer
+        where attempt_id = #{attemptId}
+    </delete>
 </mapper>

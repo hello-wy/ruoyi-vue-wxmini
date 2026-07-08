@@ -2,11 +2,10 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.system.domain.vo.PersonalityTestAdminAttemptVo;
-import com.ruoyi.system.domain.vo.PersonalityTestAdminDetailVo;
+import com.ruoyi.system.domain.bo.PersonalityTestAnswerBo;
 import com.ruoyi.system.service.IPersonalityTestService;
+import com.ruoyi.wxmini.bo.WxPersonalityAnswerBatchBo;
 import com.ruoyi.wxmini.bo.WxPersonalityAnswerBo;
 import com.ruoyi.wxmini.bo.WxPersonalityAttemptBo;
 import com.ruoyi.wxmini.domain.UserInfo;
@@ -24,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(tags = "【小程序】独立性格测试")
 @RestController
@@ -78,6 +79,20 @@ public class WxPersonalityTestController extends BaseController {
         }
     }
 
+    @ApiOperation("获取全部性格测试题目及已选答案")
+    @GetMapping("/attempts/{attemptId}/questions")
+    public AjaxResult questions(@PathVariable("attemptId") Long attemptId) {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("请先登录");
+        }
+        try {
+            return success(personalityTestService.getQuestions(attemptId, userInfo.getId()));
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
+    }
+
     @ApiOperation("按题号获取性格测试题目")
     @GetMapping("/attempts/{attemptId}/questions/{questionNo}")
     public AjaxResult question(@PathVariable("attemptId") Long attemptId,
@@ -108,6 +123,35 @@ public class WxPersonalityTestController extends BaseController {
         }
     }
 
+    @ApiOperation("批量保存性格测试答案")
+    @PostMapping("/attempts/{attemptId}/answers/batch")
+    public AjaxResult saveAnswers(@PathVariable("attemptId") Long attemptId,
+                                  @RequestBody @Valid WxPersonalityAnswerBatchBo bo) {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("请先登录");
+        }
+        try {
+            return success(personalityTestService.saveAnswers(attemptId, userInfo.getId(), toServiceAnswers(bo.getAnswers())));
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("重新开始性格测试")
+    @PostMapping("/restart")
+    public AjaxResult restart() {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("请先登录");
+        }
+        try {
+            return success(personalityTestService.startAttempt(userInfo.getId(), userInfo.getUserId(), true));
+        } catch (ServiceException e) {
+            return error(e.getMessage());
+        }
+    }
+
     @ApiOperation("获取性格测试完成结果")
     @GetMapping("/attempts/{attemptId}/result")
     public AjaxResult result(@PathVariable("attemptId") Long attemptId) {
@@ -123,6 +167,17 @@ public class WxPersonalityTestController extends BaseController {
     }
 
     // Admin endpoints and helpers removed and migrated to PersonalityTestAdminController
+
+    private List<PersonalityTestAnswerBo> toServiceAnswers(List<WxPersonalityAnswerBo> answers) {
+        List<PersonalityTestAnswerBo> serviceAnswers = new ArrayList<>(answers.size());
+        for (WxPersonalityAnswerBo answer : answers) {
+            PersonalityTestAnswerBo serviceAnswer = new PersonalityTestAnswerBo();
+            serviceAnswer.setQuestionId(answer.getQuestionId());
+            serviceAnswer.setAnswerValue(answer.getAnswerValue());
+            serviceAnswers.add(serviceAnswer);
+        }
+        return serviceAnswers;
+    }
 
     private UserInfo getCurrentUserInfo() {
         String wxUserId = WxMiniUserContext.getCurrentUserId();

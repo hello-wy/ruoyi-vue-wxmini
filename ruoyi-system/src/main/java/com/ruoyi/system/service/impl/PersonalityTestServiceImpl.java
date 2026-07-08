@@ -5,6 +5,7 @@ import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.PageUtils;
+import com.ruoyi.system.domain.bo.PersonalityTestAnswerBo;
 import com.ruoyi.system.domain.PersonalityTest;
 import com.ruoyi.system.domain.PersonalityTestAnswer;
 import com.ruoyi.system.domain.PersonalityTestAttempt;
@@ -76,7 +77,10 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         PersonalityTestAttempt attempt = personalityTestAttemptMapper.selectLatestInProgressAttempt(test.getId(), userInfoId);
         if (attempt != null && restart) {
             Date now = DateUtils.getNowDate();
+            personalityTestAnswerMapper.deleteAnswersByAttemptId(attempt.getId());
             attempt.setStatus(PersonalityTestAttempt.STATUS_CANCELED);
+            attempt.setAnsweredCount(0);
+            attempt.setCurrentQuestionNo(1);
             attempt.setUpdateTime(now);
             personalityTestAttemptMapper.updateAttempt(attempt);
             attempt = null;
@@ -133,58 +137,52 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
     }
 
     @Override
+    public List<PersonalityTestQuestionVo> getQuestions(Long attemptId, Long userInfoId) {
+        PersonalityTestAttempt attempt = requireOwnedAttempt(attemptId, userInfoId);
+        PersonalityTest test = requireEnabledAttemptTest(attempt);
+        List<PersonalityTestAnswer> answers = personalityTestAnswerMapper.selectAnswersByAttemptId(attempt.getId());
+        Map<Long, Integer> answerMap = new HashMap<>();
+        for (PersonalityTestAnswer answer : answers) {
+            answerMap.put(answer.getQuestionId(), answer.getAnswerValue());
+        }
+        List<PersonalityTestQuestion> questions = personalityTestQuestionMapper.selectEnabledQuestionsByTestId(test.getId());
+        List<PersonalityTestQuestionVo> vos = new ArrayList<>(questions.size());
+        for (PersonalityTestQuestion question : questions) {
+            PersonalityTestQuestionVo vo = toQuestionVo(attempt.getId(), test, question);
+            Integer answerValue = answerMap.get(question.getId());
+            vo.setAnswerValue(answerValue);
+            vo.setSelectedOptionId(answerValue);
+            vo.setAnswerOptionId(answerValue);
+            vos.add(vo);
+        }
+        return vos;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public PersonalityTestAnswerResultVo saveAnswer(Long attemptId, Long userInfoId, Long questionId, Integer answerValue) {
-        if (!isValidAnswer(answerValue)) {
-            throw new ServiceException("请选择有效答案");
+        PersonalityTestAnswerBo answer = new PersonalityTestAnswerBo();
+        answer.setQuestionId(questionId);
+        answer.setAnswerValue(answerValue);
+        return saveAnswers(attemptId, userInfoId, Arrays.asList(answer));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PersonalityTestAnswerResultVo saveAnswers(Long attemptId, Long userInfoId, List<PersonalityTestAnswerBo> answers) {
+        if (answers == null || answers.isEmpty()) {
+            throw new ServiceException("答案列表不能为空");
         }
         PersonalityTestAttempt attempt = requireOwnedAttempt(attemptId, userInfoId);
         if (!PersonalityTestAttempt.STATUS_IN_PROGRESS.equals(attempt.getStatus())) {
             throw new ServiceException("当前测试已完成");
         }
-        PersonalityTest test = requireEnabledTest();
-        if (!test.getId().equals(attempt.getTestId())) {
-            throw new ServiceException("测试记录不存在");
-        }
-        PersonalityTestQuestion question = personalityTestQuestionMapper.selectQuestionById(questionId);
-        if (question == null || !test.getId().equals(question.getTestId()) || !PersonalityTestQuestion.STATUS_ENABLED.equals(question.getStatus())) {
-            throw new ServiceException("题目不存在");
-        }
-
+        PersonalityTest test = requireEnabledAttemptTest(attempt);
         Date now = DateUtils.getNowDate();
-        PersonalityTestAnswer answer = new PersonalityTestAnswer();
-        answer.setAttemptId(attempt.getId());
-        answer.setTestId(test.getId());
-        answer.setUserInfoId(userInfoId);
-        answer.setQuestionId(question.getId());
-        answer.setQuestionNo(question.getQuestionNo());
-        answer.setAnswerValue(answerValue);
-        answer.setCreateTime(now);
-        answer.setUpdateTime(now);
-        personalityTestAnswerMapper.insertOrUpdateAnswer(answer);
-
-        int answeredCount = personalityTestAnswerMapper.countAnswersByAttemptId(attempt.getId());
-        PersonalityTestQuestion nextQuestion = personalityTestQuestionMapper.selectFirstUnansweredQuestion(test.getId(), attempt.getId());
-        PersonalityTestAnswerResultVo result = new PersonalityTestAnswerResultVo();
-        result.setAttemptId(attempt.getId());
-        result.setAnsweredCount(answeredCount);
-
-        attempt.setAnsweredCount(answeredCount);
-        attempt.setUpdateTime(now);
-        if (nextQuestion == null || answeredCount >= test.getTotalQuestions()) {
-            attempt.setStatus(PersonalityTestAttempt.STATUS_COMPLETED);
-            attempt.setCurrentQuestionNo(test.getTotalQuestions());
-            attempt.setCompletedAt(now);
-            personalityTestAttemptMapper.updateAttempt(attempt);
-            result.setCompleted(true);
-            return result;
+        for (PersonalityTestAnswerBo answerBo : answers) {
+            saveOneAnswer(attempt, test, userInfoId, answerBo, now);
         }
-
-        attempt.setCurrentQuestionNo(nextQuestion.getQuestionNo());
-        personalityTestAttemptMapper.updateAttempt(attempt);
-        result.setCompleted(false);
-        result.setNextQuestion(toQuestionVo(attempt.getId(), test, nextQuestion));
-        return result;
+        return refreshAttemptProgress(attempt, test, now);
     }
 
     @Override
@@ -339,6 +337,56 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
             throw new ServiceException("无权查看该测试记录");
         }
         return attempt;
+    }
+
+    private void saveOneAnswer(PersonalityTestAttempt attempt, PersonalityTest test, Long userInfoId,
+                               PersonalityTestAnswerBo answerBo, Date now) {
+        if (answerBo == null || answerBo.getQuestionId() == null) {
+            throw new ServiceException("题目不能为空");
+        }
+        if (!isValidAnswer(answerBo.getAnswerValue())) {
+            throw new ServiceException("请选择有效答案");
+        }
+        PersonalityTestQuestion question = personalityTestQuestionMapper.selectQuestionById(answerBo.getQuestionId());
+        if (question == null || !test.getId().equals(question.getTestId()) || !PersonalityTestQuestion.STATUS_ENABLED.equals(question.getStatus())) {
+            throw new ServiceException("题目不存在");
+        }
+
+        PersonalityTestAnswer answer = new PersonalityTestAnswer();
+        answer.setAttemptId(attempt.getId());
+        answer.setTestId(test.getId());
+        answer.setUserInfoId(userInfoId);
+        answer.setQuestionId(question.getId());
+        answer.setQuestionNo(question.getQuestionNo());
+        answer.setAnswerValue(answerBo.getAnswerValue());
+        answer.setCreateTime(now);
+        answer.setUpdateTime(now);
+        personalityTestAnswerMapper.insertOrUpdateAnswer(answer);
+    }
+
+    private PersonalityTestAnswerResultVo refreshAttemptProgress(PersonalityTestAttempt attempt, PersonalityTest test, Date now) {
+        int answeredCount = personalityTestAnswerMapper.countAnswersByAttemptId(attempt.getId());
+        PersonalityTestQuestion nextQuestion = personalityTestQuestionMapper.selectFirstUnansweredQuestion(test.getId(), attempt.getId());
+        PersonalityTestAnswerResultVo result = new PersonalityTestAnswerResultVo();
+        result.setAttemptId(attempt.getId());
+        result.setAnsweredCount(answeredCount);
+
+        attempt.setAnsweredCount(answeredCount);
+        attempt.setUpdateTime(now);
+        if (nextQuestion == null || answeredCount >= test.getTotalQuestions()) {
+            attempt.setStatus(PersonalityTestAttempt.STATUS_COMPLETED);
+            attempt.setCurrentQuestionNo(test.getTotalQuestions());
+            attempt.setCompletedAt(now);
+            personalityTestAttemptMapper.updateAttempt(attempt);
+            result.setCompleted(true);
+            return result;
+        }
+
+        attempt.setCurrentQuestionNo(nextQuestion.getQuestionNo());
+        personalityTestAttemptMapper.updateAttempt(attempt);
+        result.setCompleted(false);
+        result.setNextQuestion(toQuestionVo(attempt.getId(), test, nextQuestion));
+        return result;
     }
 
     private PersonalityTestEntryVo toEntryVo(PersonalityTest test, PersonalityTestAttempt attempt) {
