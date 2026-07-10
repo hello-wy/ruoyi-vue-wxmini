@@ -72,7 +72,7 @@ class PersonalityTestServiceImplTest {
         assertEquals(180, result.getAnswers().size());
         assertTrue(result.getAnswers().stream().allMatch(item -> item.getDimensionNo() != null));
         assertEquals(9, result.getScores().size());
-        assertEquals(3, result.getReports().size());
+        assertEquals(2, result.getReports().size());
         assertTrue(result.getReports().stream().allMatch(report -> "人格高：极致高".equals(report.getCategory())));
     }
 
@@ -86,18 +86,11 @@ class PersonalityTestServiceImplTest {
 
         PersonalityTestResultVo result = service.getResult(ATTEMPT_ID, USER_INFO_ID);
 
-        assertEquals(5, result.getReports().size());
+        assertEquals(2, result.getReports().size());
         assertEquals("极致高", result.getReports().get(0).getLevel());
         assertEquals(Integer.valueOf(18), result.getReports().get(0).getScore());
         assertEquals("相对高", result.getReports().get(1).getLevel());
         assertEquals(Integer.valueOf(17), result.getReports().get(1).getScore());
-        assertEquals("相对高", result.getReports().get(2).getLevel());
-        assertEquals(Integer.valueOf(14), result.getReports().get(2).getScore());
-        assertEquals("相对低", result.getReports().get(3).getLevel());
-        assertEquals(Integer.valueOf(13), result.getReports().get(3).getScore());
-        assertEquals("相对低", result.getReports().get(4).getLevel());
-        assertEquals(Integer.valueOf(10), result.getReports().get(4).getScore());
-        assertTrue(result.getReports().stream().noneMatch(report -> Integer.valueOf(6).equals(report.getType())));
         assertTrue(result.getReports().stream().noneMatch(report -> "极致低".equals(report.getLevel())));
     }
 

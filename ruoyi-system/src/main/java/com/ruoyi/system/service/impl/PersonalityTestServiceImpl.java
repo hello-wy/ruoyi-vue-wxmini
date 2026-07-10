@@ -531,12 +531,15 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
     }
 
     private List<PersonalityTestReportItemVo> buildReports(int[][] counts) {
-        List<PersonalityTestReportItemVo> reports = new ArrayList<>(9);
+        List<PersonalityTestReportItemVo> reports = new ArrayList<>(2);
         for (Integer type : sortedTypesByCount(counts[PersonalityTestAnswer.ANSWER_YES])) {
             int score = counts[PersonalityTestAnswer.ANSWER_YES][type];
             PersonalityReportCopy copy = reportCopy(type, score);
             if (copy != null) {
                 reports.add(toReportItem(type, score, copy));
+                if (reports.size() == 2) {
+                    break;
+                }
             }
         }
         return reports;
