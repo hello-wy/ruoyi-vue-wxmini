@@ -5,6 +5,7 @@ import com.ruoyi.system.domain.PersonalityTest;
 import com.ruoyi.system.domain.PersonalityTestAnswer;
 import com.ruoyi.system.domain.PersonalityTestAttempt;
 import com.ruoyi.system.domain.PersonalityTestQuestion;
+import com.ruoyi.system.domain.vo.PersonalityTestAttemptHistoryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestResultAnswerVo;
 import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
 import com.ruoyi.system.mapper.PersonalityTestAnswerMapper;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +56,28 @@ class PersonalityTestServiceImplTest {
 
     @InjectMocks
     private PersonalityTestServiceImpl service;
+
+    @Test
+    void getCompletedAttemptsShouldPreserveMapperOrderAndMapNarrowFields() {
+        Date latestCompletedAt = new Date(2_000L);
+        Date earlierCompletedAt = new Date(1_000L);
+        PersonalityTestAttempt latest = completedAttempt(180);
+        latest.setId(202L);
+        latest.setCompletedAt(latestCompletedAt);
+        PersonalityTestAttempt earlier = completedAttempt(180);
+        earlier.setId(201L);
+        earlier.setCompletedAt(earlierCompletedAt);
+        when(personalityTestAttemptMapper.selectCompletedAttemptsByUserInfoId(USER_INFO_ID))
+                .thenReturn(Arrays.asList(latest, earlier));
+
+        List<PersonalityTestAttemptHistoryVo> result = service.getCompletedAttempts(USER_INFO_ID);
+
+        assertEquals(2, result.size());
+        assertEquals(Long.valueOf(202L), result.get(0).getAttemptId());
+        assertEquals(latestCompletedAt, result.get(0).getCompletedAt());
+        assertEquals(Long.valueOf(201L), result.get(1).getAttemptId());
+        assertEquals(earlierCompletedAt, result.get(1).getCompletedAt());
+    }
 
     @Test
     void getResultShouldReturn180AnswersForCompletedAttempt() {

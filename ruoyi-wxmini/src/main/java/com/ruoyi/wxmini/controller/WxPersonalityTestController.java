@@ -50,6 +50,16 @@ public class WxPersonalityTestController extends BaseController {
         }
     }
 
+    @ApiOperation("获取已完成的性格测试记录")
+    @GetMapping("/attempts")
+    public AjaxResult attempts() {
+        UserInfo userInfo = getCurrentUserInfo();
+        if (userInfo == null) {
+            return error("请先登录");
+        }
+        return success(personalityTestService.getCompletedAttempts(userInfo.getId()));
+    }
+
     @ApiOperation("开始或继续性格测试")
     @PostMapping("/attempts")
     public AjaxResult start(@RequestBody(required = false) WxPersonalityAttemptBo bo) {

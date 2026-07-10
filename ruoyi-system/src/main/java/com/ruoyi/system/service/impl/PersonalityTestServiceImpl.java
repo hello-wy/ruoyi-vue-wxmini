@@ -14,6 +14,7 @@ import com.ruoyi.system.domain.vo.PersonalityTestAdminAnswerVo;
 import com.ruoyi.system.domain.vo.PersonalityTestAdminAttemptVo;
 import com.ruoyi.system.domain.vo.PersonalityTestAdminDetailVo;
 import com.ruoyi.system.domain.vo.PersonalityTestAnswerResultVo;
+import com.ruoyi.system.domain.vo.PersonalityTestAttemptHistoryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestEntryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestOptionVo;
 import com.ruoyi.system.domain.vo.PersonalityTestQuestionVo;
@@ -220,6 +221,19 @@ public class PersonalityTestServiceImpl implements IPersonalityTestService {
         vo.setScores(buildScores(counts));
         vo.setReports(buildReports(counts));
         return vo;
+    }
+
+    @Override
+    public List<PersonalityTestAttemptHistoryVo> getCompletedAttempts(Long userInfoId) {
+        List<PersonalityTestAttempt> attempts = personalityTestAttemptMapper.selectCompletedAttemptsByUserInfoId(userInfoId);
+        List<PersonalityTestAttemptHistoryVo> result = new ArrayList<>(attempts.size());
+        for (PersonalityTestAttempt attempt : attempts) {
+            PersonalityTestAttemptHistoryVo vo = new PersonalityTestAttemptHistoryVo();
+            vo.setAttemptId(attempt.getId());
+            vo.setCompletedAt(attempt.getCompletedAt());
+            result.add(vo);
+        }
+        return result;
     }
 
     @Override

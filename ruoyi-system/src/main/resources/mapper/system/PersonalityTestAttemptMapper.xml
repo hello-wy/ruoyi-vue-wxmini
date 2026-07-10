@@ -36,6 +36,13 @@
         limit 1
     </select>
 
+    <select id="selectCompletedAttemptsByUserInfoId" resultMap="PersonalityTestAttemptResult">
+        <include refid="selectAttemptColumns"/>
+        where user_info_id = #{userInfoId}
+          and status = 1
+        order by completed_at desc, id desc
+    </select>
+
     <select id="countCompletedAttempts" resultType="int">
         select count(distinct user_info_id)
         from personality_test_attempt

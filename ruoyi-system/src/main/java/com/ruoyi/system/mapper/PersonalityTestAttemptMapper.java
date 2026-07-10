@@ -11,6 +11,8 @@ public interface PersonalityTestAttemptMapper {
     PersonalityTestAttempt selectLatestInProgressAttempt(@Param("testId") Long testId,
                                                          @Param("userInfoId") Long userInfoId);
 
+    List<PersonalityTestAttempt> selectCompletedAttemptsByUserInfoId(@Param("userInfoId") Long userInfoId);
+
     int insertAttempt(PersonalityTestAttempt attempt);
 
     int updateAttempt(PersonalityTestAttempt attempt);

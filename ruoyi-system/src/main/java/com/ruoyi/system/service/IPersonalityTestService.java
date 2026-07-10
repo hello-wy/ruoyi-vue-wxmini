@@ -5,6 +5,7 @@ import com.ruoyi.system.domain.bo.PersonalityTestAnswerBo;
 import com.ruoyi.system.domain.vo.PersonalityTestAdminAttemptVo;
 import com.ruoyi.system.domain.vo.PersonalityTestAdminDetailVo;
 import com.ruoyi.system.domain.vo.PersonalityTestAnswerResultVo;
+import com.ruoyi.system.domain.vo.PersonalityTestAttemptHistoryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestEntryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestQuestionVo;
 import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
@@ -27,6 +28,8 @@ public interface IPersonalityTestService {
     PersonalityTestAnswerResultVo saveAnswers(Long attemptId, Long userInfoId, List<PersonalityTestAnswerBo> answers);
 
     PersonalityTestResultVo getResult(Long attemptId, Long userInfoId);
+
+    List<PersonalityTestAttemptHistoryVo> getCompletedAttempts(Long userInfoId);
 
     int countCompletedAttempts();
 

@@ -1,6 +1,7 @@
 package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.system.domain.vo.PersonalityTestAttemptHistoryVo;
 import com.ruoyi.system.domain.vo.PersonalityTestQuestionVo;
 import com.ruoyi.system.domain.vo.PersonalityTestResultVo;
 import com.ruoyi.system.service.IPersonalityTestService;
@@ -14,7 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +40,47 @@ class WxPersonalityTestControllerTest {
     @AfterEach
     void clearContext() {
         WxMiniUserContext.clear();
+    }
+
+    @Test
+    void attemptsShouldReturnCurrentUserCompletedAttempts() {
+        WxMiniUserContext.setCurrentUserId(WX_USER_ID);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(USER_INFO_ID);
+        userInfo.setUserId(WX_USER_ID);
+        PersonalityTestAttemptHistoryVo attempt = new PersonalityTestAttemptHistoryVo();
+        attempt.setAttemptId(12L);
+        List<PersonalityTestAttemptHistoryVo> attempts = Collections.singletonList(attempt);
+        when(userInfoService.selectUserInfoByUserId(WX_USER_ID)).thenReturn(userInfo);
+        when(personalityTestService.getCompletedAttempts(USER_INFO_ID)).thenReturn(attempts);
+
+        AjaxResult result = controller.attempts();
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(attempts, result.get(AjaxResult.DATA_TAG));
+        verify(personalityTestService).getCompletedAttempts(USER_INFO_ID);
+    }
+
+    @Test
+    void attemptsShouldRejectMissingUserContext() {
+        AjaxResult result = controller.attempts();
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请先登录", result.get(AjaxResult.MSG_TAG));
+        verify(userInfoService, never()).selectUserInfoByUserId(WX_USER_ID);
+        verify(personalityTestService, never()).getCompletedAttempts(USER_INFO_ID);
+    }
+
+    @Test
+    void attemptsShouldRejectMissingCurrentUser() {
+        WxMiniUserContext.setCurrentUserId(WX_USER_ID);
+        when(userInfoService.selectUserInfoByUserId(WX_USER_ID)).thenReturn(null);
+
+        AjaxResult result = controller.attempts();
+
+        assertEquals(500, result.get(AjaxResult.CODE_TAG));
+        assertEquals("请先登录", result.get(AjaxResult.MSG_TAG));
+        verify(personalityTestService, never()).getCompletedAttempts(USER_INFO_ID);
     }
 
     @Test
