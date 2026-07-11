@@ -80,6 +80,10 @@ public class UserInfo extends BaseEntity {
     @Excel(name = "用户专属邀请码")
     private String inviteCode;
 
+    /** 是否为学员：0-否，1-是 */
+    @Excel(name = "是否为学员")
+    private Integer isStudent;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -174,5 +178,13 @@ public class UserInfo extends BaseEntity {
 
     public void setInviteCode(String inviteCode) {
         this.inviteCode = inviteCode;
+    }
+
+    public Integer getIsStudent() {
+        return isStudent;
+    }
+
+    public void setIsStudent(Integer isStudent) {
+        this.isStudent = isStudent;
     }
 }

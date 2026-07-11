@@ -1,6 +1,8 @@
 package com.ruoyi.system.service.impl;
 
+import com.ruoyi.system.domain.bo.StudentAccessScope;
 import com.ruoyi.system.domain.bo.StudentQueryBo;
+import com.ruoyi.system.service.IStudentAccessService;
 import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
@@ -24,6 +26,8 @@ class StudentServiceImplTest {
 
     @Mock
     private WxUserProfileMapper wxUserProfileMapper;
+    @Mock
+    private IStudentAccessService studentAccessService;
 
     @InjectMocks
     private StudentServiceImpl service;
@@ -38,6 +42,7 @@ class StudentServiceImplTest {
         student.setDisplayName("张三");
         student.setUserType(1);
 
+        when(studentAccessService.resolveCurrentScope()).thenReturn(new StudentAccessScope());
         when(wxUserProfileMapper.selectAdminStudentList(queryBo)).thenReturn(Arrays.asList(student));
 
         List<StudentListVo> result = service.listStudents(queryBo);

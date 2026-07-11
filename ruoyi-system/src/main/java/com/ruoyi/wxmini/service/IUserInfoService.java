@@ -20,6 +20,8 @@ public interface IUserInfoService {
      */
     public List<UserInfo> selectUserInfoList(UserInfo userInfo);
 
+    UserInfo selectUserInfoById(Long id);
+
     /**
      * 新增用户信息
      *
@@ -47,4 +49,6 @@ public interface IUserInfoService {
     UserInfo selectUserInfoByInviteCode(String inviteCode);
 
     String getOrCreateInviteCode(String userId);
+
+    void markStudent(String userId);
 }

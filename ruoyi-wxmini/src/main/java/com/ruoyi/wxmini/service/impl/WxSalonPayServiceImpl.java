@@ -23,6 +23,7 @@ import com.ruoyi.wxmini.vo.WxSalonPayOrderDetailVo;
 import com.ruoyi.wxmini.vo.WxSalonPayOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo> implements IWxSalonPayService {
     private static final String STATUS_PENDING = "PENDING";
     private static final String STATUS_PAID = "PAID";
@@ -97,6 +99,7 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
             return false;
         }
         if (STATUS_PAID.equals(order.getStatus()) && order.getPayTime() != null) {
+            userInfoService.markStudent(order.getUserId());
             return true;
         }
         Date successTime = parseSuccessTime(result.getResult().getSuccessTime());
@@ -172,6 +175,7 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
             return false;
         }
         if (STATUS_PAID.equals(order.getStatus()) && order.getPayTime() != null) {
+            userInfoService.markStudent(order.getUserId());
             return true;
         }
         Date payTime = resolvePaidTime(orderNo);
@@ -220,7 +224,12 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
         return salonPayOrderService.selectSalonPayOrderByOrderNo(order.getOrderNo());
     }
 
-    private boolean markOrderPaid(SalonPayOrder order, String transactionId, String requestId, Date payTime) {
+    @Transactional(rollbackFor = Exception.class)
+    protected boolean markOrderPaid(SalonPayOrder order, String transactionId, String requestId, Date payTime) {
+        if (STATUS_PAID.equals(order.getStatus()) && order.getPayTime() != null) {
+            userInfoService.markStudent(order.getUserId());
+            return true;
+        }
         order.setStatus(STATUS_PAID);
         if (transactionId != null && !transactionId.isEmpty()) {
             order.setWechatTransactionId(transactionId);
@@ -229,7 +238,11 @@ public class WxSalonPayServiceImpl extends AbsWxPayBaseService<WxSalonPayOrderVo
             order.setRequestId(requestId);
         }
         order.setPayTime(payTime == null ? DateUtils.getNowDate() : payTime);
-        return salonPayOrderService.updateSalonPayOrder(order) > 0;
+        boolean updated = salonPayOrderService.updateSalonPayOrder(order) > 0;
+        if (updated) {
+            userInfoService.markStudent(order.getUserId());
+        }
+        return updated;
     }
 
     private Date resolvePaidTime(String orderNo) {

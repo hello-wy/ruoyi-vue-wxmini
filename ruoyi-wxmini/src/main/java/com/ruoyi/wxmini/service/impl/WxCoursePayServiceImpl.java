@@ -105,9 +105,6 @@ public class WxCoursePayServiceImpl extends AbsWxPayBaseService<WxCoursePayOrder
         if (order == null) {
             return false;
         }
-        if (CoursePayOrder.STATUS_PAID_WAIT_SIGN.equals(order.getStatus())) {
-            return true;
-        }
         Date payTime = parseSuccessTime(result.getResult().getSuccessTime());
         coursePayOrderService.markPaid(order.getOrderNo(), result.getResult().getTransactionId(), requestId, payTime);
         return true;

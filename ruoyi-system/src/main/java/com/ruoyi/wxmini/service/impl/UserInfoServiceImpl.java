@@ -41,6 +41,11 @@ public class UserInfoServiceImpl implements IUserInfoService {
         return userInfoMapper.selectUserInfoList(userInfo);
     }
 
+    @Override
+    public UserInfo selectUserInfoById(Long id) {
+        return userInfoMapper.selectUserInfoById(id);
+    }
+
     /**
      * 新增用户信息
      *
@@ -127,6 +132,13 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Override
     public UserInfo selectUserInfoByInviteCode(String inviteCode) {
         return userInfoMapper.selectUserInfoByInviteCode(inviteCode);
+    }
+
+    @Override
+    public void markStudent(String userId) {
+        if (userInfoMapper.markStudentByUserId(userId) > 0) {
+            reloadUserInfoToCache(userId);
+        }
     }
 
     @Override

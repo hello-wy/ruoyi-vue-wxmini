@@ -190,6 +190,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from user_info ui
                  left join student_staff_assignment sa on sa.student_id = ui.id
         where ui.id = #{studentId}
+          and ui.is_student = 1
           and (
             <choose>
                 <when test="scope == null or scope.fullAccess">

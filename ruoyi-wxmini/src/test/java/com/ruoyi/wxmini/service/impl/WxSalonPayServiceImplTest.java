@@ -25,6 +25,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -113,6 +114,7 @@ class WxSalonPayServiceImplTest {
 
         assertEquals("PAID", detail.getStatus());
         assertNotNull(detail.getPayTime());
+        verify(userInfoService).markStudent("user-1");
     }
 
     @Test

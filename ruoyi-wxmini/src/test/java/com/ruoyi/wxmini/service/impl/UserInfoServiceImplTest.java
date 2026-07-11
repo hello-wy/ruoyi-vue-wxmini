@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -86,6 +87,30 @@ class UserInfoServiceImplTest {
 
         assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
         verify(redisCache).setCacheObject(eq("wx_user:123"), contains("\"isRealnameAuth\":1"));
+    }
+
+    @Test
+    void markStudentShouldRefreshCacheOnlyWhenFlagChanges() {
+        UserInfo student = new UserInfo();
+        student.setUserId("123");
+        student.setIsStudent(1);
+        when(userInfoMapper.markStudentByUserId("123")).thenReturn(1, 0);
+        when(userInfoMapper.selectUserInfoByUserId("123")).thenReturn(student);
+
+        service.markStudent("123");
+        service.markStudent("123");
+
+        verify(userInfoMapper).selectUserInfoByUserId("123");
+        verify(redisCache).setCacheObject(eq("wx_user:123"), contains("\"isStudent\":1"));
+    }
+
+    @Test
+    void markStudentShouldNotReadUserWhenAlreadyMarked() {
+        when(userInfoMapper.markStudentByUserId("123")).thenReturn(0);
+
+        service.markStudent("123");
+
+        verify(userInfoMapper, never()).selectUserInfoByUserId("123");
     }
 
     @Test

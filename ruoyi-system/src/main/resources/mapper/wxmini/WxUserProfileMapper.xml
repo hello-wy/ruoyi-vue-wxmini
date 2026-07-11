@@ -179,7 +179,8 @@
                  left join sys_user su on su.user_id = sa.employee_user_id
                  left join sys_dept bound_dept on bound_dept.dept_id = su.dept_id
         <where>
-            <include refid="AdminStudentAccessScope"/>
+            ui.is_student = 1
+            and <include refid="AdminStudentAccessScope"/>
             <if test="realName != null and realName != ''">
                 and (
                     up.real_name like concat('%', #{realName}, '%')
@@ -236,11 +237,12 @@
         from user_info ui
                  left join wx_user_profile up on up.uid = ui.id
         where ui.id = #{id}
+          and ui.is_student = 1
         limit 1
     </select>
 
     <select id="countAdminStudentById" resultType="int">
-        select count(1) from user_info where id = #{id}
+        select count(1) from user_info where id = #{id} and is_student = 1
     </select>
 
     <insert id="updateAdminStudentSituation">
@@ -248,6 +250,7 @@
         select ui.id, #{studentSituation}
         from user_info ui
         where ui.id = #{id}
+          and ui.is_student = 1
         on duplicate key update student_situation = values(student_situation)
     </insert>
 </mapper>

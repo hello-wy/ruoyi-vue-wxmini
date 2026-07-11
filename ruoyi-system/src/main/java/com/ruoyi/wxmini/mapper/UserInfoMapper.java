@@ -64,4 +64,6 @@ public interface UserInfoMapper {
     UserInfo selectUserInfoByUserId(String userId);
 
     UserInfo selectUserInfoByInviteCode(String inviteCode);
+
+    int markStudentByUserId(String userId);
 }

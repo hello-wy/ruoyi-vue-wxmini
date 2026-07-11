@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOrderVo>
         implements IWxGrowupPayService {
     private static final long ORDER_TYPE_LECTURE = 2L;
@@ -142,12 +143,14 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
         return "https://zhiyujia.xyz/api/wxmini/pay/growup/notify";
     }
 
-    private boolean markOrderPaid(String orderNo) {
+    @Transactional(rollbackFor = Exception.class)
+    protected boolean markOrderPaid(String orderNo) {
         TradeOrder order = selectOrderByNo(orderNo);
         if (order == null) {
             return false;
         }
         if (Objects.equals(PAY_STATUS_PAID, order.getPayStatus()) && order.getPayTime() != null) {
+            markStudent(order.getUserId());
             return true;
         }
         order.setPayStatus(PAY_STATUS_PAID);
@@ -155,6 +158,7 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
         boolean updated = tradeOrderService.updateTradeOrder(order) > 0;
         if (updated) {
             increaseCourseEnrolledCount(order.getLectureId());
+            markStudent(order.getUserId());
             return true;
         }
         return false;
@@ -163,6 +167,13 @@ public class WxGrowupPayServiceImpl extends AbsWxPayBaseService<WxGrowupCourseOr
     private void increaseCourseEnrolledCount(Long courseId) {
         if (lecturesService.increaseEnrolledCount(courseId) <= 0) {
             throw new ServiceException("课程报名人数更新失败");
+        }
+    }
+
+    private void markStudent(Long uid) {
+        UserInfo userInfo = userInfoService.selectUserInfoById(uid);
+        if (userInfo != null) {
+            userInfoService.markStudent(userInfo.getUserId());
         }
     }
 

@@ -11,8 +11,8 @@
 ## 行为
 
 - `tradeState=SUCCESS` 时，将 `course_pay_order.status` 从 `0` 改为 `1`。
-- 写入 `wechatTransactionId`、`requestId`、`payTime`。
-- 重复回调幂等返回成功。
+- 写入 `wechatTransactionId`、`requestId`、`payTime`，并在同一事务内将订单用户的 `user_info.is_student` 条件更新为 `1`。
+- 重复回调幂等返回成功；已支付订单仍会补偿学员标记。
 
 ## 返回
 

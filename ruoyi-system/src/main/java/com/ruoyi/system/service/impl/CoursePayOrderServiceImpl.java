@@ -7,6 +7,7 @@ import com.ruoyi.system.domain.vo.CourseRefundOrderVo;
 import com.ruoyi.system.domain.vo.CourseScanSignInVo;
 import com.ruoyi.system.mapper.CoursePayOrderMapper;
 import com.ruoyi.system.service.ICoursePayOrderService;
+import com.ruoyi.wxmini.service.IUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,8 @@ import java.util.List;
 public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
     @Autowired
     private CoursePayOrderMapper coursePayOrderMapper;
+    @Autowired
+    private IUserInfoService userInfoService;
 
     @Override
     public CoursePayOrder selectCoursePayOrderByOrderNo(String orderNo) {
@@ -54,9 +57,11 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public CoursePayOrder markPaid(String orderNo, String transactionId, String requestId, Date payTime) {
         CoursePayOrder order = requireOrder(orderNo);
         if (isPaidOrAfter(order.getStatus())) {
+            userInfoService.markStudent(order.getUserId());
             return order;
         }
         if (!CoursePayOrder.STATUS_PENDING.equals(order.getStatus())) {
@@ -67,6 +72,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         order.setRequestId(requestId);
         order.setPayTime(payTime == null ? DateUtils.getNowDate() : payTime);
         updateCoursePayOrder(order);
+        userInfoService.markStudent(order.getUserId());
         return order;
     }
 
