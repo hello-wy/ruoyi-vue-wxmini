@@ -100,7 +100,7 @@ class StudentControllerTest {
     void salonPurchaseRecordsShouldReturn200WhenStudentExists() {
         StudentSalonPurchaseRecordVo record = new StudentSalonPurchaseRecordVo();
         record.setOrderNo("SALON-001");
-        when(studentService.listStudentSalonPurchaseRecords(8L)).thenReturn(List.of(record));
+        when(studentService.listStudentSalonPurchaseRecords(8L)).thenReturn(Collections.singletonList(record));
 
         AjaxResult result = controller.salonPurchaseRecords(8L);
 
