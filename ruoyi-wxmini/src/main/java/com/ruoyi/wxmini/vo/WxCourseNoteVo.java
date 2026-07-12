@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
-public class WxCourseReviewVo {
+public class WxCourseNoteVo {
     private Long id;
-    private String orderNo;
     private Long courseId;
+    private String courseName;
     private String content;
-    private String reviewerName;
-    private String reviewerAvatarUrl;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -18,16 +16,12 @@ public class WxCourseReviewVo {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getOrderNo() { return orderNo; }
-    public void setOrderNo(String orderNo) { this.orderNo = orderNo; }
     public Long getCourseId() { return courseId; }
     public void setCourseId(Long courseId) { this.courseId = courseId; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-    public String getReviewerName() { return reviewerName; }
-    public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
-    public String getReviewerAvatarUrl() { return reviewerAvatarUrl; }
-    public void setReviewerAvatarUrl(String reviewerAvatarUrl) { this.reviewerAvatarUrl = reviewerAvatarUrl; }
     public Date getCreateTime() { return createTime; }
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
     public Date getUpdateTime() { return updateTime; }

@@ -17,10 +17,14 @@ import com.ruoyi.system.domain.vo.LecturesListVo;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
+import com.ruoyi.wxmini.bo.WxCourseNoteSaveBo;
+import com.ruoyi.wxmini.bo.WxCourseNoteUpdateBo;
+import com.ruoyi.wxmini.bo.WxCourseReviewCreateBo;
 import com.ruoyi.wxmini.bo.WxCourseReviewSaveBo;
 import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
+import com.ruoyi.wxmini.service.IWxCourseNoteService;
 import com.ruoyi.wxmini.service.IWxCourseReviewService;
 import com.ruoyi.wxmini.service.IWxGrowupPayService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
@@ -28,9 +32,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,6 +74,9 @@ public class WxGrowupController extends BaseController {
 
     @Autowired
     private IWxCourseReviewService wxCourseReviewService;
+
+    @Autowired
+    private IWxCourseNoteService wxCourseNoteService;
 
     /**
      * 获取课程/讲座列表（匿名，附带拼接讲师姓名）
@@ -145,6 +154,26 @@ public class WxGrowupController extends BaseController {
         }
     }
 
+    @ApiOperation("获取课程全部评价（公开）")
+    @Anonymous
+    @GetMapping("/courses/{id}/reviews")
+    public AjaxResult listCourseReviews(@PathVariable("id") Long id) {
+        return success(wxCourseReviewService.listReviews(id));
+    }
+
+    @ApiOperation("发布课程评价（需登录且已报名）")
+    @PostMapping("/courses/{id}/reviews")
+    public AjaxResult saveCourseReview(@PathVariable("id") Long id,
+                                       @RequestBody @Valid WxCourseReviewCreateBo bo) {
+        try {
+            String wxUserId = WxMiniUserContext.getCurrentUserId();
+            return success(wxCourseReviewService.saveReview(wxUserId, id, bo));
+        } catch (Exception e) {
+            logger.error("发布课程评价失败", e);
+            return error(e.getMessage());
+        }
+    }
+
     @ApiOperation("查询当前用户当前订单的课程评价（需登录）")
     @GetMapping("/courses/{id}/reviews/my")
     public AjaxResult myCourseReview(@PathVariable("id") Long id,
@@ -169,6 +198,36 @@ public class WxGrowupController extends BaseController {
             logger.error("保存课程评价失败", e);
             return error(e.getMessage());
         }
+    }
+
+    @ApiOperation("获取当前用户的课程笔记（需登录）")
+    @GetMapping("/notes")
+    public AjaxResult myCourseNotes() {
+        String wxUserId = WxMiniUserContext.getCurrentUserId();
+        return success(wxCourseNoteService.listMyNotes(wxUserId));
+    }
+
+    @ApiOperation("创建当前用户的课程笔记（需登录）")
+    @PostMapping("/notes")
+    public AjaxResult createMyCourseNote(@RequestBody @Valid WxCourseNoteSaveBo bo) {
+        String wxUserId = WxMiniUserContext.getCurrentUserId();
+        return success(wxCourseNoteService.createMyNote(wxUserId, bo));
+    }
+
+    @ApiOperation("编辑当前用户的课程笔记（需登录）")
+    @PutMapping("/notes/{noteId}")
+    public AjaxResult updateMyCourseNote(@PathVariable Long noteId,
+                                         @RequestBody @Valid WxCourseNoteUpdateBo bo) {
+        String wxUserId = WxMiniUserContext.getCurrentUserId();
+        return success(wxCourseNoteService.updateMyNote(wxUserId, noteId, bo));
+    }
+
+    @ApiOperation("删除当前用户的课程笔记（需登录）")
+    @DeleteMapping("/notes/{noteId}")
+    public AjaxResult deleteMyCourseNote(@PathVariable Long noteId) {
+        String wxUserId = WxMiniUserContext.getCurrentUserId();
+        wxCourseNoteService.deleteMyNote(wxUserId, noteId);
+        return success();
     }
 
     /**
