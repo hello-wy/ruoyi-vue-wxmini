@@ -1,11 +1,14 @@
 package com.ruoyi.system.domain.bo;
 
 public class MiniUserQueryBo {
+    private String keyword;
     private String userName;
     private Integer userType;
     private String phone;
     private Integer isStudent;
 
+    public String getKeyword() { return keyword; }
+    public void setKeyword(String keyword) { this.keyword = keyword; }
     public String getUserName() { return userName; }
     public void setUserName(String userName) { this.userName = userName; }
     public Integer getUserType() { return userType; }
