@@ -10,6 +10,8 @@ public class CourseReview extends BaseEntity {
     private String userId;
     private Long courseId;
     private String content;
+    private String reviewerName;
+    private String reviewerAvatarUrl;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -21,4 +23,8 @@ public class CourseReview extends BaseEntity {
     public void setCourseId(Long courseId) { this.courseId = courseId; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
+    public String getReviewerName() { return reviewerName; }
+    public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
+    public String getReviewerAvatarUrl() { return reviewerAvatarUrl; }
+    public void setReviewerAvatarUrl(String reviewerAvatarUrl) { this.reviewerAvatarUrl = reviewerAvatarUrl; }
 }

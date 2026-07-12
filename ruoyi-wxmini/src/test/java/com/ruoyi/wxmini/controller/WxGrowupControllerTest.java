@@ -13,9 +13,11 @@ import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
 import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.service.IWxCourseReviewService;
 import com.ruoyi.wxmini.service.IWxGrowupPayService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.util.WxMiniUserContext;
+import com.ruoyi.wxmini.vo.WxCourseReviewPublicVo;
 import com.ruoyi.wxmini.vo.WxPayParamVo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +61,8 @@ class WxGrowupControllerTest {
     private RedisCache redisCache;
     @Mock
     private IWxGrowupPayService wxGrowupPayService;
+    @Mock
+    private IWxCourseReviewService wxCourseReviewService;
 
     @InjectMocks
     private WxGrowupController controller;
@@ -141,6 +145,18 @@ class WxGrowupControllerTest {
 
         assertEquals(200, result.get(AjaxResult.CODE_TAG));
         assertEquals(enrollment, result.get(AjaxResult.DATA_TAG));
+    }
+
+    @Test
+    void listCourseReviewsShouldReturnPublicReviewList() {
+        WxCourseReviewPublicVo review = new WxCourseReviewPublicVo();
+        review.setContent("很有收获");
+        when(wxCourseReviewService.listReviews(99L)).thenReturn(Collections.singletonList(review));
+
+        AjaxResult result = controller.listCourseReviews(99L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(1, ((java.util.List<?>) result.get(AjaxResult.DATA_TAG)).size());
     }
 
     @Test

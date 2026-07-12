@@ -8,6 +8,8 @@
         <result property="userId" column="user_id"/>
         <result property="courseId" column="course_id"/>
         <result property="content" column="content"/>
+        <result property="reviewerName" column="reviewer_name"/>
+        <result property="reviewerAvatarUrl" column="reviewer_avatar_url"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
     </resultMap>
@@ -20,6 +22,16 @@
     <select id="selectCourseReviewByOrderNo" resultMap="CourseReviewResult">
         <include refid="selectCourseReviewColumns"/>
         where order_no = #{orderNo}
+    </select>
+
+    <select id="selectCourseReviewsByCourseId" resultMap="CourseReviewResult">
+        select cr.id, cr.order_no, cr.user_id, cr.course_id, cr.content, cr.create_time, cr.update_time,
+               coalesce(nullif(ui.user_name, ''), '微信用户') as reviewer_name,
+               ui.avatar_url as reviewer_avatar_url
+        from course_review cr
+        left join user_info ui on ui.user_id = cr.user_id
+        where cr.course_id = #{courseId}
+        order by cr.update_time desc, cr.id desc
     </select>
 
     <insert id="insertCourseReview" parameterType="com.ruoyi.system.domain.CourseReview" useGeneratedKeys="true" keyProperty="id">

@@ -111,6 +111,7 @@
 - `wxmini/growup/courses.md`
 - `wxmini/growup/courses__{id}.md`
 - `wxmini/growup/courses__{id}__enroll.md`
+- `wxmini/growup/courses__{id}__reviews.md`
 - `wxmini/growup/courses__{id}__reviews__my.md`
 - `wxmini/growup/enrollments__list.md`
 - `wxmini/growup/enrollments__total.md`

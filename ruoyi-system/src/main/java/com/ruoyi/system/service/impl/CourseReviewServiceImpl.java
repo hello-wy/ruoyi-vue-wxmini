@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CourseReviewServiceImpl implements ICourseReviewService {
@@ -19,6 +20,11 @@ public class CourseReviewServiceImpl implements ICourseReviewService {
     @Override
     public CourseReview selectCourseReviewByOrderNo(String orderNo) {
         return courseReviewMapper.selectCourseReviewByOrderNo(orderNo);
+    }
+
+    @Override
+    public List<CourseReview> selectCourseReviewsByCourseId(Long courseId) {
+        return courseReviewMapper.selectCourseReviewsByCourseId(courseId);
     }
 
     @Override

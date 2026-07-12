@@ -17,6 +17,7 @@ import com.ruoyi.system.domain.vo.LecturesListVo;
 import com.ruoyi.system.service.ILecturesService;
 import com.ruoyi.system.service.IQuestionnaireService;
 import com.ruoyi.system.service.IStudentEnrollmentService;
+import com.ruoyi.wxmini.bo.WxCourseReviewCreateBo;
 import com.ruoyi.wxmini.bo.WxCourseReviewSaveBo;
 import com.ruoyi.wxmini.bo.WxGrowupCourseEnrollBo;
 import com.ruoyi.wxmini.domain.UserInfo;
@@ -141,6 +142,26 @@ public class WxGrowupController extends BaseController {
             return success(wxGrowupPayService.createCourseOrder(wxUserId, id, bo));
         } catch (Exception e) {
             logger.error("创建成长课程报名支付订单失败", e);
+            return error(e.getMessage());
+        }
+    }
+
+    @ApiOperation("获取课程全部评价（公开）")
+    @Anonymous
+    @GetMapping("/courses/{id}/reviews")
+    public AjaxResult listCourseReviews(@PathVariable("id") Long id) {
+        return success(wxCourseReviewService.listReviews(id));
+    }
+
+    @ApiOperation("发布课程评价（需登录且已报名）")
+    @PostMapping("/courses/{id}/reviews")
+    public AjaxResult saveCourseReview(@PathVariable("id") Long id,
+                                       @RequestBody @Valid WxCourseReviewCreateBo bo) {
+        try {
+            String wxUserId = WxMiniUserContext.getCurrentUserId();
+            return success(wxCourseReviewService.saveReview(wxUserId, id, bo));
+        } catch (Exception e) {
+            logger.error("发布课程评价失败", e);
             return error(e.getMessage());
         }
     }
