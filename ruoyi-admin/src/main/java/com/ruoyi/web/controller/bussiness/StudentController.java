@@ -16,6 +16,7 @@ import com.ruoyi.system.domain.vo.StudentFollowUpRecordVo;
 import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
+import com.ruoyi.system.domain.vo.StudentSalonPurchaseRecordVo;
 import com.ruoyi.system.domain.vo.StudentStaffAssignmentVo;
 import com.ruoyi.system.domain.vo.StudentStaffCandidateVo;
 import com.ruoyi.system.service.IStudentService;
@@ -96,6 +97,15 @@ public class StudentController extends BaseController {
     @GetMapping("/{id}/learning-records")
     public AjaxResult learningRecords(@PathVariable("id") Long id) {
         StudentLearningRecordsVo records = studentService.getStudentLearningRecords(id);
+        return records == null ? error("学员不存在") : success(records);
+    }
+
+    @ApiOperation("查询学员沙龙购买记录")
+    @ApiImplicitParam(name = "id", value = "学员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
+    @PreAuthorize("@ss.hasPermi('system:student:query')")
+    @GetMapping("/{id}/salon-purchase-records")
+    public AjaxResult salonPurchaseRecords(@PathVariable("id") Long id) {
+        List<StudentSalonPurchaseRecordVo> records = studentService.listStudentSalonPurchaseRecords(id);
         return records == null ? error("学员不存在") : success(records);
     }
 

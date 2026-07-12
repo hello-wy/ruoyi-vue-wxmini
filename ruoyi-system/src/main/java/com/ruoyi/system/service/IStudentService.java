@@ -10,6 +10,7 @@ import com.ruoyi.system.domain.vo.StudentFollowUpRecordVo;
 import com.ruoyi.system.domain.vo.StudentLearningRecordsVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
+import com.ruoyi.system.domain.vo.StudentSalonPurchaseRecordVo;
 import com.ruoyi.system.domain.vo.StudentStaffAssignmentVo;
 import com.ruoyi.system.domain.vo.StudentStaffCandidateVo;
 
@@ -26,6 +27,8 @@ public interface IStudentService {
     StudentLearningRecordsVo getStudentLearningRecords(Long id);
 
     List<StudentFollowUpRecordVo> listStudentFollowUpRecords(Long id);
+
+    List<StudentSalonPurchaseRecordVo> listStudentSalonPurchaseRecords(Long id);
 
     StudentFollowUpRecordVo addStudentFollowUpRecord(Long id, StudentFollowUpRecordBo bo, Long operatorId, String operatorName);
 

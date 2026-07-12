@@ -14,6 +14,8 @@ public class StudentFollowUpRecordVo {
 
     private Integer followUpMethod;
     private Integer followUpResult;
+
+    private String title;
     private String content;
     private String formData;
 
@@ -71,6 +73,14 @@ public class StudentFollowUpRecordVo {
 
     public void setFollowUpResult(Integer followUpResult) {
         this.followUpResult = followUpResult;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getContent() {

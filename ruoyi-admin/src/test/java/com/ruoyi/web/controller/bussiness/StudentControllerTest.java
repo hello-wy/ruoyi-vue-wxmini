@@ -8,6 +8,7 @@ import com.ruoyi.system.domain.vo.StudentDetailVo;
 import com.ruoyi.system.domain.vo.StudentEnrollmentSummaryVo;
 import com.ruoyi.system.domain.vo.StudentListVo;
 import com.ruoyi.system.domain.vo.StudentSituationVo;
+import com.ruoyi.system.domain.vo.StudentSalonPurchaseRecordVo;
 import com.ruoyi.system.service.IStudentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,6 +94,20 @@ class StudentControllerTest {
 
         assertEquals(false, Integer.valueOf(200).equals(result.get(AjaxResult.CODE_TAG)));
     }
+
+
+    @Test
+    void salonPurchaseRecordsShouldReturn200WhenStudentExists() {
+        StudentSalonPurchaseRecordVo record = new StudentSalonPurchaseRecordVo();
+        record.setOrderNo("SALON-001");
+        when(studentService.listStudentSalonPurchaseRecords(8L)).thenReturn(List.of(record));
+
+        AjaxResult result = controller.salonPurchaseRecords(8L);
+
+        assertEquals(200, result.get(AjaxResult.CODE_TAG));
+        assertEquals(1, ((List<?>) result.get(AjaxResult.DATA_TAG)).size());
+    }
+
 
     @Test
     void updateSituationShouldReturn200WhenStudentExists() {

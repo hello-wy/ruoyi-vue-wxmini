@@ -135,6 +135,16 @@ public class UserInfoServiceImpl implements IUserInfoService {
     }
 
     @Override
+    public int updateBirthdayById(Long id, Date birthday) {
+        int updated = userInfoMapper.updateBirthdayById(id, birthday);
+        if (updated > 0) {
+            UserInfo userInfo = userInfoMapper.selectUserInfoById(id);
+            redisCache.setCacheObject(getWxUserCacheKey(userInfo.getUserId()), JSON.toJSONString(userInfo));
+        }
+        return updated;
+    }
+
+    @Override
     public void markStudent(String userId) {
         if (userInfoMapper.markStudentByUserId(userId) > 0) {
             reloadUserInfoToCache(userId);

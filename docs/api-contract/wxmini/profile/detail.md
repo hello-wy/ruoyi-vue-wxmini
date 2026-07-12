@@ -38,6 +38,7 @@
     "displayName": "张三",
     "userName": "张三",
     "phone": "13800138000",
+    "birthday": "1992-08-18",
     "realName": "张三",
     "verified": true,
     "isRealnameAuth": 1,
@@ -60,6 +61,7 @@
 - `isRealnameAuth` 取自 `user_info.is_realname_auth`，`1` 表示已完成实名认证，`0` 或空表示未完成。
 - `displayName` 优先取 `user_info.real_name`；没有实名姓名时返回手机号脱敏值（前 3 位 + `****` + 后 4 位），不再回退到 `user_name`。
 - `realName` 取自 `user_info.real_name`，即实名认证写入的真实姓名。
+- `birthday` 为可空生日字段，格式 `yyyy-MM-dd`。
 - `switchableUserTypes` 由服务端动态计算。
 - 默认始终返回 `0=家长`、`1=学生`、`3=阿姨`。
 - 是否包含 `2=商家` 取决于当前用户是否满足商家白名单条件：

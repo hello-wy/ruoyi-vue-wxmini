@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.service;
 
 import com.ruoyi.wxmini.domain.UserInfo;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,4 +52,6 @@ public interface IUserInfoService {
     String getOrCreateInviteCode(String userId);
 
     void markStudent(String userId);
+
+    int updateBirthdayById(Long id, Date birthday);
 }

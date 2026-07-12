@@ -2,7 +2,10 @@ package com.ruoyi.wxmini.mapper;
 
 import com.ruoyi.wxmini.domain.UserInfo;
 
+import java.util.Date;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 用户信息Mapper接口
@@ -66,4 +69,6 @@ public interface UserInfoMapper {
     UserInfo selectUserInfoByInviteCode(String inviteCode);
 
     int markStudentByUserId(String userId);
+
+    int updateBirthdayById(@Param("id") Long id, @Param("birthday") Date birthday);
 }

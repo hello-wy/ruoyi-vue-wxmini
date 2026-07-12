@@ -31,6 +31,7 @@
   "realName": "张三",
   "nickName": "小张",
   "gender": 1,
+  "birthday": "1992-08-18",
   "age": 28,
   "companyName": "智育傢",
   "companyAddress": "南京市鼓楼区",
@@ -57,6 +58,7 @@
 - 未登录或 token 无效时，请求会失败。
 - 已完成实名认证的用户，姓名以实名认证写入的 `user_info.real_name` 为准，资料编辑不会修改实名姓名。
 - 未实名认证时，资料编辑保存的姓名不作为实名认证状态或实名展示依据。
+- `birthday` 使用 `yyyy-MM-dd` 格式；请求显式传 `null` 可清空已保存的生日。
 
 ## 实现来源文件
 

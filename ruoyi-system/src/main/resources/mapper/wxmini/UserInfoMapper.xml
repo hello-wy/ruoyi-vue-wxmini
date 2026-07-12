@@ -10,6 +10,7 @@
         <result property="userName" column="user_name"/>
         <result property="userType" column="user_type"/>
         <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
         <result property="openId" column="open_id"/>
         <result property="unionId" column="union_id"/>
         <result property="avatarUrl" column="avatar_url"/>
@@ -28,6 +29,7 @@
                user_name,
                user_type,
                phone,
+               birthday,
                open_id,
                union_id,
                avatar_url,
@@ -145,6 +147,13 @@
         <include refid="selectUserInfoVo"/>
         where invite_code = #{inviteCode}
     </select>
+
+    <update id="updateBirthdayById">
+        update user_info
+        set birthday = #{birthday},
+            update_time = now()
+        where id = #{id}
+    </update>
 
     <update id="markStudentByUserId">
         update user_info

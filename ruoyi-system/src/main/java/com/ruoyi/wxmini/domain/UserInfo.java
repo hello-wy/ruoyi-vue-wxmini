@@ -2,6 +2,9 @@ package com.ruoyi.wxmini.domain;
 
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
 
 /**
  * 用户信息对象 user_info
@@ -40,6 +43,9 @@ public class UserInfo extends BaseEntity {
      */
     @Excel(name = "手机号")
     private String phone;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
 
     /**
      * 微信用户唯一标识
@@ -122,6 +128,14 @@ public class UserInfo extends BaseEntity {
 
     public String getPhone() {
         return phone;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public void setOpenId(String openId) {

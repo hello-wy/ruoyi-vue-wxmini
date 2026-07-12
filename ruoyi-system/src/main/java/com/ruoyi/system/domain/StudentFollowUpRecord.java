@@ -35,6 +35,8 @@ public class StudentFollowUpRecord extends BaseEntity {
     @Excel(name = "回访结果")
     private Integer followUpResult;
 
+    private String title;
+
     /** 回访内容 */
     private String content;
 
@@ -93,6 +95,14 @@ public class StudentFollowUpRecord extends BaseEntity {
 
     public void setFollowUpResult(Integer followUpResult) {
         this.followUpResult = followUpResult;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getContent() {

@@ -10,6 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="followUpTime" column="follow_up_time"/>
         <result property="followUpMethod" column="follow_up_method"/>
         <result property="followUpResult" column="follow_up_result"/>
+        <result property="title" column="title"/>
         <result property="content" column="content"/>
         <result property="formData" column="form_data"/>
         <result property="nextFollowUpTime" column="next_follow_up_time"/>
@@ -28,6 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                follow_up_time,
                follow_up_method,
                follow_up_result,
+               title,
                content,
                cast(form_data as char) as form_data,
                next_follow_up_time,
@@ -62,6 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="followUpTime != null">follow_up_time,</if>
             <if test="followUpMethod != null">follow_up_method,</if>
             <if test="followUpResult != null">follow_up_result,</if>
+            <if test="title != null">title,</if>
             <if test="content != null">content,</if>
             <if test="formData != null">form_data,</if>
             <if test="nextFollowUpTime != null">next_follow_up_time,</if>
@@ -79,6 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="followUpTime != null">#{followUpTime},</if>
             <if test="followUpMethod != null">#{followUpMethod},</if>
             <if test="followUpResult != null">#{followUpResult},</if>
+            <if test="title != null">#{title},</if>
             <if test="content != null">#{content},</if>
             <if test="formData != null">#{formData},</if>
             <if test="nextFollowUpTime != null">#{nextFollowUpTime},</if>

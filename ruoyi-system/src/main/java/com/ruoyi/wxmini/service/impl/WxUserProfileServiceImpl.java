@@ -71,6 +71,9 @@ public class WxUserProfileServiceImpl implements IWxUserProfileService {
             userInfo.setPhone(bo.getPhone());
         }
         userInfoService.updateUserInfo(userInfo);
+        if (bo.isBirthdayProvided()) {
+            userInfoService.updateBirthdayById(userInfo.getId(), bo.getBirthday());
+        }
 
         LambdaQueryWrapper<WxUserProfile> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(WxUserProfile::getUserInfoId, userInfo.getId());

@@ -9,6 +9,7 @@
         <result property="displayName" column="display_name"/>
         <result property="userName" column="user_name"/>
         <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
         <result property="realName" column="real_name"/>
         <result property="nickName" column="nick_name"/>
         <result property="gender" column="gender"/>
@@ -50,6 +51,7 @@
         <result property="displayName" column="display_name"/>
         <result property="userName" column="user_name"/>
         <result property="phone" column="phone"/>
+        <result property="birthday" column="birthday"/>
         <result property="realName" column="real_name"/>
         <result property="nickName" column="nick_name"/>
         <result property="gender" column="gender"/>
@@ -129,6 +131,7 @@
                ui.user_name,
                ui.user_type,
                ui.phone,
+               ui.birthday,
                ui.is_realname_auth,
                ui.real_name,
                up.nick_name,
@@ -217,6 +220,7 @@
                ui.user_id,
                ui.user_name,
                ui.phone,
+               ui.birthday,
                ui.user_type,
                up.real_name,
                up.nick_name,

@@ -1,5 +1,8 @@
 package com.ruoyi.wxmini.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
 import java.util.List;
 
 public class WxUserProfileVo {
@@ -11,6 +14,9 @@ public class WxUserProfileVo {
     private String userName;
 
     private String phone;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
 
     private String realName;
 
@@ -80,6 +86,14 @@ public class WxUserProfileVo {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getRealName() {

@@ -1,10 +1,20 @@
 package com.ruoyi.wxmini.bo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
+import java.util.Date;
+
 public class WxUserProfileUpdateBo {
 
     private String userName;
 
     private String phone;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
+
+    private boolean birthdayProvided;
 
     private String realName;
 
@@ -44,6 +54,20 @@ public class WxUserProfileUpdateBo {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    @JsonSetter("birthday")
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+        this.birthdayProvided = true;
+    }
+
+    public boolean isBirthdayProvided() {
+        return birthdayProvided;
     }
 
     public String getRealName() {

@@ -1,5 +1,9 @@
 package com.ruoyi.system.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
+
 public class StudentDetailVo {
 
     private Long id;
@@ -7,6 +11,9 @@ public class StudentDetailVo {
     private String displayName;
     private String userName;
     private String phone;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private Date birthday;
     private String realName;
     private String nickName;
     private Integer gender;
@@ -59,6 +66,14 @@ public class StudentDetailVo {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getRealName() {

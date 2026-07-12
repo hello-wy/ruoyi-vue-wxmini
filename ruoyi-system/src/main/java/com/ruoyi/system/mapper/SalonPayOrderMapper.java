@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import com.ruoyi.system.domain.SalonPayOrder;
 import com.ruoyi.system.domain.vo.SalonRefundOrderVo;
+import com.ruoyi.system.domain.vo.StudentSalonPurchaseRecordVo;
 
 public interface SalonPayOrderMapper {
     SalonPayOrder selectSalonPayOrderByOrderNo(String orderNo);
@@ -19,4 +20,6 @@ public interface SalonPayOrderMapper {
     int updateSalonPayOrder(SalonPayOrder order);
 
     List<SalonRefundOrderVo> selectPaidSalonOrders(@Param("salonId") Long salonId, @Param("keyword") String keyword);
+
+    List<StudentSalonPurchaseRecordVo> selectStudentSalonPurchaseRecords(@Param("studentId") Long studentId);
 }
