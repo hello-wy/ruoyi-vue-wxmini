@@ -39,6 +39,14 @@ public interface ILecturesService
     List<LecturesListVo> selectLecturesListVo(Lectures lectures);
 
     /**
+     * 查询本月剩余时间内的讲座，speaker 字段解析为拼接的讲师姓名字符串。
+     *
+     * @param lectures 查询条件
+     * @return 本月剩余时间内的讲座列表 VO（含 speakerNames 字段）
+     */
+    List<LecturesListVo> selectRemainingMonthLecturesListVo(Lectures lectures);
+
+    /**
      * 查询讲座详情，speaker 字段解析为讲师 id/name/avatarUrl 对象列表
      *
      * @param id 讲座主键

@@ -2,7 +2,7 @@
 
 ## 用途
 
-- `GET`：获取课程/讲座列表（公开，附带讲师姓名）。
+- `GET`：获取从当前时刻至本月结束前的课程/讲座列表（公开，附带讲师姓名）。
 
 ## 鉴权
 
@@ -23,6 +23,7 @@
 - `pageNum`：若依标准分页页码。
 - `pageSize`：若依标准分页每页条数。
 - 其余筛选字段沿用 `Lectures` 对象。
+- 后端仅返回 `time` 从服务器当前时刻起（含）至下月 1 日 00:00（不含）的记录；当天已开始的会议不会返回。
 
 ### Body 示例
 
@@ -59,8 +60,11 @@
 
 ### 失败场景或特殊说明
 
-- 以当前 controller/service 的实际校验结果为准。
+- 课程时间由后端按服务器当前时刻校验，已开始的会议不会返回，前端不再按当前时间二次过滤。
+- 结果按开讲时间升序返回。
 
 ## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxGrowupController.java`
+- `ruoyi-system/src/main/java/com/ruoyi/system/service/impl/LecturesServiceImpl.java`
+- `ruoyi-system/src/main/resources/mapper/system/LecturesMapper.xml`

@@ -5,19 +5,30 @@ import com.ruoyi.system.mapper.LecturesMapper;
 import com.ruoyi.system.mapper.QuestionnaireMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LecturesServiceImplTest {
+
+    private static final long CLOCK_TOLERANCE_SECONDS = 1L;
 
     @Mock
     private LecturesMapper lecturesMapper;
@@ -27,6 +38,34 @@ class LecturesServiceImplTest {
 
     @InjectMocks
     private LecturesServiceImpl service;
+
+    @Test
+    void selectRemainingMonthLecturesListVoPassesCurrentTimeAndNextMonthStart() {
+        Lectures filter = new Lectures();
+        when(lecturesMapper.selectRemainingMonthLecturesListVo(
+                same(filter), any(Date.class),
+                any(Date.class)))
+                .thenReturn(Collections.emptyList());
+
+        Instant beforeCall = Instant.now();
+        service.selectRemainingMonthLecturesListVo(filter);
+        Instant afterCall = Instant.now();
+
+        ArgumentCaptor<Date> startCaptor = ArgumentCaptor.forClass(Date.class);
+        ArgumentCaptor<Date> endCaptor = ArgumentCaptor.forClass(Date.class);
+        verify(lecturesMapper).selectRemainingMonthLecturesListVo(
+                same(filter), startCaptor.capture(), endCaptor.capture());
+
+        Instant actualStart = startCaptor.getValue().toInstant();
+        LocalDate expectedCurrentDate = LocalDate.now();
+        LocalDate actualStartDate = actualStart.atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate actualEnd = endCaptor.getValue().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+        assertFalse(actualStart.isBefore(beforeCall.minusSeconds(CLOCK_TOLERANCE_SECONDS)));
+        assertFalse(actualStart.isAfter(afterCall.plusSeconds(CLOCK_TOLERANCE_SECONDS)));
+        assertEquals(expectedCurrentDate, actualStartDate);
+        assertEquals(expectedCurrentDate.withDayOfMonth(1).plusMonths(1), actualEnd);
+    }
 
     @Test
     void selectLecturesTemplateListReturnsExistingCourseConfiguration() {

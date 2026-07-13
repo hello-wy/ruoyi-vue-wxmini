@@ -2,7 +2,6 @@ package com.ruoyi.wxmini.controller;
 
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
-import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.system.domain.Questionnaire;
 import com.ruoyi.system.domain.StudentEnrollment;
 import com.ruoyi.system.domain.vo.EnrollmentWithLectureVo;
@@ -58,8 +57,6 @@ class WxGrowupControllerTest {
     @Mock
     private IQuestionnaireService questionnaireService;
     @Mock
-    private RedisCache redisCache;
-    @Mock
     private IWxGrowupPayService wxGrowupPayService;
     @Mock
     private IWxCourseReviewService wxCourseReviewService;
@@ -77,8 +74,7 @@ class WxGrowupControllerTest {
         LecturesListVo lecture = new LecturesListVo();
         lecture.setId(1L);
         lecture.setCoverId(9L);
-        when(redisCache.getCacheObject(any())).thenReturn(null);
-        when(lecturesService.selectLecturesListVo(any())).thenReturn(Collections.singletonList(lecture));
+        when(lecturesService.selectRemainingMonthLecturesListVo(any())).thenReturn(Collections.singletonList(lecture));
         when(questionnaireService.selectRecentQuestionnaireList(1L)).thenReturn(Collections.singletonList(new Questionnaire()));
 
         TableDataInfoVo<LecturesListVo> result = controller.getCourseList(null);

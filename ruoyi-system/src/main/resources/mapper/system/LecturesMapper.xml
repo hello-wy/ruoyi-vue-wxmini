@@ -203,6 +203,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         GROUP BY l.id
     </select>
 
+    <!-- 查询本月剩余时间讲座列表 VO，按开讲时间升序返回 -->
+    <select id="selectRemainingMonthLecturesListVo" resultMap="LecturesListVoResult">
+        SELECT
+        l.id, l.time, l.end_date, l.name, l.speaker,
+        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit,
+        l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date,
+        GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
+        FROM lectures l
+        LEFT JOIN lecturer_profile p ON FIND_IN_SET(p.id, l.speaker)
+        <where>
+            l.time &gt;= #{currentTime}
+            AND l.time &lt; #{nextMonthStart}
+            <if test="lectures.time != null"> and l.time = #{lectures.time}</if>
+            <if test="lectures.name != null and lectures.name != ''">
+                and l.name like concat('%', #{lectures.name}, '%')
+            </if>
+            <if test="lectures.location != null and lectures.location != ''">
+                and l.location = #{lectures.location}
+            </if>
+        </where>
+        GROUP BY l.id
+        ORDER BY l.time ASC
+    </select>
+
     <!-- 查询讲座详情 VO：LEFT JOIN lecturer_profile 获取每位讲师详细信息 -->
     <select id="selectLecturesDetailVoById" parameterType="Long" resultMap="LecturesDetailVoResult">
         SELECT

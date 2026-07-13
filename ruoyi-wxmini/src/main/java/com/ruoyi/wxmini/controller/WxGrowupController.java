@@ -1,13 +1,9 @@
 package com.ruoyi.wxmini.controller;
 
-
-import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.annotation.Anonymous;
-import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
-import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.domain.Questionnaire;
 import com.ruoyi.system.domain.StudentEnrollment;
@@ -67,9 +63,6 @@ public class WxGrowupController extends BaseController {
     private IQuestionnaireService questionnaireService;
 
     @Autowired
-    private RedisCache redisCache;
-
-    @Autowired
     private IWxGrowupPayService wxGrowupPayService;
 
     @Autowired
@@ -79,43 +72,20 @@ public class WxGrowupController extends BaseController {
     private IWxCourseNoteService wxCourseNoteService;
 
     /**
-     * 获取课程/讲座列表（匿名，附带拼接讲师姓名）
+     * 获取本月剩余时间课程/讲座列表（匿名，附带拼接讲师姓名）
      */
-    @ApiOperation("获取课程/讲座列表（公开，附带讲师姓名）")
+    @ApiOperation("获取本月剩余时间课程/讲座列表（公开，附带讲师姓名）")
     @Anonymous
     @GetMapping("/courses")
     public TableDataInfoVo<LecturesListVo> getCourseList(Lectures lectures) {
 
-        String cacheJson = redisCache.getCacheObject(Constants.LECTURE_KEY_PREFIX);
-        if (cacheJson != null) {
-            List<LecturesListVo> cacheList = parseCoursesCache(cacheJson);
-            if (cacheList != null) {
-                return getDataTable(cacheList);
-            }
-            logger.warn("课程列表缓存解析失败，回源数据库，key={}", Constants.LECTURE_KEY_PREFIX);
-        }
-
         startPage();
-        List<LecturesListVo> list = lecturesService.selectLecturesListVo(lectures);
+        List<LecturesListVo> list = lecturesService.selectRemainingMonthLecturesListVo(lectures);
         if (!list.isEmpty()) {
             List<Questionnaire> questionnaires = questionnaireService.selectRecentQuestionnaireList(list.get(0).getId());
             list.get(0).setQuestionnaire(questionnaires);
         }
-//        redisCache.setCacheObject(Constants.LECTURE_KEY_PREFIX, JSON.toJSONString(list), Constants.LECTURE_EXPIRATION, TimeUnit.SECONDS);
         return getDataTable(list);
-    }
-
-    private List<LecturesListVo> parseCoursesCache(String cacheJson) {
-        try {
-            return JSON.parseArray(cacheJson, LecturesListVo.class);
-        } catch (Exception ignored) {
-            try {
-                String rawJsonArray = JSON.parseObject(cacheJson, String.class);
-                return JSON.parseArray(rawJsonArray, LecturesListVo.class);
-            } catch (Exception ex) {
-                return null;
-            }
-        }
     }
 
     /**
