@@ -2,7 +2,7 @@
 -- 执行环境：生产 zhiyujia
 -- 说明：支持已报名用户按订单发布/更新课程评价，并按课程公开查询。
 
-CREATE TABLE IF NOT EXISTS `course_review` (
+CREATE TABLE `course_review` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `order_no` varchar(64) NOT NULL COMMENT '课程报名订单号',
   `user_id` varchar(64) NOT NULL COMMENT '小程序用户 UUID',
