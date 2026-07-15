@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -56,7 +57,10 @@ public class StudentAccessServiceImpl implements IStudentAccessService {
         scope.setAdminLevel(currentUser.getAdminLevel());
         scope.setBindPermission(SecurityUtils.hasPermi(STUDENT_BIND_PERMISSION));
 
+        boolean superAdminRole = currentUser.getRoles() != null && currentUser.getRoles().stream()
+                .anyMatch(role -> role != null && Constants.SUPER_ADMIN.equals(role.getRoleKey()));
         boolean fullAccess = SysUser.isAdmin(currentUser.getUserId())
+                || superAdminRole
                 || ADMIN_LEVEL_NATIONAL_MANAGER.equals(currentUser.getAdminLevel());
         scope.setFullAccess(fullAccess);
         scope.setEmployeeAccess(ADMIN_LEVEL_EMPLOYEE.equals(currentUser.getAdminLevel()));
