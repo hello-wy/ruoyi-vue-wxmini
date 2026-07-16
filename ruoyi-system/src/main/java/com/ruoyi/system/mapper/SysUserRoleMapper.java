@@ -19,6 +19,10 @@ public interface SysUserRoleMapper
      */
     public int deleteUserRoleByUserId(Long userId);
 
+    /** Delete ordinary assignments while preserving permission-management roles. */
+    public int deleteUserRolesExceptManaged(@Param("userId") Long userId,
+            @Param("managedRoleKeyPrefix") String managedRoleKeyPrefix);
+
     /**
      * 批量删除用户和角色关联
      * 
@@ -35,6 +39,12 @@ public interface SysUserRoleMapper
      */
     public int countUserRoleByRoleId(Long roleId);
 
+    /** Count every link for a managed role, including duplicate rows. */
+    public int countLinksByRoleId(Long roleId);
+
+    /** Count exact owner links so duplicate rows are detectable. */
+    public int countLinksByUserAndRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
+
     /**
      * 批量新增用户角色信息
      * 
@@ -42,6 +52,9 @@ public interface SysUserRoleMapper
      * @return 结果
      */
     public int batchUserRole(List<SysUserRole> userRoleList);
+
+    /** Insert a user-role link without duplicating an existing link. */
+    public int insertUserRoleIfAbsent(SysUserRole userRole);
 
     /**
      * 删除用户和角色关联信息

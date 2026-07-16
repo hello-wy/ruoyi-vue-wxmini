@@ -11,6 +11,11 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  */
 public interface SysUserMapper
 {
+    /** Users visible in permission management. */
+    public List<SysUser> selectPermissionManageableUsers(String keyword);
+
+    /** Lock a target user row while creating its managed role. */
+    public Long lockUserById(Long userId);
     /**
      * 根据条件分页查询用户列表
      * 

@@ -196,6 +196,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/allocatedList")
     public TableDataInfoVo<SysUser> allocatedList(SysUser user)
     {
+        roleService.checkRoleAllowed(new SysRole(user.getRoleId()));
         startPage();
         List<SysUser> list = userService.selectAllocatedList(user);
         return getDataTable(list);
@@ -208,6 +209,7 @@ public class SysRoleController extends BaseController
     @GetMapping("/authUser/unallocatedList")
     public TableDataInfoVo<SysUser> unallocatedList(SysUser user)
     {
+        roleService.checkRoleAllowed(new SysRole(user.getRoleId()));
         startPage();
         List<SysUser> list = userService.selectUnallocatedList(user);
         return getDataTable(list);
@@ -254,6 +256,7 @@ public class SysRoleController extends BaseController
     @GetMapping(value = "/deptTree/{roleId}")
     public AjaxResult deptTree(@PathVariable("roleId") Long roleId)
     {
+        roleService.checkRoleAllowed(new SysRole(roleId));
         AjaxResult ajax = AjaxResult.success();
         ajax.put("checkedKeys", deptService.selectDeptListByRoleId(roleId));
         ajax.put("depts", deptService.selectDeptTreeList(new SysDept()));

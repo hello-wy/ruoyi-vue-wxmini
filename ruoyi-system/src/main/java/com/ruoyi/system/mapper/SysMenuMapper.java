@@ -50,6 +50,12 @@ public interface SysMenuMapper
      */
     public List<String> selectMenuPermsByUserId(Long userId);
 
+    /** Active permission-bearing menu catalog. */
+    public List<SysMenu> selectActivePermissionCatalog();
+
+    /** Active catalog entries effectively owned by a user. */
+    public List<SysMenu> selectActivePermissionCatalogByUserId(Long userId);
+
     /**
      * 根据用户ID查询菜单
      *

@@ -47,6 +47,8 @@ import com.ruoyi.system.service.ISysUserService;
 public class SysUserController extends BaseController
 {
     private static final String PASSWORD_ILLEGAL_CHARS = "<>\"'\\|";
+    private static final String MANAGED_ROLE_KEY_PREFIX = "permission_user_";
+    private static final String NATIONAL_MANAGER = "national_general_manager";
 
     @Autowired
     private ISysUserService userService;
@@ -118,9 +120,10 @@ public class SysUserController extends BaseController
             SysUser sysUser = userService.selectUserById(userId);
             ajax.put(AjaxResult.DATA_TAG, sysUser);
             ajax.put("postIds", postService.selectPostListByUserId(userId));
-            ajax.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
+            ajax.put("roleIds", sysUser.getRoles().stream().filter(r -> !isManagedRole(r))
+                    .map(SysRole::getRoleId).collect(Collectors.toList()));
         }
-        List<SysRole> roles = roleService.selectRoleAll();
+        List<SysRole> roles = roleService.selectRoleAll().stream().filter(r -> !isManagedRole(r)).collect(Collectors.toList());
         ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
         ajax.put("posts", postService.selectPostAll());
         return ajax;
@@ -176,6 +179,12 @@ public class SysUserController extends BaseController
         applyPhoneLoginName(user);
         validateAdminUser(user);
         BeanValidators.validateWithException(validator, user);
+        SysUser persistedUser = userService.selectUserById(user.getUserId());
+        if (persistedUser != null && !NATIONAL_MANAGER.equals(persistedUser.getAdminLevel())
+                && NATIONAL_MANAGER.equals(user.getAdminLevel()) && !SysUser.isAdmin(getUserId()))
+        {
+            throw new ServiceException("只有超级管理员可以授予全国总经理层级");
+        }
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
         deptService.checkDeptDataScope(user.getDeptId());
@@ -251,7 +260,8 @@ public class SysUserController extends BaseController
     {
         AjaxResult ajax = AjaxResult.success();
         SysUser user = userService.selectUserById(userId);
-        List<SysRole> roles = roleService.selectRolesByUserId(userId);
+        List<SysRole> roles = roleService.selectRolesByUserId(userId).stream()
+                .filter(r -> !isManagedRole(r)).collect(Collectors.toList());
         ajax.put("user", user);
         ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
         return ajax;
@@ -304,6 +314,11 @@ public class SysUserController extends BaseController
         {
             throw new ServiceException("管理员层级不能为空");
         }
+    }
+
+    private boolean isManagedRole(SysRole role)
+    {
+        return role.getRoleKey() != null && role.getRoleKey().startsWith(MANAGED_ROLE_KEY_PREFIX);
     }
 
     private String validateLoginPassword(String password)

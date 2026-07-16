@@ -13,7 +13,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		delete from sys_user_role where user_id=#{userId}
 	</delete>
 	
-	<select id="countUserRoleByRoleId" resultType="Integer">
+	<delete id="deleteUserRolesExceptManaged">
+		delete ur from sys_user_role ur
+		left join sys_role r on r.role_id = ur.role_id
+		where ur.user_id = #{userId}
+		  and (r.role_id is null or r.role_key is null
+		       or r.role_key != concat(#{managedRoleKeyPrefix}, #{userId}))
+	</delete>
+
+		<select id="countLinksByRoleId" parameterType="Long" resultType="Integer">
+			select count(1) from sys_user_role where role_id = #{roleId}
+		</select>
+
+		<select id="countLinksByUserAndRole" resultType="Integer">
+			select count(1) from sys_user_role where user_id = #{userId} and role_id = #{roleId}
+		</select>
+
+		<select id="countUserRoleByRoleId" resultType="Integer">
 	    select count(1) from sys_user_role where role_id=#{roleId}  
 	</select>
 	
@@ -24,7 +40,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach> 
  	</delete>
 	
-	<insert id="batchUserRole">
+	<insert id="insertUserRoleIfAbsent" parameterType="SysUserRole">
+			insert ignore into sys_user_role(user_id, role_id) values(#{userId}, #{roleId})
+		</insert>
+
+		<insert id="batchUserRole">
 		insert into sys_user_role(user_id, role_id) values
 		<foreach item="item" index="index" collection="list" separator=",">
 			(#{item.userId},#{item.roleId})

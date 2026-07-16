@@ -293,7 +293,7 @@ public class SysUserServiceImpl implements ISysUserService
     {
         Long userId = user.getUserId();
         // 删除用户与角色关联
-        userRoleMapper.deleteUserRoleByUserId(userId);
+        userRoleMapper.deleteUserRolesExceptManaged(userId, PermissionManagementServiceImpl.MANAGED_ROLE_KEY_PREFIX);
         // 新增用户与角色管理
         insertUserRole(user);
         // 删除用户与岗位关联
@@ -313,7 +313,7 @@ public class SysUserServiceImpl implements ISysUserService
     @Transactional
     public void insertUserAuth(Long userId, Long[] roleIds)
     {
-        userRoleMapper.deleteUserRoleByUserId(userId);
+        userRoleMapper.deleteUserRolesExceptManaged(userId, PermissionManagementServiceImpl.MANAGED_ROLE_KEY_PREFIX);
         insertUserRole(userId, roleIds);
     }
 
@@ -426,6 +426,12 @@ public class SysUserServiceImpl implements ISysUserService
             List<SysUserRole> list = new ArrayList<SysUserRole>(roleIds.length);
             for (Long roleId : roleIds)
             {
+                SysRole role = roleMapper.selectRoleById(roleId);
+                if (role != null && role.getRoleKey() != null
+                        && role.getRoleKey().startsWith(PermissionManagementServiceImpl.MANAGED_ROLE_KEY_PREFIX))
+                {
+                    throw new ServiceException("权限管理专用角色不能通过普通用户授权接口分配");
+                }
                 SysUserRole ur = new SysUserRole();
                 ur.setUserId(userId);
                 ur.setRoleId(roleId);

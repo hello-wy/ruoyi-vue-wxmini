@@ -33,6 +33,7 @@ import com.ruoyi.system.service.ISysRoleService;
 @Service
 public class SysRoleServiceImpl implements ISysRoleService
 {
+    private static final String MANAGED_ROLE_KEY_PREFIX = "permission_user_";
     @Autowired
     private SysRoleMapper roleMapper;
 
@@ -136,7 +137,12 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public SysRole selectRoleById(Long roleId)
     {
-        return roleMapper.selectRoleById(roleId);
+        SysRole role = roleMapper.selectRoleById(roleId);
+        if (isManagedRole(role))
+        {
+            throw new ServiceException("权限管理专用角色不允许在角色管理中查看");
+        }
+        return role;
     }
 
     /**
@@ -163,9 +169,23 @@ public class SysRoleServiceImpl implements ISysRoleService
      * @param role 角色信息
      * @return 结果
      */
+    private boolean isManagedRole(SysRole role)
+    {
+        return role != null && isReservedManagedRoleKey(role.getRoleKey());
+    }
+
+    private boolean isReservedManagedRoleKey(String roleKey)
+    {
+        return roleKey != null && roleKey.startsWith(MANAGED_ROLE_KEY_PREFIX);
+    }
+
     @Override
     public boolean checkRoleKeyUnique(SysRole role)
     {
+        if (isManagedRole(role))
+        {
+            return UserConstants.NOT_UNIQUE;
+        }
         Long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
         SysRole info = roleMapper.checkRoleKeyUnique(role.getRoleKey());
         if (StringUtils.isNotNull(info) && info.getRoleId().longValue() != roleId.longValue())
@@ -183,6 +203,11 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public void checkRoleAllowed(SysRole role)
     {
+        SysRole persisted = StringUtils.isNotNull(role.getRoleId()) ? roleMapper.selectRoleById(role.getRoleId()) : null;
+        if ((persisted != null && isManagedRole(persisted)) || isManagedRole(role))
+        {
+            throw new ServiceException("权限管理专用角色不允许在角色管理中操作");
+        }
         if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin())
         {
             throw new ServiceException("不允许操作超级管理员角色");
@@ -234,6 +259,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Transactional
     public int insertRole(SysRole role)
     {
+        checkRoleAllowed(role);
         // 新增角色信息
         roleMapper.insertRole(role);
         return insertRoleMenu(role);
@@ -249,6 +275,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Transactional
     public int updateRole(SysRole role)
     {
+        checkRoleAllowed(role);
         // 修改角色信息
         roleMapper.updateRole(role);
         // 删除角色与菜单关联
@@ -265,6 +292,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public int updateRoleStatus(SysRole role)
     {
+        checkRoleAllowed(role);
         return roleMapper.updateRole(role);
     }
 
@@ -278,6 +306,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Transactional
     public int authDataScope(SysRole role)
     {
+        checkRoleAllowed(role);
         // 修改角色信息
         roleMapper.updateRole(role);
         // 删除角色与部门关联
@@ -387,6 +416,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public int deleteAuthUser(SysUserRole userRole)
     {
+        checkRoleAllowed(new SysRole(userRole.getRoleId()));
         return userRoleMapper.deleteUserRoleInfo(userRole);
     }
 
@@ -400,6 +430,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public int deleteAuthUsers(Long roleId, Long[] userIds)
     {
+        checkRoleAllowed(new SysRole(roleId));
         return userRoleMapper.deleteUserRoleInfos(roleId, userIds);
     }
 
@@ -413,6 +444,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     @Override
     public int insertAuthUsers(Long roleId, Long[] userIds)
     {
+        checkRoleAllowed(new SysRole(roleId));
         // 新增用户与角色管理
         List<SysUserRole> list = new ArrayList<SysUserRole>();
         for (Long userId : userIds)

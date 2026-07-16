@@ -73,6 +73,12 @@ public interface SysRoleMapper
      */
     public SysRole checkRoleKeyUnique(String roleKey);
 
+    /** Locate all managed-role rows by exact stable key so duplicates are detectable. */
+    public List<SysRole> selectRolesByRoleKey(String roleKey);
+
+    /** Locate all reserved managed-role keys linked to a user. */
+    public List<SysRole> selectManagedRolesByUserId(Long userId);
+
     /**
      * 修改角色信息
      * 

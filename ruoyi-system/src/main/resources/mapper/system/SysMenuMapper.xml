@@ -119,7 +119,27 @@
 		where m.status = '0' and rm.role_id = #{roleId}
 	</select>
 	
-	<select id="selectMenuById" parameterType="Long" resultMap="SysMenuResult">
+	<select id="selectActivePermissionCatalog" resultMap="SysMenuResult">
+			select m.menu_id, m.menu_name, m.parent_id, m.order_num, m.menu_type, m.status,
+			       m.visible, m.perms, m.remark
+			from sys_menu m
+			where m.status = '0' and m.perms is not null and m.perms != ''
+			order by m.parent_id, m.order_num, m.menu_id
+		</select>
+
+		<select id="selectActivePermissionCatalogByUserId" parameterType="Long" resultMap="SysMenuResult">
+			select distinct m.menu_id, m.menu_name, m.parent_id, m.order_num, m.menu_type, m.status,
+			       m.visible, m.perms, m.remark
+			from sys_menu m
+			inner join sys_role_menu rm on rm.menu_id = m.menu_id
+			inner join sys_user_role ur on ur.role_id = rm.role_id
+			inner join sys_role r on r.role_id = ur.role_id
+			where ur.user_id = #{userId} and m.status = '0' and r.status = '0'
+			  and r.del_flag = '0' and m.perms is not null and m.perms != ''
+			order by m.parent_id, m.order_num, m.menu_id
+		</select>
+
+		<select id="selectMenuById" parameterType="Long" resultMap="SysMenuResult">
 		<include refid="selectMenuVo"/>
 		where menu_id = #{menuId}
 	</select>
