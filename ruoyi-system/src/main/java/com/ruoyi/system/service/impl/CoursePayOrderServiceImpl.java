@@ -6,6 +6,7 @@ import com.ruoyi.system.domain.CoursePayOrder;
 import com.ruoyi.system.domain.vo.CourseRefundOrderVo;
 import com.ruoyi.system.domain.vo.CourseScanSignInVo;
 import com.ruoyi.system.mapper.CoursePayOrderMapper;
+import com.ruoyi.system.service.ICourseCashbackService;
 import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
     private CoursePayOrderMapper coursePayOrderMapper;
     @Autowired
     private IUserInfoService userInfoService;
+    @Autowired
+    private ICourseCashbackService courseCashbackService;
 
     @Override
     public CoursePayOrder selectCoursePayOrderByOrderNo(String orderNo) {
@@ -62,6 +65,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         CoursePayOrder order = requireOrder(orderNo);
         if (isPaidOrAfter(order.getStatus())) {
             userInfoService.markStudent(order.getUserId());
+            courseCashbackService.recordPaidCourseCashback(order.getOrderNo());
             return order;
         }
         if (!CoursePayOrder.STATUS_PENDING.equals(order.getStatus())) {
@@ -73,6 +77,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         order.setPayTime(payTime == null ? DateUtils.getNowDate() : payTime);
         updateCoursePayOrder(order);
         userInfoService.markStudent(order.getUserId());
+        courseCashbackService.recordPaidCourseCashback(order.getOrderNo());
         return order;
     }
 
@@ -83,6 +88,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public CoursePayOrder markRefunded(String orderNo, String refundNo, Date refundTime) {
         CoursePayOrder order = requireOrder(orderNo);
         if (!CoursePayOrder.STATUS_SIGNED.equals(order.getStatus())) {
@@ -92,6 +98,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         order.setRefundNo(refundNo);
         order.setRefundTime(refundTime == null ? DateUtils.getNowDate() : refundTime);
         updateCoursePayOrder(order);
+        courseCashbackService.reversePaidCourseCashback(order.getOrderNo());
         return order;
     }
 

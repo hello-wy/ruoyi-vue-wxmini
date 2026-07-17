@@ -25,6 +25,7 @@
 - `system/auth/list.md`
 - `system/auth/{ids}.md`
 - `system/auth/{id}.md`
+- `system/course-cashback.md`
 - `system/enrollment/export.md`
 - `system/enrollment/index.md`
 - `system/enrollment/list.md`
