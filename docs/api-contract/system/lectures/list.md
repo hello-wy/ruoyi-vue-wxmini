@@ -40,6 +40,7 @@
     {
       "id": 12,
       "name": "幸福解码",
+      "coursePrice": 3980.00,
       "requiresEnrollment": true,
       "cover": "6",
       "coverId": 9,
@@ -52,6 +53,7 @@
 ### 响应字段补充说明
 
 - `id`：讲座记录主键。
+- `coursePrice`：课程全价，仅用于课程信息展示；不参与报名费、定金或任何支付金额计算。
 - `requiresEnrollment`：是否报名前需要该课程学籍；缺省或 `true` 表示需要，`false` 表示不需要。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID。

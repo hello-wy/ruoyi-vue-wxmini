@@ -17,6 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="detail"    column="detail"    />
         <result property="registrationFee"    column="registration_fee"    />
         <result property="deposit"    column="deposit"    />
+        <result property="coursePrice" column="course_price" />
         <result property="requiresEnrollment" column="requires_enrollment" />
         <result property="enrolledCount" column="enrolled_count" />
         <result property="createDate"    column="create_date"    />
@@ -25,7 +26,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <sql id="selectLecturesVo">
         select id, time, end_date, name, speaker, location, geo, cover, cover_id, detail, registration_fee,
-               deposit, requires_enrollment, enrolled_count, create_date, update_date
+               deposit, course_price, requires_enrollment, enrolled_count, create_date, update_date
         from lectures
     </sql>
 
@@ -52,7 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT
             l.id, l.time, l.end_date, l.name, l.speaker,
             l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee,
-            l.deposit, l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date
+            l.deposit, l.course_price, l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date
         FROM lectures l
         INNER JOIN (
             SELECT name, MAX(id) AS id
@@ -77,6 +78,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detail != null">detail,</if>
             <if test="registrationFee != null">registration_fee,</if>
             <if test="deposit != null">deposit,</if>
+            <if test="coursePrice != null">course_price,</if>
             <if test="requiresEnrollment != null">requires_enrollment,</if>
             <if test="enrolledCount != null">enrolled_count,</if>
             <if test="createDate != null">create_date,</if>
@@ -94,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detail != null">#{detail},</if>
             <if test="registrationFee != null">#{registrationFee},</if>
             <if test="deposit != null">#{deposit},</if>
+            <if test="coursePrice != null">#{coursePrice},</if>
             <if test="requiresEnrollment != null">#{requiresEnrollment},</if>
             <if test="enrolledCount != null">#{enrolledCount},</if>
             <if test="createDate != null">#{createDate},</if>
@@ -115,6 +118,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detail != null">detail = #{detail},</if>
             <if test="registrationFee != null">registration_fee = #{registrationFee},</if>
             <if test="deposit != null">deposit = #{deposit},</if>
+            <if test="coursePriceUpdated != null and coursePriceUpdated">course_price = #{coursePrice},</if>
             <if test="requiresEnrollment != null">requires_enrollment = #{requiresEnrollment},</if>
             <if test="enrolledCount != null">enrolled_count = #{enrolledCount},</if>
             <if test="createDate != null">create_date = #{createDate},</if>
@@ -154,6 +158,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="detail"       column="detail"       />
         <result property="registrationFee" column="registration_fee"/>
         <result property="deposit"      column="deposit"      />
+        <result property="coursePrice"  column="course_price" />
         <result property="requiresEnrollment" column="requires_enrollment"/>
         <result property="enrolledCount" column="enrolled_count"/>
         <result property="createDate"   column="create_date"  />
@@ -175,6 +180,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="detail"     column="detail"     />
         <result property="registrationFee" column="registration_fee"/>
         <result property="deposit"    column="deposit"    />
+        <result property="coursePrice" column="course_price" />
         <result property="requiresEnrollment" column="requires_enrollment"/>
         <result property="enrolledCount" column="enrolled_count"/>
         <result property="createDate" column="create_date"/>
@@ -190,7 +196,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectLecturesListVo" parameterType="Lectures" resultMap="LecturesListVoResult">
         SELECT
         l.id, l.time, l.end_date, l.name, l.speaker,
-        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit,
+        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit, l.course_price,
         l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date,
         GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
         FROM lectures l
@@ -207,7 +213,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectRemainingMonthLecturesListVo" resultMap="LecturesListVoResult">
         SELECT
         l.id, l.time, l.end_date, l.name, l.speaker,
-        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit,
+        l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit, l.course_price,
         l.requires_enrollment, l.enrolled_count, l.create_date, l.update_date,
         GROUP_CONCAT(p.name ORDER BY FIND_IN_SET(p.id, l.speaker) SEPARATOR ', ') AS speaker_names
         FROM lectures l
@@ -231,7 +237,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectLecturesDetailVoById" parameterType="Long" resultMap="LecturesDetailVoResult">
         SELECT
             l.id, l.time, l.end_date, l.name, l.speaker,
-            l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit,
+            l.location, l.geo, l.cover, l.cover_id, l.detail, l.registration_fee, l.deposit, l.course_price,
             l.requires_enrollment,
             (
                 SELECT COUNT(1)

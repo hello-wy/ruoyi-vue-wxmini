@@ -29,7 +29,34 @@
     <el-table v-loading="loading" :data="lecturesList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="课程ID" align="center" prop="id" width="90" />
-      <el-table-column label="课程名称" align="center" prop="name" min-width="160" />
+      <el-table-column label="课程名称" align="center" prop="name" min-width="160" show-overflow-tooltip />
+      <el-table-column label="讲师" align="center" prop="speakerNames" width="120" show-overflow-tooltip>
+        <template slot-scope="scope">
+          <span>{{ scope.row.speakerNames || scope.row.speaker }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="课程价格" align="center" prop="coursePrice" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.coursePrice == null ? '-' : '¥' + scope.row.coursePrice }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="报名费" align="center" prop="registrationFee" width="90">
+        <template slot-scope="scope">
+          <span>{{ scope.row.registrationFee == null ? '-' : '¥' + scope.row.registrationFee }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="保证金" align="center" prop="deposit" width="90">
+        <template slot-scope="scope">
+          <span>{{ scope.row.deposit == null ? '-' : '¥' + scope.row.deposit }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="需报名" align="center" prop="requiresEnrollment" width="90">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.requiresEnrollment ? 'success' : 'info'" size="mini">
+            {{ scope.row.requiresEnrollment ? '是' : '否' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="开课时间" align="center" prop="time" width="170">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.time, '{y}-{m}-{d} {h}:{i}') }}</span>
@@ -58,44 +85,82 @@
       @pagination="getList"
     />
 
-    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="680px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="92px">
-        <el-form-item label="课程名称" prop="name">
-          <el-select
-            v-model="form.name"
-            filterable
-            allow-create
-            default-first-option
-            placeholder="请选择或输入课程名称"
-            style="width: 100%"
-            @change="handleCourseNameChange"
-          >
-            <el-option v-for="item in lectureTemplates" :key="item.name" :label="item.name" :value="item.name" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="开课时间" prop="time">
-          <el-date-picker
-            v-model="form.time"
-            clearable
-            type="datetime"
-            value-format="yyyy-MM-dd HH:mm"
-            placeholder="请选择开课时间"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endDate">
-          <el-date-picker
-            v-model="form.endDate"
-            clearable
-            type="datetime"
-            value-format="yyyy-MM-dd HH:mm"
-            placeholder="请选择结束时间"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="上课地址" prop="location">
-          <el-input v-model="form.location" placeholder="请输入上课地址" />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="课程名称" prop="name">
+              <el-select
+                v-model="form.name"
+                filterable
+                allow-create
+                default-first-option
+                placeholder="请选择或输入课程名称"
+                style="width: 100%"
+                @change="handleCourseNameChange"
+              >
+                <el-option v-for="item in lectureTemplates" :key="item.name" :label="item.name" :value="item.name" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="讲师" prop="speaker">
+              <el-select v-model="form.speaker" multiple filterable placeholder="请选择讲师" style="width: 100%">
+                <el-option v-for="item in lecturerProfiles" :key="item.id" :label="item.name" :value="String(item.id)" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="开课时间" prop="time">
+              <el-date-picker v-model="form.time" clearable type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="请选择开课时间" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="结束时间" prop="endDate">
+              <el-date-picker v-model="form.endDate" clearable type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="请选择结束时间" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="上课地址" prop="location">
+              <el-input v-model="form.location" placeholder="请输入上课地址" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="经纬度" prop="geo">
+              <el-input v-model="form.geo" placeholder="如：118.80,32.05" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="课程价格" prop="coursePrice">
+              <el-input-number v-model="form.coursePrice" :min="0" :precision="2" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="报名费" prop="registrationFee">
+              <el-input-number v-model="form.registrationFee" :min="0" :precision="2" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="保证金" prop="deposit">
+              <el-input-number v-model="form.deposit" :min="0" :precision="2" controls-position="right" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="需要报名" prop="requiresEnrollment">
+              <el-switch v-model="form.requiresEnrollment" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="课程封面" prop="cover">
+              <image-upload v-model="form.cover" :limit="1" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="课程详情" prop="detail">
+              <el-input v-model="form.detail" type="textarea" :rows="4" placeholder="请输入课程详情" />
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-alert
           v-if="selectedTemplate"
           type="info"
@@ -120,6 +185,7 @@
 </template>
 
 <script>
+import { listProfile } from '@/api/system/profile'
 import {
   addLectures,
   delLectures,
@@ -134,6 +200,7 @@ const TEMPLATE_FIELDS = [
   'cover',
   'coverId',
   'detail',
+  'coursePrice',
   'registrationFee',
   'deposit',
   'requiresEnrollment'
@@ -151,6 +218,7 @@ export default {
       total: 0,
       lecturesList: [],
       lectureTemplates: [],
+      lecturerProfiles: [],
       title: '',
       open: false,
       selectedTemplate: null,
@@ -164,7 +232,10 @@ export default {
       rules: {
         name: [{ required: true, message: '课程名称不能为空', trigger: 'change' }],
         time: [{ required: true, message: '开课时间不能为空', trigger: 'change' }],
-        endDate: [{ required: true, message: '结束时间不能为空', trigger: 'change' }],
+        endDate: [
+          { required: true, message: '结束时间不能为空', trigger: 'change' },
+          { validator: this.validateEndDate, trigger: 'change' }
+        ],
         location: [{ required: true, message: '上课地址不能为空', trigger: 'blur' }]
       }
     }
@@ -172,8 +243,16 @@ export default {
   created() {
     this.getList()
     this.getTemplateList()
+    this.getLecturerProfiles()
   },
   methods: {
+    validateEndDate(rule, value, callback) {
+      if (value && this.form.time && value <= this.form.time) {
+        callback(new Error('结束时间必须晚于开课时间'))
+        return
+      }
+      callback()
+    },
     getList() {
       this.loading = true
       listLectures(this.queryParams).then(response => {
@@ -187,6 +266,11 @@ export default {
         this.lectureTemplates = response.data || []
       })
     },
+    getLecturerProfiles() {
+      listProfile({ pageNum: 1, pageSize: 1000 }).then(response => {
+        this.lecturerProfiles = response.rows || []
+      })
+    },
     cancel() {
       this.open = false
       this.reset()
@@ -198,10 +282,12 @@ export default {
         time: null,
         endDate: null,
         location: null,
-        speaker: null,
+        geo: null,
+        speaker: [],
         cover: null,
         coverId: null,
         detail: null,
+        coursePrice: null,
         registrationFee: null,
         deposit: null,
         requiresEnrollment: true
@@ -225,16 +311,17 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = '新增课程排期'
+      this.title = '新增课程管理'
     },
     handleUpdate(row) {
       this.reset()
       const id = row.id || this.ids
       getLectures(id).then(response => {
         this.form = response.data
+        this.form.speaker = this.form.speaker ? this.form.speaker.split(',') : []
         this.selectedTemplate = this.findTemplateByName(this.form.name)
         this.open = true
-        this.title = '修改课程排期'
+        this.title = '修改课程管理'
       })
     },
     handleCourseNameChange(name) {
@@ -253,20 +340,24 @@ export default {
       TEMPLATE_FIELDS.forEach(field => {
         this.$set(this.form, field, template[field])
       })
+      this.form.speaker = this.form.speaker ? this.form.speaker.split(',') : []
     },
     clearTemplateFields() {
       TEMPLATE_FIELDS.forEach(field => {
-        this.$set(this.form, field, field === 'requiresEnrollment' ? true : null)
+        this.$set(this.form, field, field === 'speaker' ? [] : field === 'requiresEnrollment' ? true : null)
       })
     },
     submitForm() {
       this.$refs['form'].validate(valid => {
         if (!valid) return
-        const template = this.findTemplateByName(this.form.name)
-        if (template && !this.form.id) this.applyTemplate(template)
-        const request = this.form.id != null ? updateLectures : addLectures
-        request(this.form).then(() => {
-          this.$modal.msgSuccess(this.form.id != null ? '修改成功' : '新增成功')
+        const data = {
+          ...this.form,
+          speaker: this.form.speaker.join(','),
+          coursePriceUpdated: this.form.id != null
+        }
+        const request = data.id != null ? updateLectures : addLectures
+        request(data).then(() => {
+          this.$modal.msgSuccess(data.id != null ? '修改成功' : '新增成功')
           this.open = false
           this.getList()
           this.getTemplateList()

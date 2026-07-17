@@ -3,9 +3,11 @@ package com.ruoyi.system.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -71,6 +73,15 @@ public class Lectures extends BaseEntity
     /** 席位预定金 */
     @Excel(name = "席位预定金")
     private BigDecimal deposit;
+
+    /** 课程全价（仅展示，不参与支付计算） */
+    @Excel(name = "课程全价")
+    private BigDecimal coursePrice;
+
+    /** 是否显式更新课程全价 */
+    @TableField(exist = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Boolean coursePriceUpdated;
 
     /** 是否需要学籍 */
     @Excel(name = "是否需要学籍")
@@ -190,6 +201,26 @@ public class Lectures extends BaseEntity
         return deposit;
     }
 
+    public void setCoursePrice(BigDecimal coursePrice)
+    {
+        this.coursePrice = coursePrice;
+    }
+
+    public BigDecimal getCoursePrice()
+    {
+        return coursePrice;
+    }
+
+    public Boolean getCoursePriceUpdated()
+    {
+        return coursePriceUpdated;
+    }
+
+    public void setCoursePriceUpdated(Boolean coursePriceUpdated)
+    {
+        this.coursePriceUpdated = coursePriceUpdated;
+    }
+
     public Boolean getRequiresEnrollment()
     {
         return requiresEnrollment;
@@ -265,6 +296,7 @@ public class Lectures extends BaseEntity
             .append("detail", getDetail())
             .append("registrationFee", getRegistrationFee())
             .append("deposit", getDeposit())
+            .append("coursePrice", getCoursePrice())
             .append("requiresEnrollment", getRequiresEnrollment())
             .append("enrolledCount", getEnrolledCount())
             .append("createDate", getCreateDate())

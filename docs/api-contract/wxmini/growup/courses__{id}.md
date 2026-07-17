@@ -40,6 +40,7 @@
     "location": "北京",
     "registrationFee": 100.00,
     "deposit": 30.00,
+    "coursePrice": 3980.00,
     "requiresEnrollment": true,
     "enrolledCount": 18,
     "cover": "6",
@@ -62,6 +63,7 @@
 - `endDate`：开课结束时间，格式 `yyyy-MM-dd HH:mm`。
 - `location`：上课地址。
 - `registrationFee`：课程报名费，默认 `100.00`。
+- `coursePrice`：课程全价，可能为 `null`；仅用于展示，不参与报名费、定金或任何支付金额计算。
 - `cover`：讲座详情海报数量。
 - `coverId`：讲座封面资源目录 ID；顶部封面图应优先使用该字段拼接 `/lectures/{coverId}/cover.webp`。
 - `deposit`：席位预定金/报名押金，报名接口会以后端课程配置中的该字段作为微信支付金额来源；缺失时报名接口返回错误。
