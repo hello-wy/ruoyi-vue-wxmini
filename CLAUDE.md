@@ -26,7 +26,6 @@
 - 小程序用户上下文通过 `WxMiniUserContext.getCurrentUserId()` 获取
 
 ## Common Rules
-
 - 接口类任务优先核对 `docs/api-contract/`
 - ORM 主要为 MyBatis-Plus + MyBatis XML
 - 配置入口优先查看 `ruoyi-admin/src/main/resources/application*.yml`
