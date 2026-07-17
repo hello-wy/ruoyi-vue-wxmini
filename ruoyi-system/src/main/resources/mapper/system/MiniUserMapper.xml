@@ -9,6 +9,7 @@
         <result property="phone" column="phone"/>
         <result property="avatarUrl" column="avatar_url"/>
         <result property="realName" column="real_name"/>
+        <result property="gender" column="gender"/>
         <result property="isRealnameAuth" column="is_realname_auth"/>
         <result property="isStudent" column="is_student"/>
         <result property="createTime" column="create_time"/>
@@ -16,28 +17,29 @@
     </resultMap>
 
     <sql id="MiniUserColumns">
-        select id, user_id, user_name, user_type, phone, avatar_url, real_name,
-               is_realname_auth, is_student, create_time, update_time
-        from user_info
+        select ui.id, ui.user_id, ui.user_name, ui.user_type, ui.phone, ui.avatar_url, ui.real_name,
+               up.gender, ui.is_realname_auth, ui.is_student, ui.create_time, ui.update_time
+        from user_info ui
+        left join wx_user_profile up on up.uid = ui.id
     </sql>
 
     <select id="selectMiniUserList" resultMap="MiniUserVoResult">
         <include refid="MiniUserColumns"/>
         <where>
             <if test="keyword != null and keyword != ''">
-                and (user_name like concat('%', #{keyword}, '%')
-                     or real_name like concat('%', #{keyword}, '%')
-                     or phone like concat('%', #{keyword}, '%')
-                     or user_id like concat('%', #{keyword}, '%'))
+                and (ui.user_name like concat('%', #{keyword}, '%')
+                     or ui.real_name like concat('%', #{keyword}, '%')
+                     or ui.phone like concat('%', #{keyword}, '%')
+                     or ui.user_id like concat('%', #{keyword}, '%'))
             </if>
-            <if test="userType != null">and user_type = #{userType}</if>
-            <if test="isStudent != null">and is_student = #{isStudent}</if>
+            <if test="userType != null">and ui.user_type = #{userType}</if>
+            <if test="isStudent != null">and ui.is_student = #{isStudent}</if>
         </where>
-        order by create_time desc, id desc
+        order by ui.create_time desc, ui.id desc
     </select>
 
     <select id="selectMiniUserById" resultMap="MiniUserVoResult">
         <include refid="MiniUserColumns"/>
-        where id = #{id}
+        where ui.id = #{id}
     </select>
 </mapper>

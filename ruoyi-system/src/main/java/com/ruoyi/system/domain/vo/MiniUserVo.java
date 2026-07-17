@@ -10,6 +10,7 @@ public class MiniUserVo {
     private String phone;
     private String avatarUrl;
     private String realName;
+    private Integer gender;
     private Integer isRealnameAuth;
     private Integer isStudent;
     private Date createTime;
@@ -29,6 +30,8 @@ public class MiniUserVo {
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public String getRealName() { return realName; }
     public void setRealName(String realName) { this.realName = realName; }
+    public Integer getGender() { return gender; }
+    public void setGender(Integer gender) { this.gender = gender; }
     public Integer getIsRealnameAuth() { return isRealnameAuth; }
     public void setIsRealnameAuth(Integer isRealnameAuth) { this.isRealnameAuth = isRealnameAuth; }
     public Integer getIsStudent() { return isStudent; }
