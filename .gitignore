@@ -52,4 +52,6 @@ uploadPath
 logs
 docs/
 
+.claude/worktrees
+
 *.docx
