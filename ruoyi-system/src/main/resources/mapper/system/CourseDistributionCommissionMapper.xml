@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CourseDistributionCommissionMapper">
+  <resultMap id="Config" type="com.ruoyi.system.domain.CourseDistributionCommissionConfig">
+    <id property="id" column="id"/><result property="level1Ratio" column="level1_ratio"/><result property="level2Ratio" column="level2_ratio"/>
+  </resultMap>
+  <resultMap id="Ledger" type="com.ruoyi.system.domain.CourseDistributionCommissionLedger">
+    <id property="id" column="id"/><result property="orderNo" column="order_no"/><result property="courseId" column="course_id"/><result property="buyerUserId" column="buyer_user_id"/><result property="beneficiaryUserId" column="beneficiary_user_id"/><result property="commissionLevel" column="commission_level"/><result property="paidAmount" column="paid_amount"/><result property="commissionRatio" column="commission_ratio"/><result property="commissionAmount" column="commission_amount"/><result property="status" column="status"/><result property="createTime" column="create_time"/><result property="reverseTime" column="reverse_time"/>
+  </resultMap>
+  <select id="selectConfig" resultMap="Config">select id,level1_ratio,level2_ratio from course_distribution_commission_config where id=1</select>
+  <select id="lockConfig" resultType="int">select id from course_distribution_commission_config where id=1 for update</select>
+  <insert id="saveConfig" parameterType="com.ruoyi.system.domain.CourseDistributionCommissionConfig">insert into course_distribution_commission_config(id,level1_ratio,level2_ratio,update_time) values(1,#{level1Ratio},#{level2Ratio},now()) on duplicate key update level1_ratio=values(level1_ratio),level2_ratio=values(level2_ratio),update_time=now()</insert>
+  <insert id="insertLedger" parameterType="com.ruoyi.system.domain.CourseDistributionCommissionLedger">insert ignore into course_distribution_commission_ledger(order_no,course_id,buyer_user_id,beneficiary_user_id,commission_level,paid_amount,commission_ratio,commission_amount,status,create_time) values(#{orderNo},#{courseId},#{buyerUserId},#{beneficiaryUserId},#{commissionLevel},#{paidAmount},#{commissionRatio},#{commissionAmount},#{status},#{createTime})</insert>
+  <update id="reverseLedgers">update course_distribution_commission_ledger set status='REVERSED',reverse_time=now() where order_no=#{orderNo} and status='ACTIVE'</update>
+  <select id="selectRecords" resultType="java.util.HashMap">
+    select * from (
+      select l.id, 'COMMISSION' as recordType, l.commission_level as commissionLevel, l.status, l.commission_amount as amount, l.beneficiary_user_id as beneficiaryUserId, l.order_no as orderNo, l.course_id as courseId, null as direction, null as reason, l.create_time as occurredAt
+      from course_distribution_commission_ledger l
+      union all
+      select m.id, 'MANUAL' as recordType, null as commissionLevel, null as status, m.amount, m.beneficiary_user_id as beneficiaryUserId, m.order_no as orderNo, m.course_id as courseId, m.direction, m.reason, m.occurred_at as occurredAt
+      from course_distribution_finance_manual_record m
+    ) r order by r.occurred_at desc,r.id desc
+  </select>
+  <select id="selectSummary" resultType="com.ruoyi.system.domain.vo.CourseDistributionCommissionSummaryVo">
+    select
+      coalesce(sum(case when commission_level=1 and status='ACTIVE' then commission_amount else 0 end),0) as level1Amount,
+      coalesce(sum(case when commission_level=2 and status='ACTIVE' then commission_amount else 0 end),0) as level2Amount,
+      coalesce(sum(case when status='REVERSED' then commission_amount else 0 end),0) as reversedAmount,
+      coalesce((select sum(amount) from course_distribution_finance_manual_record where direction='CREDIT'),0) as manualCreditAmount,
+      coalesce((select sum(amount) from course_distribution_finance_manual_record where direction='DEBIT'),0) as manualDebitAmount
+    from course_distribution_commission_ledger
+  </select>
+  <insert id="insertManualRecord">insert into course_distribution_finance_manual_record(direction,amount,reason,beneficiary_user_id,course_id,order_no,operator_user_id,occurred_at,create_time) values(#{record.direction},#{record.amount},#{record.reason},#{record.beneficiaryUserId},#{record.courseId},#{record.orderNo},#{operatorUserId},#{record.occurredAt},now())</insert>
+</mapper>

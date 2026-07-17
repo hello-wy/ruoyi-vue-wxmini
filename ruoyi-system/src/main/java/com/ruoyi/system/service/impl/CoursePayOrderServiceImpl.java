@@ -7,6 +7,7 @@ import com.ruoyi.system.domain.vo.CourseRefundOrderVo;
 import com.ruoyi.system.domain.vo.CourseScanSignInVo;
 import com.ruoyi.system.mapper.CoursePayOrderMapper;
 import com.ruoyi.system.service.ICourseCashbackService;
+import com.ruoyi.system.service.ICourseDistributionCommissionService;
 import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
     private IUserInfoService userInfoService;
     @Autowired
     private ICourseCashbackService courseCashbackService;
+    @Autowired
+    private ICourseDistributionCommissionService courseDistributionCommissionService;
 
     @Override
     public CoursePayOrder selectCoursePayOrderByOrderNo(String orderNo) {
@@ -66,6 +69,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         if (isPaidOrAfter(order.getStatus())) {
             userInfoService.markStudent(order.getUserId());
             courseCashbackService.recordPaidCourseCashback(order.getOrderNo());
+            courseDistributionCommissionService.recordPaidCourseCommission(order.getOrderNo());
             return order;
         }
         if (!CoursePayOrder.STATUS_PENDING.equals(order.getStatus())) {
@@ -78,6 +82,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         updateCoursePayOrder(order);
         userInfoService.markStudent(order.getUserId());
         courseCashbackService.recordPaidCourseCashback(order.getOrderNo());
+        courseDistributionCommissionService.recordPaidCourseCommission(order.getOrderNo());
         return order;
     }
 
@@ -99,6 +104,7 @@ public class CoursePayOrderServiceImpl implements ICoursePayOrderService {
         order.setRefundTime(refundTime == null ? DateUtils.getNowDate() : refundTime);
         updateCoursePayOrder(order);
         courseCashbackService.reversePaidCourseCashback(order.getOrderNo());
+        courseDistributionCommissionService.reversePaidCourseCommission(order.getOrderNo());
         return order;
     }
 
