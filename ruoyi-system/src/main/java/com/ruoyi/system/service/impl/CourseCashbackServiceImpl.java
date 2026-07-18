@@ -3,20 +3,25 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.system.domain.CourseCashbackConfig;
 import com.ruoyi.system.domain.CourseCashbackLedger;
+import com.ruoyi.system.domain.CourseFinanceManualRecord;
 import com.ruoyi.system.domain.CoursePayOrder;
 import com.ruoyi.system.domain.Lectures;
 import com.ruoyi.system.domain.StudentStaffAssignment;
 import com.ruoyi.system.domain.bo.CourseCashbackDeductionBo;
+import com.ruoyi.system.domain.bo.CourseFinanceManualRecordBo;
 import com.ruoyi.system.domain.bo.CourseFinanceQueryBo;
 import com.ruoyi.system.domain.bo.StudentAccessScope;
+import com.ruoyi.system.domain.vo.CourseFinanceManualRecordVo;
 import com.ruoyi.system.domain.vo.CourseFinanceSummaryVo;
 import com.ruoyi.system.mapper.CourseCashbackMapper;
 import com.ruoyi.system.mapper.StudentStaffAssignmentMapper;
 import com.ruoyi.system.service.ICourseCashbackService;
 import com.ruoyi.system.service.ICoursePayOrderService;
 import com.ruoyi.system.service.ILecturesService;
+import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.system.service.IStudentAccessService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.service.IUserInfoService;
@@ -45,6 +50,8 @@ public class CourseCashbackServiceImpl implements ICourseCashbackService {
     private StudentStaffAssignmentMapper assignments;
     @Resource
     private IStudentAccessService access;
+    @Resource
+    private ISysUserService sysUsers;
 
     @Override
     public CourseCashbackConfig selectConfig() {
@@ -187,6 +194,61 @@ public class CourseCashbackServiceImpl implements ICourseCashbackService {
         summary.setDeductedCashbackAmount(summary.getGrossCashbackAmount()
                 .subtract(summary.getReversedCashbackAmount()).subtract(available));
         return summary;
+    }
+
+    @Override
+    public List<CourseFinanceManualRecordVo> selectManualRecordList() {
+        return mapper.selectManualRecordList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createManualRecord(CourseFinanceManualRecordBo input) {
+        if (input == null || input.getAmount() == null || input.getAmount().compareTo(BigDecimal.ZERO) <= 0
+                || input.getAmount().scale() > 2 || input.getReason() == null || input.getReason().trim().isEmpty()) {
+            throw new ServiceException("财务记录信息不完整或金额不合法");
+        }
+        if (!"INCOME".equals(input.getRecordType()) && !"WITHDRAWAL".equals(input.getRecordType())) {
+            throw new ServiceException("记录类型不合法");
+        }
+
+        Lectures course = lectures.selectLecturesById(input.getCourseId());
+        if (course == null || course.getCoursePrice() == null || course.getCoursePrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ServiceException("课程售价未设置");
+        }
+        if (input.getAmount().compareTo(course.getCoursePrice()) > 0) {
+            throw new ServiceException("金额不能超过课程售价");
+        }
+        UserInfo wxminiUser = users.selectUserInfoByUserId(input.getWxminiUserId());
+        if (wxminiUser == null) {
+            throw new ServiceException("微信用户不存在");
+        }
+        SysUser employee = sysUsers.selectUserById(input.getEmployeeUserId());
+        if (employee == null) {
+            throw new ServiceException("员工不存在");
+        }
+        sysUsers.checkUserDataScope(input.getEmployeeUserId());
+
+        CourseFinanceManualRecord record = new CourseFinanceManualRecord();
+        record.setRecordType(input.getRecordType());
+        record.setCourseId(input.getCourseId());
+        record.setWxminiUserId(input.getWxminiUserId());
+        record.setEmployeeUserId(input.getEmployeeUserId());
+        record.setAmount(input.getAmount());
+        record.setReason(input.getReason().trim());
+        record.setOperatorUserId(SecurityUtils.getUserId());
+        record.setOccurredAt(DateUtils.getNowDate());
+        record.setCreateTime(DateUtils.getNowDate());
+        mapper.insertManualRecord(record);
+
+        if ("WITHDRAWAL".equals(input.getRecordType())) {
+            mapper.lockFinanceConfig();
+            BigDecimal available = amount(mapper.selectEmployeeAvailable(input.getEmployeeUserId()));
+            if (available.compareTo(input.getAmount()) < 0) {
+                throw new ServiceException("提现金额超过员工可用返现");
+            }
+            mapper.insertManualDeduction(record.getId(), input.getEmployeeUserId(), input.getAmount(), record.getReason(), SecurityUtils.getUserId());
+        }
     }
 
     @Override

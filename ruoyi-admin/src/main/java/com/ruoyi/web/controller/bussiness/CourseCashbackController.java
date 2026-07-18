@@ -6,6 +6,7 @@ import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.system.domain.CourseCashbackConfig;
 import com.ruoyi.system.domain.CourseCashbackLedger;
 import com.ruoyi.system.domain.bo.CourseCashbackDeductionBo;
+import com.ruoyi.system.domain.bo.CourseFinanceManualRecordBo;
 import com.ruoyi.system.domain.bo.CourseFinanceQueryBo;
 import com.ruoyi.system.domain.vo.CourseFinanceSummaryVo;
 import com.ruoyi.system.service.ICourseCashbackService;
@@ -35,4 +36,8 @@ public class CourseCashbackController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:course-finance:config')") @GetMapping("/config") public AjaxResult config(){return success(courseCashbackService.selectConfig());}
     @PreAuthorize("@ss.hasPermi('system:course-finance:config')") @PutMapping("/config") public AjaxResult config(@RequestBody CourseCashbackConfig c){courseCashbackService.saveConfig(c);return success();}
     @PreAuthorize("@ss.hasPermi('system:course-finance:deduct')") @PostMapping("/deductions") public AjaxResult deduct(@RequestBody @Validated CourseCashbackDeductionBo d){courseCashbackService.deduct(d);return success();}
+    @PreAuthorize("@ss.hasPermi('system:course-finance:manual:list')") @GetMapping("/manual-records")
+    public TableDataInfoVo manualRecords() { startPage(); return getDataTable(courseCashbackService.selectManualRecordList()); }
+    @PreAuthorize("@ss.hasPermi('system:course-finance:manual:add')") @PostMapping("/manual-records")
+    public AjaxResult manualRecord(@RequestBody @Validated CourseFinanceManualRecordBo record) { courseCashbackService.createManualRecord(record); return success(); }
 }

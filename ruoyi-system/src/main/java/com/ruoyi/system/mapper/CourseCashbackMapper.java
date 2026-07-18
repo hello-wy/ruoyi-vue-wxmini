@@ -2,7 +2,9 @@ package com.ruoyi.system.mapper;
 
 import com.ruoyi.system.domain.CourseCashbackConfig;
 import com.ruoyi.system.domain.CourseCashbackLedger;
+import com.ruoyi.system.domain.CourseFinanceManualRecord;
 import com.ruoyi.system.domain.bo.CourseFinanceQueryBo;
+import com.ruoyi.system.domain.vo.CourseFinanceManualRecordVo;
 import com.ruoyi.system.domain.bo.StudentAccessScope;
 import org.apache.ibatis.annotations.Param;
 import java.math.BigDecimal;
@@ -22,4 +24,9 @@ public interface CourseCashbackMapper {
     List<java.util.Map<String, Object>> selectDeductionHistory(@Param("orderNo") String orderNo);
     int insertDeduction(@Param("employeeUserId") Long employeeUserId, @Param("amount") BigDecimal amount,
                         @Param("reason") String reason, @Param("operatorUserId") Long operatorUserId);
+    int insertManualRecord(CourseFinanceManualRecord record);
+    int insertManualDeduction(@Param("financeRecordId") Long financeRecordId, @Param("employeeUserId") Long employeeUserId,
+                              @Param("amount") BigDecimal amount, @Param("reason") String reason,
+                              @Param("operatorUserId") Long operatorUserId);
+    List<CourseFinanceManualRecordVo> selectManualRecordList();
 }

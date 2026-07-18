@@ -2,7 +2,9 @@ package com.ruoyi.system.service;
 import com.ruoyi.system.domain.CourseCashbackConfig;
 import com.ruoyi.system.domain.CourseCashbackLedger;
 import com.ruoyi.system.domain.bo.CourseCashbackDeductionBo;
+import com.ruoyi.system.domain.bo.CourseFinanceManualRecordBo;
 import com.ruoyi.system.domain.bo.CourseFinanceQueryBo;
+import com.ruoyi.system.domain.vo.CourseFinanceManualRecordVo;
 import com.ruoyi.system.domain.vo.CourseFinanceSummaryVo;
 import java.util.List;
 import java.util.Map;
@@ -19,4 +21,6 @@ public interface ICourseCashbackService {
     CourseFinanceSummaryVo selectSummary();
     CourseFinanceSummaryVo selectMySummary();
     void deduct(CourseCashbackDeductionBo deduction);
+    List<CourseFinanceManualRecordVo> selectManualRecordList();
+    void createManualRecord(CourseFinanceManualRecordBo record);
 }
