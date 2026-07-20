@@ -36,6 +36,10 @@ public interface UserReferralMapper {
      */
     public UserReferral selectReferralByInviteeUserId(String inviteeUserId);
 
+    UserReferral selectReferralByIdForUpdate(Long id);
+
+    int rewardReferral(UserReferral userReferral);
+
     /**
      * 统计邀请人数
      *

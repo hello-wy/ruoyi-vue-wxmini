@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -12,6 +13,8 @@ import java.util.Date;
  */
 public class UserReferralVo implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private Long id;
 
     /** 被邀请人user_id */
     private String userId;
@@ -40,6 +43,13 @@ public class UserReferralVo implements Serializable {
     /** 绑定时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+    private String rewardStatus;
+    private BigDecimal rewardAmount;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date rewardTime;
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getUserId() {
         return userId;
@@ -112,4 +122,11 @@ public class UserReferralVo implements Serializable {
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
+
+    public String getRewardStatus() { return rewardStatus; }
+    public void setRewardStatus(String rewardStatus) { this.rewardStatus = rewardStatus; }
+    public BigDecimal getRewardAmount() { return rewardAmount; }
+    public void setRewardAmount(BigDecimal rewardAmount) { this.rewardAmount = rewardAmount; }
+    public Date getRewardTime() { return rewardTime; }
+    public void setRewardTime(Date rewardTime) { this.rewardTime = rewardTime; }
 }

@@ -9,10 +9,14 @@
         <result property="inviterUserId" column="inviter_user_id"/>
         <result property="inviteeUserId" column="invitee_user_id"/>
         <result property="inviteCode" column="invite_code"/>
+        <result property="rewardStatus" column="reward_status"/>
+        <result property="rewardAmount" column="reward_amount"/>
+        <result property="rewardTime" column="reward_time"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
     <resultMap type="UserReferralVo" id="UserReferralVoResult">
+        <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="userName" column="user_name"/>
         <result property="phone" column="phone"/>
@@ -21,11 +25,14 @@
         <result property="inviterUserName" column="inviter_user_name"/>
         <result property="inviterPhone" column="inviter_phone"/>
         <result property="inviteCode" column="invite_code"/>
+        <result property="rewardStatus" column="reward_status"/>
+        <result property="rewardAmount" column="reward_amount"/>
+        <result property="rewardTime" column="reward_time"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
     <sql id="selectUserReferralVo">
-        select id, inviter_user_id, invitee_user_id, invite_code, create_time from user_referral
+        select id, inviter_user_id, invitee_user_id, invite_code, reward_status, reward_amount, reward_time, reward_operator_user_id, create_time from user_referral
     </sql>
 
     <insert id="insertUserReferral" parameterType="UserReferral" useGeneratedKeys="true" keyProperty="id">
@@ -34,12 +41,14 @@
             <if test="inviterUserId != null and inviterUserId != ''">inviter_user_id,</if>
             <if test="inviteeUserId != null and inviteeUserId != ''">invitee_user_id,</if>
             <if test="inviteCode != null and inviteCode != ''">invite_code,</if>
+            <if test="rewardStatus != null and rewardStatus != ''">reward_status,</if>
             <if test="createTime != null">create_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="inviterUserId != null and inviterUserId != ''">#{inviterUserId},</if>
             <if test="inviteeUserId != null and inviteeUserId != ''">#{inviteeUserId},</if>
             <if test="inviteCode != null and inviteCode != ''">#{inviteCode},</if>
+            <if test="rewardStatus != null and rewardStatus != ''">#{rewardStatus},</if>
             <if test="createTime != null">#{createTime},</if>
         </trim>
     </insert>
@@ -64,6 +73,17 @@
         where invitee_user_id = #{inviteeUserId}
     </select>
 
+    <select id="selectReferralByIdForUpdate" parameterType="Long" resultMap="UserReferralResult">
+        <include refid="selectUserReferralVo"/>
+        where id = #{id} for update
+    </select>
+
+    <update id="rewardReferral" parameterType="UserReferral">
+        update user_referral
+        set reward_status = 'REWARDED', reward_amount = #{rewardAmount}, reward_time = #{rewardTime}, reward_operator_user_id = #{rewardOperatorUserId}
+        where id = #{id} and reward_status = 'PENDING'
+    </update>
+
     <select id="selectReferralCountByInviterUserId" parameterType="String" resultType="int">
         select count(1) from user_referral where inviter_user_id = #{inviterUserId}
     </select>
@@ -79,7 +99,8 @@
     </select>
 
     <select id="selectUserReferralVoList" parameterType="UserReferralVo" resultMap="UserReferralVoResult">
-        select 
+        select
+            ur.id as id,
             ur.invitee_user_id as user_id,
             ui_ee.user_name as user_name,
             ui_ee.phone as phone,
@@ -88,6 +109,9 @@
             ui_er.user_name as inviter_user_name,
             ui_er.phone as inviter_phone,
             ur.invite_code as invite_code,
+            ur.reward_status as reward_status,
+            ur.reward_amount as reward_amount,
+            ur.reward_time as reward_time,
             ur.create_time as create_time
         from user_referral ur
         left join user_info ui_ee on ur.invitee_user_id = ui_ee.user_id

@@ -279,6 +279,45 @@ public class WalletServiceImpl implements IWalletService
         walletMapper.insertTransaction(transaction);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void creditReferralReward(Long uid, BigDecimal amount, String bizId)
+    {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0)
+        {
+            throw new ServiceException("邀请奖金必须大于0");
+        }
+        if (walletMapper.selectTransactionByBiz("REFERRAL_REWARD", bizId) != null)
+        {
+            throw new ServiceException("邀请奖金已发放");
+        }
+        UserWallet wallet = walletMapper.selectWalletByUidForUpdate(uid);
+        if (wallet == null)
+        {
+            getOrCreateWallet(uid);
+            wallet = walletMapper.selectWalletByUidForUpdate(uid);
+        }
+        if (wallet == null)
+        {
+            throw new ServiceException("钱包初始化失败");
+        }
+        wallet.setBalance(wallet.getBalance().add(amount));
+        wallet.setTotalEarned(wallet.getTotalEarned().add(amount));
+        walletMapper.updateWallet(wallet);
+
+        WalletTransaction transaction = new WalletTransaction();
+        transaction.setId(SnowflakeIdWorker.nextIdDefault());
+        transaction.setUid(uid);
+        transaction.setBizType("REFERRAL_REWARD");
+        transaction.setBizId(bizId);
+        transaction.setDirection(DIRECTION_INCOME);
+        transaction.setAmount(amount);
+        transaction.setBalanceAfter(wallet.getBalance());
+        transaction.setRemark("邀请新人奖金");
+        transaction.setCreateTime(DateUtils.getNowDate());
+        walletMapper.insertTransaction(transaction);
+    }
+
     /**
      * SDK 调用成功后同步查询状态，返回结构化 WithdrawResult
      */

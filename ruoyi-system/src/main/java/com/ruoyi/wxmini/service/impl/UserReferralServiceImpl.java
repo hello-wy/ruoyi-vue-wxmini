@@ -1,6 +1,10 @@
 package com.ruoyi.wxmini.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.system.domain.CourseDistributionCommissionConfig;
+import com.ruoyi.system.service.ICourseDistributionCommissionService;
+import com.ruoyi.system.service.IWalletService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.UserReferral;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
@@ -14,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +40,12 @@ public class UserReferralServiceImpl implements IUserReferralService {
 
     @Autowired
     private IUserInfoService userInfoService;
+
+    @Autowired
+    private ICourseDistributionCommissionService commissionService;
+
+    @Autowired
+    private IWalletService walletService;
 
     @Override
     public int bindReferral(String inviteCode, String inviteeUserId) {
@@ -73,6 +85,7 @@ public class UserReferralServiceImpl implements IUserReferralService {
         userReferral.setInviterUserId(inviter.getUserId());
         userReferral.setInviteeUserId(inviteeUserId);
         userReferral.setInviteCode(normalizedInviteCode);
+        userReferral.setRewardStatus("PENDING");
         userReferral.setCreateTime(new Date());
 
         try {
@@ -88,6 +101,31 @@ public class UserReferralServiceImpl implements IUserReferralService {
 
         log.warn("绑定邀请关系失败: 邀请人={}，被邀请人={}，邀请码={}", inviter.getUserId(), inviteeUserId, normalizedInviteCode);
         return ReferralBindResult.FAILED;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void rewardReferral(Long referralId, Long operatorUserId) {
+        UserReferral referral = userReferralMapper.selectReferralByIdForUpdate(referralId);
+        if (referral == null) {
+            throw new ServiceException("邀请关系不存在");
+        }
+        if (!"PENDING".equals(referral.getRewardStatus())) {
+            throw new ServiceException("邀请奖金已审核");
+        }
+        CourseDistributionCommissionConfig config = commissionService.selectConfig();
+        BigDecimal amount = config == null || config.getInviteRewardAmount() == null
+                ? BigDecimal.ZERO : config.getInviteRewardAmount();
+        referral.setRewardAmount(amount);
+        referral.setRewardTime(DateUtils.getNowDate());
+        referral.setRewardOperatorUserId(operatorUserId);
+        if (userReferralMapper.rewardReferral(referral) != 1) {
+            throw new ServiceException("邀请奖金审核失败");
+        }
+        if (amount.compareTo(BigDecimal.ZERO) > 0) {
+            walletService.creditReferralReward(walletService.resolveCurrentUserUid(referral.getInviterUserId()), amount,
+                    "REFERRAL:" + referral.getId());
+        }
     }
 
     @Override

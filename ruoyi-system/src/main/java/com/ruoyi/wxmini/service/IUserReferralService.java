@@ -63,6 +63,8 @@ public interface IUserReferralService {
      */
     public UserReferral getMyInviter(String inviteeUserId);
 
+    void rewardReferral(Long referralId, Long operatorUserId);
+
     /**
      * 分页查询所有邀请关系列表
      *

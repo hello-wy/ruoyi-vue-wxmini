@@ -34,8 +34,9 @@ public class CourseDistributionCommissionServiceImpl implements ICourseDistribut
     @Override
     public void saveConfig(CourseDistributionCommissionConfig config) {
         if (config == null || invalidRatio(config.getLevel1Ratio()) || invalidRatio(config.getLevel2Ratio())
-                || config.getLevel1Ratio().add(config.getLevel2Ratio()).compareTo(BigDecimal.ONE) > 0) {
-            throw new ServiceException("一级、二级返现比例必须在0到1之间且合计不超过1");
+                || config.getLevel1Ratio().add(config.getLevel2Ratio()).compareTo(BigDecimal.ONE) > 0
+                || invalidAmount(config.getInviteRewardAmount())) {
+            throw new ServiceException("返现配置不合法");
         }
         mapper.saveConfig(config);
     }
@@ -99,4 +100,5 @@ public class CourseDistributionCommissionServiceImpl implements ICourseDistribut
     }
 
     private boolean invalidRatio(BigDecimal ratio) { return ratio == null || ratio.compareTo(BigDecimal.ZERO) < 0 || ratio.compareTo(BigDecimal.ONE) > 0; }
+    private boolean invalidAmount(BigDecimal amount) { return amount == null || amount.compareTo(BigDecimal.ZERO) < 0 || amount.scale() > 2; }
 }

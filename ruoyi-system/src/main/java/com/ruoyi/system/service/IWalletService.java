@@ -22,4 +22,6 @@ public interface IWalletService
     List<WalletTransaction> getTransactions(Long uid);
 
     void creditPayroll(Long uid, BigDecimal amount, String bizId, String remark);
+
+    void creditReferralReward(Long uid, BigDecimal amount, String bizId);
 }

@@ -1,6 +1,8 @@
 package com.ruoyi.web.controller.bussiness;
 
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
 import com.ruoyi.wxmini.service.IUserReferralService;
@@ -9,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,5 +42,13 @@ public class UserReferralController extends BaseController {
         startPage();
         List<UserReferralVo> list = userReferralService.selectUserReferralVoList(userReferralVo);
         return getDataTable(list);
+    }
+
+    @ApiOperation("审核并发放邀请新人奖金")
+    @PreAuthorize("@ss.hasPermi('system:referral:reward')")
+    @PostMapping("/{id}/reward")
+    public AjaxResult reward(@PathVariable Long id) {
+        userReferralService.rewardReferral(id, SecurityUtils.getUserId());
+        return success();
     }
 }

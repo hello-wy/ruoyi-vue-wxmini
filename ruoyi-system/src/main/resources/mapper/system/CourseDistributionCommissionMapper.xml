@@ -2,14 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.system.mapper.CourseDistributionCommissionMapper">
   <resultMap id="Config" type="com.ruoyi.system.domain.CourseDistributionCommissionConfig">
-    <id property="id" column="id"/><result property="level1Ratio" column="level1_ratio"/><result property="level2Ratio" column="level2_ratio"/>
+    <id property="id" column="id"/><result property="level1Ratio" column="level1_ratio"/><result property="level2Ratio" column="level2_ratio"/><result property="inviteRewardAmount" column="invite_reward_amount"/>
   </resultMap>
   <resultMap id="Ledger" type="com.ruoyi.system.domain.CourseDistributionCommissionLedger">
     <id property="id" column="id"/><result property="orderNo" column="order_no"/><result property="courseId" column="course_id"/><result property="buyerUserId" column="buyer_user_id"/><result property="beneficiaryUserId" column="beneficiary_user_id"/><result property="commissionLevel" column="commission_level"/><result property="paidAmount" column="paid_amount"/><result property="commissionRatio" column="commission_ratio"/><result property="commissionAmount" column="commission_amount"/><result property="status" column="status"/><result property="createTime" column="create_time"/><result property="reverseTime" column="reverse_time"/>
   </resultMap>
-  <select id="selectConfig" resultMap="Config">select id,level1_ratio,level2_ratio from course_distribution_commission_config where id=1</select>
+  <select id="selectConfig" resultMap="Config">select id,level1_ratio,level2_ratio,invite_reward_amount from course_distribution_commission_config where id=1</select>
   <select id="lockConfig" resultType="int">select id from course_distribution_commission_config where id=1 for update</select>
-  <insert id="saveConfig" parameterType="com.ruoyi.system.domain.CourseDistributionCommissionConfig">insert into course_distribution_commission_config(id,level1_ratio,level2_ratio,update_time) values(1,#{level1Ratio},#{level2Ratio},now()) on duplicate key update level1_ratio=values(level1_ratio),level2_ratio=values(level2_ratio),update_time=now()</insert>
+  <insert id="saveConfig" parameterType="com.ruoyi.system.domain.CourseDistributionCommissionConfig">insert into course_distribution_commission_config(id,level1_ratio,level2_ratio,invite_reward_amount,update_time) values(1,#{level1Ratio},#{level2Ratio},#{inviteRewardAmount},now()) on duplicate key update level1_ratio=values(level1_ratio),level2_ratio=values(level2_ratio),invite_reward_amount=values(invite_reward_amount),update_time=now()</insert>
   <insert id="insertLedger" parameterType="com.ruoyi.system.domain.CourseDistributionCommissionLedger">insert ignore into course_distribution_commission_ledger(order_no,course_id,buyer_user_id,beneficiary_user_id,commission_level,paid_amount,commission_ratio,commission_amount,status,create_time) values(#{orderNo},#{courseId},#{buyerUserId},#{beneficiaryUserId},#{commissionLevel},#{paidAmount},#{commissionRatio},#{commissionAmount},#{status},#{createTime})</insert>
   <update id="reverseLedgers">update course_distribution_commission_ledger set status='REVERSED',reverse_time=now() where order_no=#{orderNo} and status='ACTIVE'</update>
   <select id="selectRecords" resultType="java.util.HashMap">
