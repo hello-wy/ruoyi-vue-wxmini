@@ -14,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -118,6 +119,14 @@ public class UserReferralController extends BaseController {
     @PostMapping("/{id}/reward")
     public AjaxResult reward(@PathVariable Long id) {
         userReferralService.rewardReferral(id, SecurityUtils.getUserId());
+        return success();
+    }
+
+    @ApiOperation("删除待审核邀请关系")
+    @PreAuthorize("@ss.hasPermi('system:referral:remove')")
+    @DeleteMapping("/{id}")
+    public AjaxResult remove(@PathVariable Long id) {
+        userReferralService.removeReferral(id);
         return success();
     }
 

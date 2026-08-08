@@ -65,6 +65,8 @@ public interface IUserReferralService {
 
     void rewardReferral(Long referralId, Long operatorUserId);
 
+    void removeReferral(Long referralId);
+
     /**
      * 分页查询所有邀请关系列表
      *

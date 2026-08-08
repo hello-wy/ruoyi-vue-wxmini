@@ -54,7 +54,8 @@
     </insert>
 
     <select id="selectReferralVoListByInviterUserId" parameterType="String" resultMap="UserReferralVoResult">
-        select 
+        select
+            ur.id as id,
             ui.user_id,
             ui.user_name,
             ui.phone,
@@ -81,8 +82,12 @@
     <update id="rewardReferral" parameterType="UserReferral">
         update user_referral
         set reward_status = 'REWARDED', reward_amount = #{rewardAmount}, reward_time = #{rewardTime}, reward_operator_user_id = #{rewardOperatorUserId}
-        where id = #{id} and reward_status = 'PENDING'
+        where id = #{id} and (reward_status = 'PENDING' or reward_status is null or reward_status = '')
     </update>
+
+    <delete id="deletePendingReferralById" parameterType="Long">
+        delete from user_referral where id = #{id} and (reward_status = 'PENDING' or reward_status is null or reward_status = '')
+    </delete>
 
     <select id="selectReferralCountByInviterUserId" parameterType="String" resultType="int">
         select count(1) from user_referral where inviter_user_id = #{inviterUserId}

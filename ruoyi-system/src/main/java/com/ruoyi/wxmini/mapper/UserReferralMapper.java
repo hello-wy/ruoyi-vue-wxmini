@@ -40,6 +40,8 @@ public interface UserReferralMapper {
 
     int rewardReferral(UserReferral userReferral);
 
+    int deletePendingReferralById(Long id);
+
     /**
      * 统计邀请人数
      *

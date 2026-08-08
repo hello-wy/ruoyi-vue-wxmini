@@ -110,7 +110,7 @@ public class UserReferralServiceImpl implements IUserReferralService {
         if (referral == null) {
             throw new ServiceException("邀请关系不存在");
         }
-        if (!"PENDING".equals(referral.getRewardStatus())) {
+        if (!isPendingReward(referral)) {
             throw new ServiceException("邀请奖金已审核");
         }
         CourseDistributionCommissionConfig config = commissionService.selectConfig();
@@ -126,6 +126,25 @@ public class UserReferralServiceImpl implements IUserReferralService {
             walletService.creditReferralReward(walletService.resolveCurrentUserUid(referral.getInviterUserId()), amount,
                     "REFERRAL:" + referral.getId());
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeReferral(Long referralId) {
+        UserReferral referral = userReferralMapper.selectReferralByIdForUpdate(referralId);
+        if (referral == null) {
+            throw new ServiceException("邀请关系不存在");
+        }
+        if (!isPendingReward(referral)) {
+            throw new ServiceException("已发放奖金的邀请关系不可删除");
+        }
+        if (userReferralMapper.deletePendingReferralById(referralId) != 1) {
+            throw new ServiceException("邀请关系删除失败");
+        }
+    }
+
+    private boolean isPendingReward(UserReferral referral) {
+        return StringUtils.isBlank(referral.getRewardStatus()) || "PENDING".equals(referral.getRewardStatus());
     }
 
     @Override
