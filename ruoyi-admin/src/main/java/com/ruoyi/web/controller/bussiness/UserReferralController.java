@@ -109,15 +109,15 @@ public class UserReferralController extends BaseController {
             case SUCCESS:
                 return success(data);
             case ALREADY_BOUND:
-                return error("被邀请人已绑定邀请关系", data);
+                return AjaxResult.error("被邀请人已绑定邀请关系", data);
             case INVALID_INVITE_CODE:
-                return error("邀请人邀请码无效", data);
+                return AjaxResult.error("邀请人邀请码无效", data);
             case SELF_INVITE:
-                return error("邀请人和被邀请人不能是同一用户", data);
+                return AjaxResult.error("邀请人和被邀请人不能是同一用户", data);
             case REFERRAL_CYCLE:
-                return error("该邀请关系会形成循环，无法绑定", data);
+                return AjaxResult.error("该邀请关系会形成循环，无法绑定", data);
             default:
-                return error("邀请关系绑定失败", data);
+                return AjaxResult.error("邀请关系绑定失败", data);
         }
     }
 
