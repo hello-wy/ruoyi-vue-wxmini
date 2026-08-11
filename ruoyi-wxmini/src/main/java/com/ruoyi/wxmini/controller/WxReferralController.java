@@ -84,19 +84,19 @@ public class WxReferralController extends BaseController {
         data.put("status", result.name());
         switch (result) {
             case SUCCESS:
-                return success("绑定成功", data);
+                return AjaxResult.success("绑定成功", data);
             case EMPTY_INVITE_CODE:
-                return error("邀请码不能为空", data);
+                return AjaxResult.error("邀请码不能为空", data);
             case ALREADY_BOUND:
-                return error("已经被邀请过了", data);
+                return AjaxResult.error("已经被邀请过了", data);
             case INVALID_INVITE_CODE:
-                return error("邀请码无效", data);
+                return AjaxResult.error("邀请码无效", data);
             case SELF_INVITE:
-                return error("不能绑定自己的邀请码", data);
+                return AjaxResult.error("不能绑定自己的邀请码", data);
             case REFERRAL_CYCLE:
-                return error("该邀请关系会形成循环，无法绑定", data);
+                return AjaxResult.error("该邀请关系会形成循环，无法绑定", data);
             default:
-                return error("绑定失败，请稍后重试", data);
+                return AjaxResult.error("绑定失败，请稍后重试", data);
         }
     }
 
