@@ -4,6 +4,7 @@ import com.ruoyi.framework.config.properties.PermitAllUrlProperties;
 import com.ruoyi.framework.security.filter.JwtAuthenticationTokenFilter;
 import com.ruoyi.framework.security.handle.AuthenticationEntryPointImpl;
 import com.ruoyi.framework.security.handle.LogoutSuccessHandlerImpl;
+import com.ruoyi.framework.security.handle.RequestRejectedHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -47,6 +49,9 @@ public class SecurityConfig {
     @Autowired
     private LogoutSuccessHandlerImpl logoutSuccessHandler;
 
+    @Autowired
+    private RequestRejectedHandlerImpl requestRejectedHandler;
+
     /**
      * token认证过滤器
      */
@@ -64,6 +69,12 @@ public class SecurityConfig {
      */
     @Autowired
     private PermitAllUrlProperties permitAllUrl;
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer()
+    {
+        return web -> web.requestRejectedHandler(requestRejectedHandler);
+    }
 
     /**
      * 身份验证实现

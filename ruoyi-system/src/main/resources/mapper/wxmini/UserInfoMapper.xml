@@ -148,6 +148,12 @@
         where invite_code = #{inviteCode}
     </select>
 
+    <select id="selectUserInfosForUpdate" resultMap="UserInfoResult">
+        <include refid="selectUserInfoVo"/>
+        where user_id in (#{firstUserId}, #{secondUserId})
+        order by user_id for update
+    </select>
+
     <update id="updateBirthdayById">
         update user_info
         set birthday = #{birthday},

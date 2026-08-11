@@ -68,6 +68,8 @@ public interface UserInfoMapper {
 
     UserInfo selectUserInfoByInviteCode(String inviteCode);
 
+    List<UserInfo> selectUserInfosForUpdate(@Param("firstUserId") String firstUserId, @Param("secondUserId") String secondUserId);
+
     int markStudentByUserId(String userId);
 
     int updateBirthdayById(@Param("id") Long id, @Param("birthday") Date birthday);

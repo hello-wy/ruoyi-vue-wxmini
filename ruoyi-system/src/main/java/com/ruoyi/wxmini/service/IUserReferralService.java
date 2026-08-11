@@ -18,6 +18,7 @@ public interface IUserReferralService {
         ALREADY_BOUND,
         INVALID_INVITE_CODE,
         SELF_INVITE,
+        REFERRAL_CYCLE,
         FAILED
     }
 

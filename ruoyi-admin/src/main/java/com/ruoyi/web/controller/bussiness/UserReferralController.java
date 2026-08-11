@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 邀请关系管理Controller
@@ -99,18 +101,23 @@ public class UserReferralController extends BaseController {
         if (inviter.getUserId().equals(invitee.getUserId())) {
             return error("邀请人和被邀请人不能是同一用户");
         }
-        ReferralBindResult result = userReferralService.bindReferralWithResult(inviter.getInviteCode(), invitee.getUserId());
+        String inviteCode = userInfoService.getOrCreateInviteCode(inviter.getUserId());
+        ReferralBindResult result = userReferralService.bindReferralWithResult(inviteCode, invitee.getUserId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("status", result.name());
         switch (result) {
             case SUCCESS:
-                return success();
+                return success(data);
             case ALREADY_BOUND:
-                return error("被邀请人已绑定邀请关系");
+                return error("被邀请人已绑定邀请关系", data);
             case INVALID_INVITE_CODE:
-                return error("邀请人邀请码无效");
+                return error("邀请人邀请码无效", data);
             case SELF_INVITE:
-                return error("邀请人和被邀请人不能是同一用户");
+                return error("邀请人和被邀请人不能是同一用户", data);
+            case REFERRAL_CYCLE:
+                return error("该邀请关系会形成循环，无法绑定", data);
             default:
-                return error("邀请关系绑定失败");
+                return error("邀请关系绑定失败", data);
         }
     }
 
