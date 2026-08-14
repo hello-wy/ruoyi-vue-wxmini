@@ -65,4 +65,12 @@ public interface UserReferralMapper {
      * @return 邀请Vo集合
      */
     public List<UserReferralVo> selectUserReferralVoList(UserReferralVo userReferralVo);
+
+    /**
+     * 查询指定用户直接邀请的一、二级用户。
+     *
+     * @param inviterUserId 邀请人user_id
+     * @return 二级邀请关系集合
+     */
+    public List<UserReferralVo> selectSecondLevelReferralVoListByInviterUserId(String inviterUserId);
 }

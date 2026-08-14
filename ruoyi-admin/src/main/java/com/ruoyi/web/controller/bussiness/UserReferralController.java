@@ -6,6 +6,8 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.core.page.TableDataInfoVo;
 import com.ruoyi.web.controller.bussiness.bo.ReferralManualBindBo;
 import com.ruoyi.wxmini.domain.UserInfo;
+import com.ruoyi.wxmini.domain.vo.ReferralTreeVo;
+import com.ruoyi.wxmini.domain.vo.ReferralUserVo;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IUserReferralService;
@@ -57,6 +59,23 @@ public class UserReferralController extends BaseController {
         return getDataTable(list);
     }
 
+    @ApiOperation("查询指定用户的一、二级邀请关系")
+    @PreAuthorize("@ss.hasPermi('system:referral:list')")
+    @GetMapping("/tree")
+    public AjaxResult tree(@RequestParam String userId) {
+        UserInfo selectedUser = userInfoService.selectUserInfoByUserId(userId);
+        if (selectedUser == null) {
+            return error("小程序用户不存在");
+        }
+        UserReferralVo query = new UserReferralVo();
+        query.setInviterUserId(selectedUser.getUserId());
+        ReferralTreeVo tree = new ReferralTreeVo();
+        tree.setSelectedUser(new ReferralUserVo(selectedUser));
+        tree.setLevel1Invitees(userReferralService.selectUserReferralVoList(query));
+        tree.setLevel2Invitees(userReferralService.selectSecondLevelReferralVoList(selectedUser.getUserId()));
+        return success(tree);
+    }
+
     @ApiOperation("按手机号查询邀请绑定用户")
     @PreAuthorize("@ss.hasPermi('system:referral:list')")
     @GetMapping("/users")
@@ -72,7 +91,7 @@ public class UserReferralController extends BaseController {
             return error("该手机号对应多个用户，请联系管理员处理");
         }
         UserInfo user = users.get(0);
-        return success(new ReferralUserVo(user));
+        return success(new ReferralPhoneUserVo(user));
     }
 
     @ApiOperation("手动绑定邀请关系")
@@ -150,13 +169,13 @@ public class UserReferralController extends BaseController {
         return phone != null && phone.trim().matches("^1\\d{10}$");
     }
 
-    private static class ReferralUserVo {
+    private static class ReferralPhoneUserVo {
         private final String userId;
         private final String phone;
         private final String realName;
         private final String userName;
 
-        private ReferralUserVo(UserInfo user) {
+        private ReferralPhoneUserVo(UserInfo user) {
             this.userId = user.getUserId();
             this.phone = user.getPhone();
             this.realName = user.getRealName();

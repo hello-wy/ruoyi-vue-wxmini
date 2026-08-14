@@ -103,6 +103,32 @@
         order by create_time desc
     </select>
 
+    <select id="selectSecondLevelReferralVoListByInviterUserId" parameterType="String" resultMap="UserReferralVoResult">
+        select
+            ur.id as id,
+            ur.invitee_user_id as user_id,
+            ui_ee.user_name as user_name,
+            ui_ee.phone as phone,
+            ui_ee.avatar_url as avatar_url,
+            ur.inviter_user_id as inviter_user_id,
+            ui_er.user_name as inviter_user_name,
+            ui_er.phone as inviter_phone,
+            ur.invite_code as invite_code,
+            ur.reward_status as reward_status,
+            ur.reward_amount as reward_amount,
+            ur.reward_time as reward_time,
+            ur.create_time as create_time
+        from user_referral ur
+        left join user_info ui_ee on ur.invitee_user_id = ui_ee.user_id
+        left join user_info ui_er on ur.inviter_user_id = ui_er.user_id
+        where ur.inviter_user_id in (
+            select first_level.invitee_user_id
+            from user_referral first_level
+            where first_level.inviter_user_id = #{inviterUserId}
+        )
+        order by ur.create_time desc
+    </select>
+
     <select id="selectUserReferralVoList" parameterType="UserReferralVo" resultMap="UserReferralVoResult">
         select
             ur.id as id,
@@ -122,6 +148,9 @@
         left join user_info ui_ee on ur.invitee_user_id = ui_ee.user_id
         left join user_info ui_er on ur.inviter_user_id = ui_er.user_id
         <where>
+            <if test="inviterUserId != null and inviterUserId != ''">
+                and ur.inviter_user_id = #{inviterUserId}
+            </if>
             <if test="inviteCode != null and inviteCode != ''">
                 and ur.invite_code = #{inviteCode}
             </if>

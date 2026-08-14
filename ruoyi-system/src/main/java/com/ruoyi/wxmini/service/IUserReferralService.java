@@ -83,4 +83,12 @@ public interface IUserReferralService {
      * @return 邀请关系视图集合
      */
     public List<UserReferralVo> selectUserReferralVoList(UserReferralVo userReferralVo);
+
+    /**
+     * 查询指定用户的二级邀请关系。
+     *
+     * @param inviterUserId 邀请人user_id
+     * @return 二级邀请关系集合
+     */
+    public List<UserReferralVo> selectSecondLevelReferralVoList(String inviterUserId);
 }

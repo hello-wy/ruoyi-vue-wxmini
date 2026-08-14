@@ -196,4 +196,9 @@ public class UserReferralServiceImpl implements IUserReferralService {
     public List<UserReferralVo> selectUserReferralVoList(UserReferralVo userReferralVo) {
         return userReferralMapper.selectUserReferralVoList(userReferralVo);
     }
+
+    @Override
+    public List<UserReferralVo> selectSecondLevelReferralVoList(String inviterUserId) {
+        return userReferralMapper.selectSecondLevelReferralVoListByInviterUserId(inviterUserId);
+    }
 }
