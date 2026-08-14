@@ -7,7 +7,10 @@ import com.ruoyi.system.service.ICourseDistributionCommissionService;
 import com.ruoyi.system.service.IWalletService;
 import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.domain.UserReferral;
+import com.ruoyi.wxmini.domain.vo.ReferralTreeGroupVo;
+import com.ruoyi.wxmini.domain.vo.ReferralTreePageVo;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.wxmini.mapper.UserInfoMapper;
 import com.ruoyi.wxmini.mapper.UserReferralMapper;
 import com.ruoyi.wxmini.service.IUserInfoService;
@@ -22,10 +25,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 用户邀请关系Service业务层处理
@@ -175,6 +182,34 @@ public class UserReferralServiceImpl implements IUserReferralService {
     @Override
     public List<UserReferralVo> getMyInvitees(String inviterUserId) {
         return userReferralMapper.selectReferralVoListByInviterUserId(inviterUserId);
+    }
+
+    @Override
+    public ReferralTreePageVo getMyReferralTree(String inviterUserId) {
+        List<UserReferralVo> level1Invitees = userReferralMapper.selectReferralTreeLevel1Invitees(inviterUserId);
+        ReferralTreePageVo result = new ReferralTreePageVo();
+        result.setTotal(new PageInfo<>(level1Invitees).getTotal());
+        if (level1Invitees.isEmpty()) {
+            result.setRows(Collections.emptyList());
+            return result;
+        }
+
+        List<String> level1UserIds = level1Invitees.stream()
+                .map(UserReferralVo::getUserId)
+                .collect(Collectors.toList());
+        Map<String, List<UserReferralVo>> level2InviteesByInviterId = userReferralMapper
+                .selectReferralVoListByInviterUserIds(level1UserIds)
+                .stream()
+                .collect(Collectors.groupingBy(UserReferralVo::getInviterUserId));
+        List<ReferralTreeGroupVo> groups = new ArrayList<>();
+        for (UserReferralVo level1Invitee : level1Invitees) {
+            ReferralTreeGroupVo group = new ReferralTreeGroupVo();
+            group.setLevel1Invitee(level1Invitee);
+            group.setLevel2Invitees(level2InviteesByInviterId.get(level1Invitee.getUserId()));
+            groups.add(group);
+        }
+        result.setRows(groups);
+        return result;
     }
 
     @Override

@@ -3,8 +3,11 @@ package com.ruoyi.wxmini.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfoVo;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.wxmini.bo.WxReferralBindBo;
 import com.ruoyi.wxmini.domain.UserReferral;
+import com.ruoyi.wxmini.domain.vo.ReferralTreeGroupVo;
+import com.ruoyi.wxmini.domain.vo.ReferralTreePageVo;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
 import com.ruoyi.wxmini.service.IUserInfoService;
 import com.ruoyi.wxmini.service.IUserReferralService;
@@ -69,6 +72,20 @@ public class WxReferralController extends BaseController {
         startPage();
         List<UserReferralVo> list = userReferralService.getMyInvitees(userId);
         return getDataTable(list);
+    }
+
+    @ApiOperation("分页获取我的两级邀请关系树")
+    @GetMapping("/tree")
+    public TableDataInfoVo<ReferralTreeGroupVo> myReferralTree() {
+        String userId = WxMiniUserContext.getCurrentUserId();
+        if (StringUtils.isBlank(userId)) {
+            throw new ServiceException("请先登录");
+        }
+        startPage();
+        ReferralTreePageVo page = userReferralService.getMyReferralTree(userId);
+        TableDataInfoVo<ReferralTreeGroupVo> result = getDataTable(page.getRows());
+        result.setTotal(page.getTotal());
+        return result;
     }
 
     @ApiOperation("登录用户绑定邀请码")

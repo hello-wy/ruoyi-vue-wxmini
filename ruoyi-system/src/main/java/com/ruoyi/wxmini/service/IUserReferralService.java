@@ -1,6 +1,7 @@
 package com.ruoyi.wxmini.service;
 
 import com.ruoyi.wxmini.domain.UserReferral;
+import com.ruoyi.wxmini.domain.vo.ReferralTreePageVo;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
 import java.util.List;
 
@@ -91,4 +92,12 @@ public interface IUserReferralService {
      * @return 二级邀请关系集合
      */
     public List<UserReferralVo> selectSecondLevelReferralVoList(String inviterUserId);
+
+    /**
+     * 分页查询当前用户的两级邀请关系树。
+     *
+     * @param inviterUserId 当前登录邀请人 user_id
+     * @return 两级邀请关系分页结果
+     */
+    public ReferralTreePageVo getMyReferralTree(String inviterUserId);
 }

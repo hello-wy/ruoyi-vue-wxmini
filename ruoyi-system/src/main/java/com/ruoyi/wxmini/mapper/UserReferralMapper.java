@@ -2,6 +2,7 @@ package com.ruoyi.wxmini.mapper;
 
 import com.ruoyi.wxmini.domain.UserReferral;
 import com.ruoyi.wxmini.domain.vo.UserReferralVo;
+import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
@@ -73,4 +74,21 @@ public interface UserReferralMapper {
      * @return 二级邀请关系集合
      */
     public List<UserReferralVo> selectSecondLevelReferralVoListByInviterUserId(String inviterUserId);
+
+    /**
+     * 查询拥有二级邀请人的一级邀请用户，供分页使用。
+     *
+     * @param inviterUserId 当前登录邀请人 user_id
+     * @return 一级邀请用户列表
+     */
+    public List<UserReferralVo> selectReferralTreeLevel1Invitees(String inviterUserId);
+
+    /**
+     * 批量查询指定一级邀请用户的二级邀请用户。
+     *
+     * @param inviterUserIds 一级邀请用户 user_id 列表
+     * @return 二级邀请用户列表
+     */
+    public List<UserReferralVo> selectReferralVoListByInviterUserIds(
+            @Param("inviterUserIds") List<String> inviterUserIds);
 }
