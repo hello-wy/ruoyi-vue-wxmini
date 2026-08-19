@@ -68,3 +68,8 @@
 ## 实现来源文件
 
 - `ruoyi-admin/src/main/java/com/ruoyi/web/controller/bussiness/LecturesController.java`
+
+
+## 默认排序
+
+列表默认按 `isTop` 降序、`time` 升序返回，已置顶活动优先展示。

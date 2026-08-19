@@ -111,6 +111,8 @@
             ui.phone as phone,
             ui.avatar_url as avatar_url,
             ur.inviter_user_id as inviter_user_id,
+            ui_er.user_name as inviter_user_name,
+            ui_er.phone as inviter_phone,
             ur.invite_code as invite_code,
             ur.reward_status as reward_status,
             ur.reward_amount as reward_amount,
@@ -118,6 +120,7 @@
             ur.create_time as create_time
         from user_referral ur
         left join user_info ui on ur.invitee_user_id = ui.user_id
+        left join user_info ui_er on ur.inviter_user_id = ui_er.user_id
         where ur.inviter_user_id = #{inviterUserId}
         order by ur.create_time desc
     </select>

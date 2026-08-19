@@ -213,9 +213,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="location != null and location != ''"> and l.location = #{location}</if>
         </where>
         GROUP BY l.id
+        ORDER BY l.is_top DESC, l.time ASC
     </select>
 
-    <!-- 查询全部活动列表 VO，按开讲时间升序返回 -->
+    <!-- 查询全部活动列表 VO，置顶活动优先，其次按开讲时间升序返回 -->
     <select id="selectAllLecturesListVo" parameterType="Lectures" resultMap="LecturesListVoResult">
         SELECT
         l.id, l.time, l.end_date, l.name, l.speaker,
