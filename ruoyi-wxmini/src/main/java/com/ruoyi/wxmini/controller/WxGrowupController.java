@@ -72,15 +72,14 @@ public class WxGrowupController extends BaseController {
     private IWxCourseNoteService wxCourseNoteService;
 
     /**
-     * 获取本月剩余时间课程/讲座列表（匿名，附带拼接讲师姓名）
+     * 获取全部课程活动/讲座列表（匿名，附带拼接讲师姓名）
      */
-    @ApiOperation("获取本月剩余时间课程/讲座列表（公开，附带讲师姓名）")
+    @ApiOperation("获取全部课程活动/讲座列表（公开，附带讲师姓名）")
     @Anonymous
     @GetMapping("/courses")
     public TableDataInfoVo<LecturesListVo> getCourseList(Lectures lectures) {
 
-        startPage();
-        List<LecturesListVo> list = lecturesService.selectRemainingMonthLecturesListVo(lectures);
+        List<LecturesListVo> list = lecturesService.selectAllLecturesListVo(lectures);
         if (!list.isEmpty()) {
             List<Questionnaire> questionnaires = questionnaireService.selectRecentQuestionnaireList(list.get(0).getId());
             list.get(0).setQuestionnaire(questionnaires);

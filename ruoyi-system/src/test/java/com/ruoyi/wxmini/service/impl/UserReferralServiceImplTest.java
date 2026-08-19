@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserReferralServiceImplTest {
 
@@ -25,15 +26,15 @@ class UserReferralServiceImplTest {
         currentPage.add(inviteeA);
         currentPage.add(inviteeB);
         currentPage.setTotal(7L);
-        TestMapper mapper = new TestMapper(currentPage, Arrays.asList(
-                referral("user-a-child", "user-a"), referral("user-b-child", "user-b")));
+        TestMapper mapper = new TestMapper(currentPage, Collections.singletonList(
+                referral("user-a-child", "user-a")));
 
         ReferralTreePageVo result = service(mapper.proxy()).getMyReferralTree("root-user");
 
         assertEquals(7L, result.getTotal());
         assertEquals(2, result.getRows().size());
         assertEquals("user-a-child", result.getRows().get(0).getLevel2Invitees().get(0).getUserId());
-        assertEquals("user-b-child", result.getRows().get(1).getLevel2Invitees().get(0).getUserId());
+        assertTrue(result.getRows().get(1).getLevel2Invitees().isEmpty());
         assertEquals(Arrays.asList("user-a", "user-b"), mapper.batchInviterUserIds);
     }
 

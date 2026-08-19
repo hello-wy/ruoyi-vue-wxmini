@@ -74,7 +74,7 @@ class WxGrowupControllerTest {
         LecturesListVo lecture = new LecturesListVo();
         lecture.setId(1L);
         lecture.setCoverId(9L);
-        when(lecturesService.selectRemainingMonthLecturesListVo(any())).thenReturn(Collections.singletonList(lecture));
+        when(lecturesService.selectAllLecturesListVo(any())).thenReturn(Collections.singletonList(lecture));
         when(questionnaireService.selectRecentQuestionnaireList(1L)).thenReturn(Collections.singletonList(new Questionnaire()));
 
         TableDataInfoVo<LecturesListVo> result = controller.getCourseList(null);

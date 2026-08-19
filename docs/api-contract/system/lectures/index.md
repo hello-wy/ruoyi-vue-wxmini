@@ -34,7 +34,8 @@
   "registrationFee": 100.00,
   "deposit": 30.00,
   "coursePrice": 3980.00,
-  "requiresEnrollment": true
+  "requiresEnrollment": true,
+  "isTop": false
 }
 ```
 
@@ -66,7 +67,8 @@
   "name": "幸福解码",
   "coursePrice": null,
   "coursePriceUpdated": true,
-  "requiresEnrollment": false
+  "requiresEnrollment": false,
+  "isTop": true
 }
 ```
 
@@ -75,6 +77,7 @@
 - `coursePrice`：课程全价，仅用于课程信息展示；不参与报名费、定金或任何支付金额计算。
 - `coursePriceUpdated`：仅用于 `PUT`。为 `true` 时将 `coursePrice` 写入数据库；`coursePrice` 可为 `null`，此时清空课程全价。未传或非 `true` 时不更新已有课程全价，以兼容历史部分更新请求。
 - `requiresEnrollment`：是否报名前需要该课程学籍；缺省或 `true` 表示需要，`false` 表示不需要。
+- `isTop`：是否在小程序首页「最近课程」区域置顶展示；默认 `false`。
 
 ### 成功响应示例
 

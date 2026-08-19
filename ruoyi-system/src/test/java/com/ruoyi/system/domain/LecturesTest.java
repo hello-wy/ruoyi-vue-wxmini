@@ -30,6 +30,11 @@ class LecturesTest {
     }
 
     @Test
+    void exposesIsTopBeanProperty() throws Exception {
+        assertBeanPropertyExists("isTop");
+    }
+
+    @Test
     void exposesEnrolledCountBeanProperty() throws Exception {
         assertBeanPropertyExists("enrolledCount");
     }
@@ -52,6 +57,16 @@ class LecturesTest {
 
         Field field = Lectures.class.getDeclaredField("coursePriceUpdated");
         assertEquals(JsonProperty.Access.WRITE_ONLY, field.getAnnotation(JsonProperty.class).access());
+    }
+
+    @Test
+    void mapperPersistsHomepageRecentCoursePinning() {
+        InputStream mapperStream = Objects.requireNonNull(
+                getClass().getResourceAsStream("/mapper/system/LecturesMapper.xml"));
+        String mapperXml = new Scanner(mapperStream, StandardCharsets.UTF_8.name())
+                .useDelimiter("\\A").next();
+
+        assertTrue(mapperXml.contains("<if test=\"isTop != null\">is_top = #{isTop},</if>"));
     }
 
     @Test

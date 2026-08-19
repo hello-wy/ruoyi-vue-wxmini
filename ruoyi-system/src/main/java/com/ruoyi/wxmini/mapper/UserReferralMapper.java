@@ -76,7 +76,7 @@ public interface UserReferralMapper {
     public List<UserReferralVo> selectSecondLevelReferralVoListByInviterUserId(String inviterUserId);
 
     /**
-     * 查询拥有二级邀请人的一级邀请用户，供分页使用。
+     * 查询当前用户直接邀请的全部一级邀请用户，供分页使用。
      *
      * @param inviterUserId 当前登录邀请人 user_id
      * @return 一级邀请用户列表

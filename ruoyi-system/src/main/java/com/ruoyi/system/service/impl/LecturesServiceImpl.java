@@ -2,9 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -100,18 +98,9 @@ public class LecturesServiceImpl implements ILecturesService
     }
 
     @Override
-    public List<LecturesListVo> selectRemainingMonthLecturesListVo(Lectures lectures)
+    public List<LecturesListVo> selectAllLecturesListVo(Lectures lectures)
     {
-        LocalDateTime currentTime = LocalDateTime.now();
-        LocalDateTime nextMonthStart = currentTime.toLocalDate().withDayOfMonth(1)
-                .plusMonths(1).atStartOfDay();
-        return lecturesMapper.selectRemainingMonthLecturesListVo(
-                lectures, toDate(currentTime), toDate(nextMonthStart));
-    }
-
-    private Date toDate(LocalDateTime dateTime)
-    {
-        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return lecturesMapper.selectAllLecturesListVo(lectures);
     }
 
     @Override

@@ -119,11 +119,6 @@
         from user_referral ur
         left join user_info ui on ur.invitee_user_id = ui.user_id
         where ur.inviter_user_id = #{inviterUserId}
-          and exists (
-            select 1
-            from user_referral level2
-            where level2.inviter_user_id = ur.invitee_user_id
-          )
         order by ur.create_time desc
     </select>
 

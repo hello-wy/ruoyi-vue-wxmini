@@ -1,9 +1,6 @@
 package com.ruoyi.system.mapper;
 
-import java.util.Date;
 import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.system.domain.Lectures;
@@ -90,17 +87,12 @@ public interface LecturesMapper extends BaseMapper<Lectures>
     public List<LecturesListVo> selectLecturesListVo(Lectures lectures);
 
     /**
-     * 查询本月剩余时间内的讲座列表 VO。
+     * 查询全部课程活动/讲座列表 VO。
      *
      * @param lectures 查询条件
-     * @param currentTime 当前时刻（含）
-     * @param nextMonthStart 下个月开始时间（不含）
-     * @return 本月剩余时间内的讲座列表 VO 集合
+     * @return 全部课程活动/讲座列表 VO 集合
      */
-    public List<LecturesListVo> selectRemainingMonthLecturesListVo(
-            @Param("lectures") Lectures lectures,
-            @Param("currentTime") Date currentTime,
-            @Param("nextMonthStart") Date nextMonthStart);
+    public List<LecturesListVo> selectAllLecturesListVo(Lectures lectures);
 
     /**
      * 查询讲座详情 VO（通过 SQL JOIN 关联讲师信息）

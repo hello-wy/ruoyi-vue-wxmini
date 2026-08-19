@@ -87,6 +87,10 @@ public class Lectures extends BaseEntity
     @Excel(name = "是否需要学籍")
     private Boolean requiresEnrollment;
 
+    /** 是否在首页最近课程区域置顶展示 */
+    @Excel(name = "首页最近课程置顶展示", readConverterExp = "1=是,0=否")
+    private Boolean isTop;
+
     /** 已报名人数 */
     @Excel(name = "已报名人数")
     private Integer enrolledCount;
@@ -231,6 +235,16 @@ public class Lectures extends BaseEntity
         this.requiresEnrollment = requiresEnrollment;
     }
 
+    public Boolean getIsTop()
+    {
+        return isTop;
+    }
+
+    public void setIsTop(Boolean isTop)
+    {
+        this.isTop = isTop;
+    }
+
     public Integer getEnrolledCount()
     {
         return enrolledCount;
@@ -298,6 +312,7 @@ public class Lectures extends BaseEntity
             .append("deposit", getDeposit())
             .append("coursePrice", getCoursePrice())
             .append("requiresEnrollment", getRequiresEnrollment())
+            .append("isTop", getIsTop())
             .append("enrolledCount", getEnrolledCount())
             .append("createDate", getCreateDate())
             .append("updateDate", getUpdateDate())

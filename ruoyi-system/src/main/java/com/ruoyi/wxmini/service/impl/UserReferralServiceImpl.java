@@ -205,7 +205,8 @@ public class UserReferralServiceImpl implements IUserReferralService {
         for (UserReferralVo level1Invitee : level1Invitees) {
             ReferralTreeGroupVo group = new ReferralTreeGroupVo();
             group.setLevel1Invitee(level1Invitee);
-            group.setLevel2Invitees(level2InviteesByInviterId.get(level1Invitee.getUserId()));
+            group.setLevel2Invitees(level2InviteesByInviterId.getOrDefault(
+                    level1Invitee.getUserId(), Collections.emptyList()));
             groups.add(group);
         }
         result.setRows(groups);
