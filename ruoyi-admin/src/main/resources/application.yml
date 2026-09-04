@@ -13,8 +13,9 @@ ruoyi:
 
 aliyun:
   cloudauth:
-    accessKeyId: LTAI5t9F3pgh3ymDeHQc5UsS
-    accessKeySecret: UrCbBeKcLrpyXctTCU4QXtKlzXDE19
+    # 由部署环境注入，禁止在仓库中保存访问凭证
+    accessKeyId: ${ALIYUN_CLOUDAUTH_ACCESS_KEY_ID:}
+    accessKeySecret: ${ALIYUN_CLOUDAUTH_ACCESS_KEY_SECRET:}
     regionId: cn-hangzhou
     endpoint: cloudauth.aliyuncs.com
 

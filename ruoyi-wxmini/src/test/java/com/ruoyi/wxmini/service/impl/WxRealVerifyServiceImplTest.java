@@ -86,6 +86,43 @@ class WxRealVerifyServiceImplTest {
     }
 
     @Test
+    void verifyShouldThrowConfigurationMessageWhenCredentialsMissing() {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        WxRealVerifyServiceImpl service = new WxRealVerifyServiceImpl(properties, userInfoService);
+
+        ServiceException error = assertThrows(ServiceException.class,
+                () -> service.verify("wx-user", request("张三", "110105199001011234")));
+
+        assertEquals("实名认证服务未配置，请联系管理员", error.getMessage());
+    }
+
+    @Test
+    void verifyShouldThrowGenericMessageWhenRemoteClientThrows() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        Client client = mock(Client.class);
+        when(client.id2MetaVerify(any())).thenThrow(new RuntimeException("remote unavailable"));
+        WxRealVerifyServiceImpl service = spyService(userInfoService, client);
+
+        ServiceException error = assertThrows(ServiceException.class,
+                () -> service.verify("wx-user", request("张三", "110105199001011234")));
+
+        assertEquals("实名认证失败，请稍后重试", error.getMessage());
+    }
+
+    @Test
+    void verifyShouldThrowPersistenceMessageWhenSavingVerifiedUserFails() throws Exception {
+        IUserInfoService userInfoService = mock(IUserInfoService.class);
+        when(userInfoService.updateRealnameInfo("wx-user", "张三", "11010520050110010X"))
+                .thenThrow(new RuntimeException("unknown column"));
+        WxRealVerifyServiceImpl service = createService(userInfoService, buildResponse("200", "1"));
+
+        ServiceException error = assertThrows(ServiceException.class,
+                () -> service.verify("wx-user", request("张三", "11010520050110010x")));
+
+        assertEquals("实名认证信息保存失败，请稍后重试", error.getMessage());
+    }
+
+    @Test
     void verifyShouldThrowWhenRealNameBlank() {
         IUserInfoService userInfoService = mock(IUserInfoService.class);
         WxRealVerifyServiceImpl service = new WxRealVerifyServiceImpl(properties, userInfoService);
@@ -114,9 +151,20 @@ class WxRealVerifyServiceImplTest {
     private WxRealVerifyServiceImpl createService(IUserInfoService userInfoService, Id2MetaVerifyResponse response) throws Exception {
         Client client = mock(Client.class);
         when(client.id2MetaVerify(any())).thenReturn(response);
+        return spyService(userInfoService, client);
+    }
+
+    private WxRealVerifyServiceImpl spyService(IUserInfoService userInfoService, Client client) throws Exception {
         WxRealVerifyServiceImpl service = org.mockito.Mockito.spy(new WxRealVerifyServiceImpl(properties, userInfoService));
         doReturn(client).when(service).buildClient();
         return service;
+    }
+
+    private WxRealVerifyRequestBo request(String realName, String idCard) {
+        WxRealVerifyRequestBo request = new WxRealVerifyRequestBo();
+        request.setRealName(realName);
+        request.setIdCard(idCard);
+        return request;
     }
 
     private Id2MetaVerifyResponse buildResponse(String code, String bizCode) {
