@@ -5,11 +5,14 @@ import com.ruoyi.wxmini.domain.UserInfo;
 import com.ruoyi.wxmini.mapper.UserInfoMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.dao.DuplicateKeyException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -44,6 +47,21 @@ class UserInfoServiceImplTest {
         assertEquals("110105199001011234", userInfo.getIdCard());
         assertEquals(Integer.valueOf(1), userInfo.getIsRealnameAuth());
         verify(userInfoMapper).updateUserInfo(userInfo);
+        verify(redisCache).setCacheObject(eq("wx_user:123"), contains("\"isRealnameAuth\":1"));
+    }
+
+    @Test
+    void updateRealnameInfoShouldNotRefreshCacheWhenDatabaseWriteFails() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(1L);
+        userInfo.setUserId("123");
+        when(userInfoMapper.selectUserInfoByUserId("123")).thenReturn(userInfo);
+        when(userInfoMapper.updateUserInfo(userInfo)).thenThrow(new DuplicateKeyException("duplicate id_card"));
+
+        assertThrows(DuplicateKeyException.class,
+                () -> service.updateRealnameInfo("123", "示例用户", "11010519491231002X"));
+
+        verify(redisCache, never()).setCacheObject(any(), any());
     }
 
     @Test

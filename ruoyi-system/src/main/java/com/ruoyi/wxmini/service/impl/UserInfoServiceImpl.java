@@ -77,8 +77,11 @@ public class UserInfoServiceImpl implements IUserInfoService {
             }
         }
         userInfo.setUpdateTime(DateUtils.getNowDate());
-        redisCache.setCacheObject(this.getWxUserCacheKey(userInfo.getUserId()), JSON.toJSONString(userInfo));
-        return userInfoMapper.updateUserInfo(userInfo);
+        int result = userInfoMapper.updateUserInfo(userInfo);
+        if (result > 0) {
+            redisCache.setCacheObject(this.getWxUserCacheKey(userInfo.getUserId()), JSON.toJSONString(userInfo));
+        }
+        return result;
     }
 
     @Override
