@@ -20,6 +20,8 @@ public class WxUserProfileVo {
 
     private String realName;
 
+    private String idCard;
+
     private String nickName;
 
     private Integer gender;
@@ -102,6 +104,14 @@ public class WxUserProfileVo {
 
     public void setRealName(String realName) {
         this.realName = realName;
+    }
+
+    public String getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(String idCard) {
+        this.idCard = idCard;
     }
 
     public String getNickName() {

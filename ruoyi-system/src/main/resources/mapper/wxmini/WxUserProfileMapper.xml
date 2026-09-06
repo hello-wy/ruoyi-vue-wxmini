@@ -11,6 +11,7 @@
         <result property="phone" column="phone"/>
         <result property="birthday" column="birthday"/>
         <result property="realName" column="real_name"/>
+        <result property="idCard" column="id_card"/>
         <result property="nickName" column="nick_name"/>
         <result property="gender" column="gender"/>
         <result property="age" column="age"/>
@@ -134,6 +135,10 @@
                ui.birthday,
                ui.is_realname_auth,
                ui.real_name,
+               case
+                   when ui.is_realname_auth = 1 then ui.id_card
+                   else ''
+               end as id_card,
                up.nick_name,
                up.gender,
                up.age,

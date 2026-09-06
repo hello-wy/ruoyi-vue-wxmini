@@ -233,11 +233,15 @@ class WxUserProfileServiceImplTest {
         profile.setUserName("张三");
         profile.setUserType(1);
         profile.setIsRealnameAuth(1);
+        profile.setRealName("张三");
+        profile.setIdCard("11010519900101123X");
         when(wxUserProfileMapper.selectProfileDetailByUserId(USER_ID)).thenReturn(profile);
 
         WxUserProfileVo result = service.getCurrentUserProfile(USER_ID);
 
         assertEquals(Integer.valueOf(1), result.getIsRealnameAuth());
+        assertEquals("张三", result.getRealName());
+        assertEquals("11010519900101123X", result.getIdCard());
     }
 
     @Test
