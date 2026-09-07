@@ -2,38 +2,22 @@
 
 ## 用途
 
-- `GET`：GET /wxmini/tutoring/tutors/list。
+- 分页查询已审核通过的公开教员列表。
 
 ## 鉴权
 
 - 公开接口。
 
-## 请求头
+## Query 参数
 
-- 无。
+- `pageNum`：页码，默认 `1`。
+- `pageSize`：每页数量，默认 `5`。
+- `subject`：科目模糊筛选，可选。
+- `region`：区域模糊筛选，可选。
+- `methods`：授课方式精确筛选，可选。
+- `grade`：学历精确筛选，可选。
 
-## Path 参数
-
-- 无。
-
-## GET 请求
-
-### Query 参数
-
-- `pageNum`：若依标准分页页码。
-- `pageSize`：若依标准分页每页条数。
-- `1`：`long`，默认 `1`。
-- `5`：`long`，默认 `5`。
-- `subject`：`String`。
-- `region`：`String`。
-- `methods`：`Long`。
-- `grade`：`Long`。
-
-### Body 示例
-
-- 无。
-
-### 成功响应示例
+## 成功响应示例
 
 ```json
 {
@@ -42,7 +26,7 @@
   "total": 1,
   "rows": [
     {
-      "id": 1,
+      "id": "1234567890123456700",
       "identity": 0,
       "status": 1,
       "realName": "张老师",
@@ -53,17 +37,18 @@
       "methods": 1,
       "degree": 1,
       "city": "江宁区",
-      "certificateList": "教师资格证,英语六级",
-      "certificates": "https://example.com/cert.jpg"
+      "certificateList": "教师资格证,英语六级"
     }
   ]
 }
 ```
 
-### 失败场景或特殊说明
+## 隐私说明
 
-- 以当前 controller/service 的实际校验结果为准。
+- 公开列表不返回 `certificates` 和 `materials`。
+- 身份证正反面、学生证和证书图片仅允许本人接口与后台审核接口读取。
 
 ## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxTutoringController.java`
+- `ruoyi-system/src/main/java/com/ruoyi/system/service/impl/TutorsServiceImpl.java`

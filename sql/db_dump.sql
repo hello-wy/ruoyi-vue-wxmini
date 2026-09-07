@@ -612,11 +612,25 @@ CREATE TABLE `trade_order` (
   KEY `idx_lecture_id` (`lecture_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='通用交易订单表（包含沙龙和讲座）';
 
+CREATE TABLE `tutor_material` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '材料ID',
+  `tutor_id` bigint DEFAULT NULL COMMENT '教员ID',
+  `owner_uid` varchar(64) NOT NULL COMMENT '材料所属小程序用户ID',
+  `type` tinyint NOT NULL COMMENT '材料类型：1身份证正面 2身份证反面 3学生证 4证书',
+  `url` varchar(512) NOT NULL COMMENT '图片URL',
+  `sort_order` int NOT NULL DEFAULT '0' COMMENT '排序',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_tutor_material_tutor` (`tutor_id`),
+  KEY `idx_tutor_material_owner` (`owner_uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='教员审核材料';
+
 CREATE TABLE `tutors` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '教员表主键ID',
   `uid` int NOT NULL COMMENT '关联user表的主键ID',
   `title` varchar(20) DEFAULT NULL COMMENT '职称（如：教师、老师、大学生教员）',
-  `certificates` varchar(255) DEFAULT NULL COMMENT '证书图片url',
+  `certificates` text DEFAULT NULL COMMENT '审核材料ID列表，逗号分隔',
   `subjects` varchar(40) DEFAULT NULL COMMENT '可授科目数组（使用索引0，1，2)',
   `areas` varchar(100) DEFAULT NULL COMMENT '可授区域数组（地区索引id）',
   `methods` int DEFAULT NULL COMMENT '授课方式（网络辅导、线下）',

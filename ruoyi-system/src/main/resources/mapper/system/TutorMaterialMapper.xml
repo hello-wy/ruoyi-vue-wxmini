@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TutorMaterialMapper">
+    <resultMap id="TutorMaterialResult" type="TutorMaterial">
+        <id property="id" column="id" />
+        <result property="tutorId" column="tutor_id" />
+        <result property="ownerUid" column="owner_uid" />
+        <result property="type" column="type" />
+        <result property="url" column="url" />
+        <result property="sortOrder" column="sort_order" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <insert id="insertTutorMaterial" parameterType="TutorMaterial">
+        insert into tutor_material (id, tutor_id, owner_uid, type, url, sort_order, create_time, update_time)
+        values (#{id}, #{tutorId}, #{ownerUid}, #{type}, #{url}, #{sortOrder}, now(), now())
+    </insert>
+
+    <select id="selectTutorMaterialsByIds" resultMap="TutorMaterialResult">
+        select id, tutor_id, owner_uid, type, url, sort_order, create_time, update_time
+        from tutor_material
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="bindTutorMaterials">
+        update tutor_material
+        set tutor_id = #{tutorId}, update_time = now()
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteTutorMaterialsByTutorId">
+        delete from tutor_material where tutor_id = #{tutorId}
+    </delete>
+
+    <delete id="deleteTutorMaterialsByTutorIds">
+        delete from tutor_material where tutor_id in
+        <foreach collection="tutorIds" item="tutorId" open="(" separator="," close=")">
+            #{tutorId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteTutorMaterialsByTutorIdExcludingIds">
+        delete from tutor_material
+        where tutor_id = #{tutorId}
+          and id not in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

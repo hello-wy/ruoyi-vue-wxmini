@@ -3,7 +3,6 @@ package com.ruoyi.web.controller.bussiness;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -58,7 +57,7 @@ public class TutorsController extends BaseController
 
     @ApiOperation("获取大学生/教员详细信息")
     @ApiImplicitParam(name = "id", value = "教员ID", required = true, dataType = "Long", paramType = "path", dataTypeClass = Long.class)
-    @Anonymous
+    @PreAuthorize("@ss.hasPermi('system:tutors:list')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {

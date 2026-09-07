@@ -18,6 +18,5 @@ public class WxTutorDetailVo {
     private String currentGrade;
     private String selfJudge;
     private String certificateList;
-    private String certificates;
     private String city;
 }

@@ -49,7 +49,8 @@
       "major": "数学",
       "subjects": "1,2",
       "areas": "320100",
-      "status": 1
+      "status": 1,
+      "certificates": "1234567890123456789,1234567890123456790"
     }
   ]
 }
@@ -65,6 +66,7 @@
 - `subjects`：可授科目。
 - `areas`：可授区域。
 - `status`：审核状态，`1` 表示通过。
+- `certificates`：审核材料 ID 列表，使用英文逗号分隔；列表接口不展开 `materials`，审核详情通过 `GET /system/tutors/{id}` 获取。
 
 ### 失败场景或特殊说明
 

@@ -2,7 +2,7 @@
 
 ## 用途
 
-- `GET`：教员详情（公开）。
+- 获取已审核通过的公开教员详情。
 
 ## 鉴权
 
@@ -14,26 +14,16 @@
 
 ## Path 参数
 
-- `id`：路径参数。
+- `id`：教员 ID。
 
-## GET 请求
-
-### Query 参数
-
-- 无。
-
-### Body 示例
-
-- 无。
-
-### 成功响应示例
+## 成功响应示例
 
 ```json
 {
   "code": 200,
   "msg": "操作成功",
   "data": {
-    "id": 1,
+    "id": "1234567890123456700",
     "realName": "张老师",
     "identity": 0,
     "subjects": "8,10",
@@ -44,18 +34,24 @@
     "major": "数学与应用数学",
     "school": "南京大学",
     "degree": 1,
+    "currentGrade": "大三",
     "selfJudge": "认真负责，善于沟通",
     "certificateList": "教师资格证,英语六级",
-    "certificates": "https://example.com/cert.jpg",
     "city": "江宁区"
   }
 }
 ```
 
-### 失败场景或特殊说明
+## 隐私说明
 
-- 以当前 controller/service 的实际校验结果为准。
+- 公开详情不返回 `certificates` 和 `materials`。
+- 身份证正反面、学生证和证书图片仅允许本人接口与后台审核接口读取。
+
+## 失败场景或特殊说明
+
+- 教员不存在或未通过审核：`msg = 教员不存在`。
 
 ## 实现来源文件
 
 - `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/controller/WxTutoringController.java`
+- `ruoyi-wxmini/src/main/java/com/ruoyi/wxmini/vo/WxTutorDetailVo.java`

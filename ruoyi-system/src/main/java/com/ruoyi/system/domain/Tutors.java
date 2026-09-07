@@ -1,10 +1,13 @@
 package com.ruoyi.system.domain;
 
 import java.util.Date;
+import java.util.List;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -24,7 +27,8 @@ public class Tutors extends BaseEntity
     @Excel(name = "身份", readConverterExp = "0=大学生教员,1=在职教师,2=其他")
     private Long identity;
 
-    @Excel(name = "证书图片url")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Excel(name = "审核材料ID列表")
     private String certificates;
 
     @Excel(name = "可授科目数组")
@@ -62,12 +66,15 @@ public class Tutors extends BaseEntity
     @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date updateDate;
 
+    @TableField(exist = false)
     @Excel(name = "实名认证真实姓名")
     private String realName;
 
+    @TableField(exist = false)
     @Excel(name = "手机号")
     private String phone;
 
+    @TableField(exist = false)
     @Excel(name = "身份证号码")
     private String idCard;
 
@@ -79,6 +86,11 @@ public class Tutors extends BaseEntity
 
     @Excel(name = "城市")
     private String city;
+
+    /** 审核材料详情，仅用于本人资料和管理审核详情 */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @TableField(exist = false)
+    private List<TutorMaterial> materials;
 
     public void setId(Long id)
     {
@@ -290,6 +302,16 @@ public class Tutors extends BaseEntity
         return city;
     }
 
+    public void setMaterials(List<TutorMaterial> materials)
+    {
+        this.materials = materials;
+    }
+
+    public List<TutorMaterial> getMaterials()
+    {
+        return materials;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -314,6 +336,7 @@ public class Tutors extends BaseEntity
             .append("selfJudge", getSelfJudge())
             .append("certificateList", getCertificateList())
             .append("city", getCity())
+            .append("materials", getMaterials())
             .toString();
     }
 }

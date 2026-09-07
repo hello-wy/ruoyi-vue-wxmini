@@ -133,7 +133,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
             <if test="uid != null and uid != ''">uid = #{uid},</if>
             <if test="identity != null">identity = #{identity},</if>
-            <if test="certificates != null and certificates != ''">certificates = #{certificates},</if>
+            <if test="certificates != null">certificates = #{certificates},</if>
             <if test="subjects != null and subjects != ''">subjects = #{subjects},</if>
             <if test="areas != null and areas != ''">areas = #{areas},</if>
             <if test="methods != null">methods = #{methods},</if>
