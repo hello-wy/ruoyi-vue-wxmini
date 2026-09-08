@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,42 @@ class TutorMaterialServiceImplTest {
 
     @InjectMocks
     private TutorMaterialServiceImpl service;
+
+    @Test
+    void createOwnedMaterialAcceptsMatchingUserAndTypePath() {
+        String url = "/profile/certification/wx-user-1/sfz_front/sfz_front-uuid.png";
+
+        TutorMaterial material = service.createOwnedMaterial(OWNER_UID, 1, url);
+
+        assertEquals(OWNER_UID, material.getOwnerUid());
+        assertEquals(1, material.getType());
+        assertEquals("身份证正面", material.getTypeName());
+        assertEquals("sfz_front", material.getDirectoryName());
+        assertEquals(url, material.getUrl());
+        verify(tutorMaterialMapper).insertTutorMaterial(material);
+    }
+
+    @Test
+    void createOwnedMaterialRejectsPathForAnotherType() {
+        String url = "/profile/certification/wx-user-1/sfz_back/sfz_back-uuid.png";
+
+        ServiceException error = assertThrows(ServiceException.class,
+                () -> service.createOwnedMaterial(OWNER_UID, 1, url));
+
+        assertEquals("材料图片地址与类型不匹配", error.getMessage());
+        verifyNoInteractions(tutorMaterialMapper);
+    }
+
+    @Test
+    void createOwnedMaterialRejectsPathForAnotherUser() {
+        String url = "/profile/certification/another-user/sfz_front/sfz_front-uuid.png";
+
+        ServiceException error = assertThrows(ServiceException.class,
+                () -> service.createOwnedMaterial(OWNER_UID, 1, url));
+
+        assertEquals("材料图片地址与类型不匹配", error.getMessage());
+        verifyNoInteractions(tutorMaterialMapper);
+    }
 
     @Test
     void createOwnedMaterialRejectsInvalidType() {

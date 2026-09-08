@@ -2,17 +2,12 @@
 
 ## 用途
 
-- 登记一张已经通过原上传接口保存的教员审核材料，返回材料 ID。
-- 文件上传地址保持为 `POST /wxmini/common/uploadCertification`；本接口只保存图片 URL、材料类型和所属用户。
+登记一张已通过对应类型独立上传接口保存的教员审核材料，返回材料 ID。本接口只保存图片相对 URL、材料类型和所属用户。
 
 ## 鉴权
 
 - 需要 `Wx-Authorization: Bearer <token>`。
-
-## 请求头
-
-- `Wx-Authorization: Bearer <token>`
-- `Content-Type: application/json`
+- `Content-Type: application/json`。
 
 ## Body 字段
 
@@ -21,14 +16,20 @@
   - `2`：身份证反面，仅允许在最终提交中保留一张。
   - `3`：学生证，仅允许在最终提交中保留一张。
   - `4`：证书，允许多张。
-- `url`：原上传接口返回的图片地址，必填，最大 512 个字符。
+- `url`：对应上传接口返回的 `fileName` 相对资源路径，必填，最大 512 个字符。
+
+URL 必须属于当前登录用户，并与 `type` 的目录和文件名前缀匹配。例如类型 `1` 必须使用：
+
+```text
+/profile/certification/{当前用户ID}/sfz_front/sfz_front-{唯一标识}.jpg
+```
 
 ## Body 示例
 
 ```json
 {
   "type": 1,
-  "url": "/profile/upload/id-card-front.jpg"
+  "url": "/profile/certification/321/sfz_front/sfz_front-uuid.jpg"
 }
 ```
 
@@ -41,22 +42,25 @@
   "data": {
     "id": "1234567890123456789",
     "type": 1,
-    "url": "/profile/upload/id-card-front.jpg"
+    "typeName": "身份证正面",
+    "directoryName": "sfz_front",
+    "url": "/profile/certification/321/sfz_front/sfz_front-uuid.jpg"
   }
 }
 ```
 
 ## 使用流程
 
-1. 调用 `POST /wxmini/common/uploadCertification` 上传图片并取得 URL。
-2. 调用本接口登记 `type` 和 `url`，取得字符串形式的材料 ID。
+1. 按材料类型调用 `material-uploads.md` 中对应的独立上传接口。
+2. 使用上传响应的 `type` 和 `fileName` 调用本接口登记材料，取得字符串形式的材料 ID。
 3. 申请或更新教员资料时，将所有保留材料的 ID 用英文逗号连接后写入 `certificates`。
 
 ## 失败场景或特殊说明
 
 - 未登录：`msg = 请先登录`。
 - `type` 不在 `1` 至 `4`：`msg = 材料类型非法`。
-- URL 为空、超长或不是 `/`、`http://`、`https://` 开头：`msg = 材料图片地址非法`。
+- URL 为空或超过 512 个字符：`msg = 材料图片地址非法`。
+- URL 不属于当前用户，或目录、文件名前缀与 `type` 不匹配：`msg = 材料图片地址与类型不匹配`。
 - 材料最终绑定到教员时，后端会校验材料归属、材料 ID 有效性，以及身份证正反面和学生证不能重复。
 
 ## 实现来源文件

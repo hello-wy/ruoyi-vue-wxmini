@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.ruoyi.system.enums.TutorMaterialType;
 
 public class TutorMaterial extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -49,6 +50,16 @@ public class TutorMaterial extends BaseEntity {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getTypeName() {
+        TutorMaterialType materialType = TutorMaterialType.fromCode(type);
+        return materialType == null ? "" : materialType.getDisplayName();
+    }
+
+    public String getDirectoryName() {
+        TutorMaterialType materialType = TutorMaterialType.fromCode(type);
+        return materialType == null ? "" : materialType.getDirectoryName();
     }
 
     public String getUrl() {

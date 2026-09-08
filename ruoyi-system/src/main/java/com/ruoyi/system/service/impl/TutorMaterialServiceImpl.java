@@ -5,6 +5,7 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.SnowflakeIdWorker;
 import com.ruoyi.system.domain.TutorMaterial;
 import com.ruoyi.system.domain.Tutors;
+import com.ruoyi.system.enums.TutorMaterialType;
 import com.ruoyi.system.mapper.TutorMaterialMapper;
 import com.ruoyi.system.service.ITutorMaterialService;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class TutorMaterialServiceImpl implements ITutorMaterialService {
-    private static final int ID_CARD_FRONT = 1;
-    private static final int CERTIFICATE = 4;
+    private static final int ID_CARD_FRONT = TutorMaterialType.ID_CARD_FRONT.getCode();
+    private static final int CERTIFICATE = TutorMaterialType.CERTIFICATE.getCode();
     private static final int MAX_URL_LENGTH = 512;
 
     @Resource
@@ -74,16 +75,30 @@ public class TutorMaterialServiceImpl implements ITutorMaterialService {
         if (StringUtils.isBlank(ownerUid)) {
             throw new ServiceException("请先登录");
         }
-        if (type == null || type < ID_CARD_FRONT || type > CERTIFICATE) {
+        TutorMaterialType materialType = TutorMaterialType.fromCode(type);
+        if (materialType == null) {
             throw new ServiceException("材料类型非法");
         }
         String normalizedUrl = StringUtils.trim(url);
         if (StringUtils.isBlank(normalizedUrl) || normalizedUrl.length() > MAX_URL_LENGTH) {
             throw new ServiceException("材料图片地址非法");
         }
-        if (!normalizedUrl.startsWith("/") && !normalizedUrl.startsWith("http://")
-                && !normalizedUrl.startsWith("https://")) {
-            throw new ServiceException("材料图片地址非法");
+        validateMaterialUrl(ownerUid, normalizedUrl, materialType);
+    }
+
+    private void validateMaterialUrl(
+            String ownerUid,
+            String url,
+            TutorMaterialType materialType
+    ) {
+        String expectedDirectory = String.format(
+                "/profile/certification/%s/%s/",
+                ownerUid,
+                materialType.getDirectoryName()
+        );
+        String expectedFilePrefix = expectedDirectory + materialType.getDirectoryName() + "-";
+        if (!url.startsWith(expectedFilePrefix)) {
+            throw new ServiceException("材料图片地址与类型不匹配");
         }
     }
 

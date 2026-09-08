@@ -87,32 +87,6 @@ class WxCommonControllerTest {
         assertDoesNotThrow(() -> ReflectionTestUtils.setField(freshController, "serverConfig", new ServerConfig()));
     }
 
-    @Test
-    void uploadCertificationShouldSaveAsUserIdAndDeleteOlderExtensionFile() throws Exception {
-        Path certificationDir = tempDir.resolve("certification");
-        Files.createDirectories(certificationDir);
-        Files.write(certificationDir.resolve("321.jpg"), "old".getBytes(StandardCharsets.UTF_8));
-
-        MockHttpServletRequest request = buildRequest("/wxmini/common/uploadCertification");
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "certificate.png",
-            "image/png",
-            "new-image".getBytes(StandardCharsets.UTF_8)
-        );
-
-        AjaxResult result = controller.uploadCertification(file);
-
-        assertEquals(200, result.get("code"));
-        assertEquals("http://localhost:8080/profile/certification/321.png", result.get("url"));
-        assertEquals("/profile/certification/321.png", result.get("fileName"));
-        assertEquals("321.png", result.get("newFileName"));
-        assertEquals("certificate.png", result.get("originalFilename"));
-        assertTrue(Files.exists(certificationDir.resolve("321.png")));
-        assertFalse(Files.exists(certificationDir.resolve("321.jpg")));
-    }
 
     @Test
     void uploadAvatarShouldTranscodeJpgToPngUpdateAvatarUrlAndDeleteOlderExtensionFiles() throws Exception {
@@ -232,36 +206,7 @@ class WxCommonControllerTest {
         assertEquals("图片内容无效", result.get("msg"));
     }
 
-    @Test
-    void uploadCertificationShouldRejectNonImageExtension() {
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "certificate.pdf",
-            "application/pdf",
-            "fake-pdf".getBytes(StandardCharsets.UTF_8)
-        );
 
-        AjaxResult result = controller.uploadCertification(file);
-
-        assertEquals(500, result.get("code"));
-        assertEquals("仅支持上传 JPG、JPEG、PNG 格式图片", result.get("msg"));
-    }
-
-    @Test
-    void uploadCertificationShouldRequireLoggedInWxUser() {
-        WxMiniUserContext.clear();
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "certificate.png",
-            "image/png",
-            "new-image".getBytes(StandardCharsets.UTF_8)
-        );
-
-        AjaxResult result = controller.uploadCertification(file);
-
-        assertEquals(500, result.get("code"));
-        assertEquals("请先登录", result.get("msg"));
-    }
 
     private byte[] createImageBytes(String format) throws Exception {
         BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);

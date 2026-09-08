@@ -27,12 +27,16 @@
       {
         "id": "1234567890123456789",
         "type": 1,
-        "url": "/profile/upload/id-card-front.jpg"
+        "typeName": "身份证正面",
+        "directoryName": "sfz_front",
+        "url": "/profile/certification/321/sfz_front/sfz_front-uuid.jpg"
       },
       {
         "id": "1234567890123456790",
         "type": 4,
-        "url": "/profile/upload/certificate.jpg"
+        "typeName": "证书",
+        "directoryName": "certification",
+        "url": "/profile/certification/321/certification/certification-uuid.jpg"
       }
     ]
   }
@@ -44,6 +48,8 @@
 - `certificates`：英文逗号分隔的材料 ID 列表，不是图片 URL。
 - `materials`：按 `certificates` 中的 ID 顺序返回材料详情。
 - `materials[].type`：`1` 身份证正面、`2` 身份证反面、`3` 学生证、`4` 证书。
+- `materials[].typeName`：材料类型中文名称。
+- `materials[].directoryName`：材料对应存储目录名称。
 
 ## 失败场景或特殊说明
 
