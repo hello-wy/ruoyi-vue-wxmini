@@ -11,13 +11,6 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 
-aliyun:
-  cloudauth:
-    # 由部署环境注入，禁止在仓库中保存访问凭证
-    accessKeyId: LTAI5t9F3pgh3ymDeHQc5UsS
-    accessKeySecret: UrCbBeKcLrpyXctTCU4QXtKlzXDE19
-    regionId: cn-hangzhou
-    endpoint: cloudauth.aliyuncs.com
 
 file-storage:
   type: local
